@@ -1,0 +1,71 @@
+{
+    "Pipes":[
+        {
+            "Name":"ComponentA pipe",
+            "InitialPhase":{
+                "Name":"Dev",
+                "Tasks":[
+                    {
+                        "Name":"Build",
+                        "IsAutomatic":true
+                    }
+                ],
+                "NextPhases":[
+                    {
+                        "Name":"Test",
+                        "Tasks":[
+                            {
+                                "Name":"Deploy",
+                                "IsAutomatic":false
+                            },
+                            {
+                                "Name":"Run gui tests",
+                                "IsAutomatic":true
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "Name":"ComponentB pipe",
+            "InitialPhase":{
+                "Name":"Dev",
+                "Tasks":[
+                    {
+                        "Name":"Build",
+                        "IsAutomatic":true
+                    }
+                ],
+                "NextPhases":[
+                    {
+                        "Name":"GUI Test",
+                        "Tasks":[
+                            {
+                                "Name":"Deploy",
+                                "IsAutomatic":false
+                            },
+                            {
+                                "Name":"Run gui tests",
+                                "IsAutomatic":true
+                            }
+                        ]
+                    },
+                    {
+                        "Name":"Robustness Test",
+                        "Tasks":[
+                            {
+                                "Name":"Deploy",
+                                "IsAutomatic":false
+                            },
+                            {
+                                "Name":"Run robustness tests",
+                                "IsAutomatic":true
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}
