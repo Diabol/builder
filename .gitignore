@@ -6,7 +6,7 @@ tmp
 .history
 dist
 *.class
-
+.idea
 # Package Files #
 *.jar
 *.war
