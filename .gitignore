@@ -2,6 +2,10 @@ logs
 project/project
 project/target
 target
+.target
+.classpath
+.project
+.settings
 tmp
 .history
 dist
