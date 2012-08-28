@@ -1,0 +1,18 @@
+@(pipes: List[Pipe])
+
+@main("All Pipes!"){
+<ul>
+    @for(pipe <- pipes) {
+        <div class=pipe id=@pipe.getName()><div>@pipe.getName()</div>
+            <div class=phase-column>
+                <div class=phase id=@pipe.getInitialPhase().getName()>@pipe.getInitialPhase().getName()</div>
+            </div>
+            <div class=phase-column>
+                @for(phase <- pipe.getInitialPhase().getNextPhases()){
+                    <div class=phase id=@phase.getName()>@phase.getName()</div>
+                }
+            </div>
+        </div>
+    }
+</ul>
+}

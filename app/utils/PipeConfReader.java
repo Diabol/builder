@@ -22,20 +22,25 @@ import java.util.List;
  */
 @Component
 public class PipeConfReader {
+
+    private static PipeConfReader theInstance = new PipeConfReader();
+    private List<Pipe> jsonAsObjects =  new ArrayList<Pipe>();
     private String urlToJson = "conf/pipes/";
-    public List<Pipe> getConfiguredPipes() {
+
+    public static PipeConfReader getInstance() {
+        return theInstance;
+    }
+    private PipeConfReader() {
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = mapper.getJsonFactory();
-        List<Pipe> result =  new ArrayList<Pipe>();
+
         try {
             File pipeDir = new File(urlToJson);
             for(int i = 0; i < pipeDir.list().length; i++){
                 JsonParser jp = factory.createJsonParser(new File(urlToJson + pipeDir.list()[i]));
                 Pipe jsonAsPipe = mapper.readValue(jp, Pipe.class);
-                result.add(jsonAsPipe);
+                jsonAsObjects.add(jsonAsPipe);
             }
-
-            return result;
         } catch (JsonGenerationException e) {
 
             e.printStackTrace();
@@ -49,6 +54,9 @@ public class PipeConfReader {
             e.printStackTrace();
 
         }
-        return null;
+    }
+
+    public List<Pipe> getConfiguredPipes() {
+        return jsonAsObjects;
     }
 }
