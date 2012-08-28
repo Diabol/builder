@@ -1,21 +1,16 @@
 package utils;
 
 import models.Pipe;
-import models.PipeConfDocument;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.JavaType;
-import play.api.libs.json.JerksonJson;
-import scala.util.parsing.json.JSONObject;
+import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,15 +20,22 @@ import java.util.List;
  * Time: 14:15
  * To change this template use File | Settings | File Templates.
  */
+@Component
 public class PipeConfReader {
-    private static String urlToJson = "conf/pipes.json";
-    public static List<Pipe> getConfiguredPipes() {
+    private String urlToJson = "conf/pipes/";
+    public List<Pipe> getConfiguredPipes() {
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = mapper.getJsonFactory();
+        List<Pipe> result =  new ArrayList<Pipe>();
         try {
-            JsonParser jp = factory.createJsonParser(new File(urlToJson));
-            PipeConfDocument jsonAsPipeConfDoc = mapper.readValue(jp, PipeConfDocument.class);
-            return jsonAsPipeConfDoc.getPipes();
+            File pipeDir = new File(urlToJson);
+            for(int i = 0; i < pipeDir.list().length; i++){
+                JsonParser jp = factory.createJsonParser(new File(urlToJson + pipeDir.list()[i]));
+                Pipe jsonAsPipe = mapper.readValue(jp, Pipe.class);
+                result.add(jsonAsPipe);
+            }
+
+            return result;
         } catch (JsonGenerationException e) {
 
             e.printStackTrace();

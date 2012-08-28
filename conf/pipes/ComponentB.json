@@ -1,0 +1,40 @@
+{
+    "name":"ComponentB pipe",
+    "initialPhase":{
+        "name":"Dev",
+        "tasks":[
+            {
+                "name":"Build",
+                "isAutomatic":true
+            }
+        ],
+        "nextPhases":[
+            {
+                "name":"GUI Test",
+                "tasks":[
+                    {
+                        "name":"Deploy",
+                        "isAutomatic":false
+                    },
+                    {
+                        "name":"Run gui tests",
+                        "isAutomatic":true
+                    }
+                ]
+            },
+            {
+                "name":"Robustness Test",
+                "tasks":[
+                    {
+                        "name":"Deploy",
+                        "isAutomatic":false
+                    },
+                    {
+                        "name":"Run robustness tests",
+                        "isAutomatic":true
+                    }
+                ]
+            }
+        ]
+    }
+}
