@@ -6,7 +6,7 @@ import play.mvc.Result;
 import utils.PipeConfReader;
 import views.html.allPipes;
 
-public class PipesApplication extends Controller {
+public class PipeListController extends Controller {
 
   private static PipeConfReader configReader = PipeConfReader.getInstance() ;
 
