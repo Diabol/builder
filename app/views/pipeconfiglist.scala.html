@@ -5,7 +5,10 @@
 @displayPipe(graphCount: Int, pipe: PipeConfig) = {
     //Create unique variable for the graph which the pipe will be displayed in.
     var graph@{graphCount} = new Graph();
-    graph@{graphCount}.addNode("@{pipe.getInitialPhase().getName()}", {render:render@{graphCount}});
+
+    graph@{graphCount}.addNode("@{pipe.getInitialPhase().getName()}", {render:nodeRenderer});
+    //Set how many tasks for the phase. Used by nodeRenderer.
+    graph@{graphCount}.nodes["@{pipe.getInitialPhase().getName()}"].numTasks = @pipe.getInitialPhase().getTasks().length;
 
     //Create nodes for coming phases, if any.
     @if(pipe.getInitialPhase().getNextPhases() != null){
@@ -16,12 +19,16 @@
 
     //Create unique layout and renderer for the graph.
     var layouter@{graphCount} = new Graph.Layout.Ordered(graph@{graphCount}, topological_sort(graph@{graphCount}));
-    var render@{graphCount} = new Graph.Renderer.Raphael('pipe@{graphCount}', graph@{graphCount}, width, height);
+
+    var render@{graphCount} = new Graph.Renderer.Raphael('pipe@{graphCount}', graph@{graphCount}, $(".pipe:first").width(), $(".pipe:first").height());
 }
 
-<!--Adds a new node to the graph for a phase and connects to the given parent(previous phase).-->
-@addPhaseWithParentEdge(graphCount: Int, parent: PhaseConfig, phase: PhaseConfig) = {
-    graph@{graphCount}.addNode("@{phase.getName()}", {render:render@{graphCount}});
+    <!--Adds a new node to the graph for a phase and connects to the given parent(privious phase).-->
+    @addPhaseWithParentEdge(graphCount: Int, parent: PhaseConfig, phase: PhaseConfig) = {
+
+    graph@{graphCount}.addNode("@{phase.getName()}", {render:nodeRenderer});
+    //Set how many tasks for the phase. Used by nodeRenderer.
+    graph@{graphCount}.nodes["@{phase.getName()}"].numTasks = @phase.getTasks().length;
     graph@{graphCount}.addEdge("@{parent.getName()}", "@{phase.getName()}");
 
     //Recursively add nodes in the graph for all phases
@@ -37,9 +44,16 @@
     var redraw;
 
     window.onload = function () {
-        var width = 400;
-        var height = 200;
 
+        var nodeRenderer = function(r, n) {
+            /* the Raphael set is obligatory, containing all you want to display */
+            var set = r.set().push(
+                    /* Set how the nodes should be rendered */
+
+                    r.rect(n.point[0]-30, n.point[1]-13, 60, 44).attr({"fill": "lightgray", "stroke":"#bf5600", r : "10", "stroke-width" : "2" })).push(
+                    r.text(n.point[0], n.point[1] + 10, (n.label || n.id) + "\n#Tasks: " + n.numTasks));
+            return set;
+        };
 
         @for(i <- 0 until pipes.length){
             @displayPipe(i, pipes(i))
