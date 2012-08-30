@@ -1,19 +1,53 @@
 @(pipes: List[Pipe])
 
-@main("Pipe List"){
-<ul id="pipeList">
-    @for(pipe <- pipes) {
-        <div class=pipe id=@pipe.getName()>
-        	<div>@pipe.getName()</div>
-            <div class=phase-column>
-                <div class=phase id=@pipe.getInitialPhase().getName()>@pipe.getInitialPhase().getName()</div>
-            </div>
-            <div class=phase-column>
-                @for(phase <- pipe.getInitialPhase().getNextPhases()){
-                    <div class=phase id=@phase.getName()>@phase.getName()</div>
-                }
-            </div>
-        </div>
+@displayPipe(graphCount: Int, pipe: Pipe) = {
+    //Create unique variable for the graph which the pipe will be displayed in.
+    var graph@{graphCount} = new Graph();
+    graph@{graphCount}.addNode("@{pipe.getInitialPhase().getName()}", {render:render@{graphCount}});
+
+    //Create nodes for coming phases, if any.
+    @if(pipe.getInitialPhase().getNextPhases() != null){
+        @for(phase <- pipe.getInitialPhase().getNextPhases())  {
+            @addPhaseWithParentEdge(graphCount,pipe.getInitialPhase(), phase)
+        }
     }
+
+    //Create unique layout and renderer for the graph.
+    var layouter@{graphCount} = new Graph.Layout.Ordered(graph@{graphCount}, topological_sort(graph@{graphCount}));
+    var render@{graphCount} = new Graph.Renderer.Raphael('pipe@{graphCount}', graph@{graphCount}, width, height);
+}
+
+<!--Adds a new node to the graph for a phase and connects to the given parent(privious phase).-->
+@addPhaseWithParentEdge(graphCount: Int, parent: Phase, phase: Phase) = {
+    graph@{graphCount}.addNode("@{phase.getName()}", {render:render@{graphCount}});
+    graph@{graphCount}.addEdge("@{parent.getName()}", "@{phase.getName()}");
+
+    //Recursively add nodes in the graph for all phases
+    @if(phase.getNextPhases() != null){
+        @for(next <- phase.getNextPhases())  {
+            @addPhaseWithParentEdge(graphCount, phase, next)
+        }
+    }
+}
+
+@main("Pipe List"){
+<script type="text/javascript">
+    var redraw;
+
+    window.onload = function () {
+        var width = 400;
+        var height = 200;
+
+
+        @for(i <- 0 until pipes.length){
+            @displayPipe(i, pipes(i))
+        }
+    };
+</script>
+<ul id="pipeList">
+<!--Create one div per graph-->
+@for(pipeCount <- 0 until pipes.length){
+    <div id="pipe@{pipeCount}" class="pipe">@pipes(pipeCount).getName()</div>
+}
 </ul>
 }

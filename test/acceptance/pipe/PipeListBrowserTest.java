@@ -8,6 +8,7 @@ import static play.test.Helpers.testServer;
 
 import org.fluentlenium.core.annotation.Page;
 import org.fluentlenium.core.domain.FluentList;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import play.libs.WS;
@@ -28,6 +29,9 @@ public class PipeListBrowserTest extends AbstractBrowserFluentTest {
         });
     }
 
+    /**
+     * TODO: Figure out how to do gui testing. Webdriver does not seem to handle graffle api.
+     */
     @Test
     public void testPipeIsVivibleInBrowser() {
         goTo(pipeListPage);
