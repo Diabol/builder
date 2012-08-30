@@ -1,4 +1,14 @@
-This is your new Play 2.0 application
+This is Diabol's Builder Play 2.0 app
 =====================================
 
-This file will be packaged with your application, when using `play dist`.
+CI
+------
+There is a Jenkins-as-a-Service running provided by CloudBees.
+
+https://diabol.ci.cloudbees.com
+
+### Documentation
+http://wiki.cloudbees.com/bin/view/DEV/Playframework
+http://wiki.cloudbees.com/bin/view/DEV/GitHub+Commit+Hooks+HOWTO
+http://wiki.cloudbees.com/bin/view/DEV/How+to+use+Private+GitHub+Repositories+with+CloudBees
+https://help.github.com/articles/managing-deploy-keys

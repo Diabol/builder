@@ -1,6 +1,6 @@
 package acceptance.pipe;
 
-import static acceptance.AbstractBrowserFluentTest.LOCALHOST_BASE_URL;
+import static acceptance.AbstractBrowserFluentTest.LOCALHOST_BASE_TEST_URL;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fluentlenium.core.filter.FilterConstructor.withId;
 
@@ -23,7 +23,7 @@ public class PipeListPage extends FluentPage {
 
     @Override
     public String getUrl() {
-        return LOCALHOST_BASE_URL + "pipeList";
+        return LOCALHOST_BASE_TEST_URL + "pipeList";
     }
 
     @Override
