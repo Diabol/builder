@@ -12,3 +12,15 @@ http://wiki.cloudbees.com/bin/view/DEV/Playframework
 http://wiki.cloudbees.com/bin/view/DEV/GitHub+Commit+Hooks+HOWTO
 http://wiki.cloudbees.com/bin/view/DEV/How+to+use+Private+GitHub+Repositories+with+CloudBees
 https://help.github.com/articles/managing-deploy-keys
+
+HEROKU
+------
+Marcus followed this:
+http://www.playframework.org/documentation/2.0.2/ProductionHeroku
+and had a quick look at:
+http://www.jamesward.com/2012/02/21/play-framework-2-with-scala-anorm-json-coffeescript-jquery-heroku
+and:
+https://devcenter.heroku.com/articles/play but note that this is for _Play 1_.
+
+### Heroku CLI
+https://toolbelt.heroku.com/osx
