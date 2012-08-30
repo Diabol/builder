@@ -1,9 +1,10 @@
 @(pipes: List[Pipe])
 
-@main("All Pipes!"){
-<ul>
+@main("Pipe List"){
+<ul id="pipeList">
     @for(pipe <- pipes) {
-        <div class=pipe id=@pipe.getName()><div>@pipe.getName()</div>
+        <div class=pipe id=@pipe.getName()>
+        	<div>@pipe.getName()</div>
             <div class=phase-column>
                 <div class=phase id=@pipe.getInitialPhase().getName()>@pipe.getInitialPhase().getName()</div>
             </div>
