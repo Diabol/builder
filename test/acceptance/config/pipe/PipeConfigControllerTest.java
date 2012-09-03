@@ -20,8 +20,8 @@ public class PipeConfigControllerTest {
         assertThat(contentType(result)).isEqualTo("text/html");
         assertThat(charset(result)).isEqualTo("utf-8");
         assertThat(contentAsString(result)).contains("id=\"pipeList\"");
-        assertThat(contentAsString(result)).contains("ComponentA pipe");
-        assertThat(contentAsString(result)).contains("ComponentB pipe");
+        assertThat(contentAsString(result)).contains("Component-A");
+        assertThat(contentAsString(result)).contains("Component-B");
     }
 
     @Test
