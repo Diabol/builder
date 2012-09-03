@@ -1,6 +1,8 @@
-@(pipes: List[Pipe])
+@(pipes: List[models.config.PipeConfig])
 
-@displayPipe(graphCount: Int, pipe: Pipe) = {
+@import models.config._
+
+@displayPipe(graphCount: Int, pipe: PipeConfig) = {
     //Create unique variable for the graph which the pipe will be displayed in.
     var graph@{graphCount} = new Graph();
     graph@{graphCount}.addNode("@{pipe.getInitialPhase().getName()}", {render:render@{graphCount}});
@@ -17,8 +19,8 @@
     var render@{graphCount} = new Graph.Renderer.Raphael('pipe@{graphCount}', graph@{graphCount}, width, height);
 }
 
-<!--Adds a new node to the graph for a phase and connects to the given parent(privious phase).-->
-@addPhaseWithParentEdge(graphCount: Int, parent: Phase, phase: Phase) = {
+<!--Adds a new node to the graph for a phase and connects to the given parent(previous phase).-->
+@addPhaseWithParentEdge(graphCount: Int, parent: PhaseConfig, phase: PhaseConfig) = {
     graph@{graphCount}.addNode("@{phase.getName()}", {render:render@{graphCount}});
     graph@{graphCount}.addEdge("@{parent.getName()}", "@{phase.getName()}");
 
@@ -47,6 +49,9 @@
 <ul id="pipeList">
 <!--Create one div per graph-->
 @for(pipeCount <- 0 until pipes.length){
+    <form action="/pipe/@{pipes(pipeCount).getName()}" id="startPipe_@{pipes(pipeCount).getName()}_Form">
+        <button id="startPipe_@{pipes(pipeCount).getName()}_Btn">Start @{pipes(pipeCount).getName()}</button>
+    </form>
     <div id="pipe@{pipeCount}" class="pipe">@pipes(pipeCount).getName()</div>
 }
 </ul>

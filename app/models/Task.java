@@ -1,43 +1,31 @@
 package models;
 
-/**
- * Created with IntelliJ IDEA.
- * User: danielgronberg
- * Date: 2012-08-27
- * Time: 14:05
- * To change this template use File | Settings | File Templates.
- */
+import models.config.TaskConfig;
+import models.result.TaskResult;
+
 public class Task {
 
-    public enum Progress {NOT_STARTED, IN_PROGRESS, SUCCESS, FAILURE}
+    public enum State {NOT_STARTED, IN_PROGRESS, FINISHED}
 
+    private final TaskConfig config;
+    private State state = State.NOT_STARTED;
 
-    private String name;
-    private Progress progress = Progress.NOT_STARTED;
-    private boolean isAutomatic;
-
-    public String getName() {
-        return name;
+    public Task(TaskConfig config) {
+        this.config = config;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public TaskResult start() {
+        TaskResult result = new TaskResult(this);
+
+        return result;
     }
 
-    public Progress getProgress() {
-        return progress;
+    public State getState() {
+        return state;
     }
 
-    public void setProgress(Progress progress) {
-        this.progress = progress;
-    }
-
-    public Boolean getIsAutomatic() {
-        return isAutomatic;
-    }
-
-    public void setIsAutomatic(Boolean isAutomatic) {
-        isAutomatic = isAutomatic;
+    private void setState(State state) {
+        this.state = state;
     }
 
 }

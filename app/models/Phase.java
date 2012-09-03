@@ -1,40 +1,19 @@
 package models;
 
-import java.util.List;
+import models.config.PhaseConfig;
 
-/**
- * Created with IntelliJ IDEA.
- * User: danielgronberg
- * Date: 2012-08-27
- * Time: 14:10
- * To change this template use File | Settings | File Templates.
- */
 public class Phase {
-    private String name;
-    private List<Task> tasks;
-    private List<Phase> nextPhases;
 
-    public String getName() {
-        return name;
+    private final PhaseConfig config;
+
+    public Phase(PhaseConfig config) {
+        this.config = config;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public PhaseResult start() {
+        PhaseResult result = new PhaseResult(this);
+
+        return result;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
-    }
-
-    public List<Phase> getNextPhases() {
-        return nextPhases;
-    }
-
-    public void setNextPhases(List<Phase> nextPhases) {
-        this.nextPhases = nextPhases;
-    }
 }

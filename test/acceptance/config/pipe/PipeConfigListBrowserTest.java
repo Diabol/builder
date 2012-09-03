@@ -1,4 +1,4 @@
-package acceptance.pipe;
+package acceptance.config.pipe;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.fluentlenium.FluentLeniumAssertions.assertThat;
@@ -6,31 +6,30 @@ import static play.mvc.Http.Status.OK;
 
 import org.fluentlenium.core.annotation.Page;
 import org.fluentlenium.core.domain.FluentList;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import play.libs.WS;
 import acceptance.AbstractBrowserFluentTest;
 
-public class PipeListBrowserTest extends AbstractBrowserFluentTest {
+public class PipeConfigListBrowserTest extends AbstractBrowserFluentTest {
 
     @Page
-    public PipeListPage pipeListPage;
+    public PipeConfigListPage pipeConfigListPage;
 
     @Test
-    public void testPipeListUrl() {
-        assertThat(WS.url(LOCALHOST + ":" + TEST_SERVER_PORT).get().get().getStatus()).isEqualTo(OK);
+    public void testPipeConfigListUrl() {
+        assertThat(WS.url(pipeConfigListPage.getUrl()).get().get().getStatus()).isEqualTo(OK);
     }
 
     /**
      * TODO: Figure out how to do gui testing. Webdriver does not seem to handle graffle api.
      */
     @Test
-    public void testPipeIsVivibleInBrowser() {
-        goTo(pipeListPage);
-        assertThat(pipeListPage).isAt();
+    public void testPipeConfigVisibleInBrowser() {
+        goTo(pipeConfigListPage);
+        assertThat(pipeConfigListPage).isAt();
 
-        FluentList<?> pipeDivList = pipeListPage.getPipeDivList();
+        FluentList<?> pipeDivList = pipeConfigListPage.getPipeDivList();
         assertThat(pipeDivList.size()).isEqualTo(2);
     }
 

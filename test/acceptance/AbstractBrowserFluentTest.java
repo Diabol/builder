@@ -16,7 +16,7 @@ public abstract class AbstractBrowserFluentTest extends FluentTest {
     /** If we start a test server in a test we use this port. 9000 is default when running play locally in console. */
     protected static final int TEST_SERVER_PORT = 3366;
 
-    public static final String LOCALHOST_BASE_TEST_URL = LOCALHOST + ":" + TEST_SERVER_PORT + "/";
+    public static final String LOCALHOST_BASE_TEST_URL = LOCALHOST + ":" + TEST_SERVER_PORT;
 
     /** Marcus thinks it should work with a shared test server. If not: refactor! ;) */
     private static TestServer testServer;

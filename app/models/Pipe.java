@@ -1,29 +1,35 @@
 package models;
 
-/**
- * Created with IntelliJ IDEA.
- * User: danielgronberg
- * Date: 2012-08-27
- * Time: 14:12
- * To change this template use File | Settings | File Templates.
- */
+import models.config.PhaseConfig;
+import models.config.PipeConfig;
+import models.result.PipeResult;
+
 public class Pipe {
-    private String name;
-    private Phase initialPhase;
 
+    private final PipeConfig config;
+
+    public Pipe(PipeConfig config) {
+        this.config = config;
+    }
+
+    public PipeResult start() {
+        PipeResult result = new PipeResult(this);
+
+        return result;
+    }
+
+    /**
+     * @see models.config.PipeConfig#getName()
+     */
     public String getName() {
-        return name;
+        return config.getName();
     }
 
-    public void setName(String name) {
-        this.name = name;
+    /**
+     * @see models.config.PipeConfig#getInitialPhase()
+     */
+    public PhaseConfig getInitialPhase() {
+        return config.getInitialPhase();
     }
 
-    public Phase getInitialPhase() {
-        return initialPhase;
-    }
-
-    public void setInitialPhase(Phase initialPhase) {
-        this.initialPhase = initialPhase;
-    }
 }

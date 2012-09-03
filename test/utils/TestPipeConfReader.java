@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import models.Pipe;
+import models.config.PipeConfig;
+
 import org.junit.Test;
 
 
@@ -16,7 +17,7 @@ public class TestPipeConfReader {
 
     @Test
     public void testConfIsReadOk() throws Exception{
-        List<Pipe> result = reader.getConfiguredPipes();
+        List<PipeConfig> result = reader.getConfiguredPipes();
         assertEquals(2, result.size());
     }
 }

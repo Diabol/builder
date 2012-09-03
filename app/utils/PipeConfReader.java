@@ -1,17 +1,20 @@
 package utils;
 
-import models.Pipe;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import models.config.PipeConfig;
+
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,8 +27,8 @@ import java.util.List;
 public class PipeConfReader {
 
     private static PipeConfReader theInstance = new PipeConfReader();
-    private List<Pipe> jsonAsObjects =  new ArrayList<Pipe>();
-    private String urlToJson = "conf/pipes/";
+    private final List<PipeConfig> jsonAsObjects =  new ArrayList<PipeConfig>();
+    private final String urlToJson = "conf/pipes/";
 
     public static PipeConfReader getInstance() {
         return theInstance;
@@ -38,25 +41,32 @@ public class PipeConfReader {
             File pipeDir = new File(urlToJson);
             for(int i = 0; i < pipeDir.list().length; i++){
                 JsonParser jp = factory.createJsonParser(new File(urlToJson + pipeDir.list()[i]));
-                Pipe jsonAsPipe = mapper.readValue(jp, Pipe.class);
+                PipeConfig jsonAsPipe = mapper.readValue(jp, PipeConfig.class);
                 jsonAsObjects.add(jsonAsPipe);
             }
         } catch (JsonGenerationException e) {
-
             e.printStackTrace();
-
         } catch (JsonMappingException e) {
-
             e.printStackTrace();
-
         } catch (IOException e) {
-
             e.printStackTrace();
-
         }
     }
 
-    public List<Pipe> getConfiguredPipes() {
+    public List<PipeConfig> getConfiguredPipes() {
         return jsonAsObjects;
     }
+
+    public Map<String, PipeConfig> getConfiguredPipesMappedByName() {
+        Map<String, PipeConfig> pipeMap = new HashMap<String, PipeConfig>();
+        for (int i = 0; i < jsonAsObjects.size(); i++) {
+            pipeMap.put(jsonAsObjects.get(i).getName(), jsonAsObjects.get(i));
+        }
+        return pipeMap;
+    }
+
+    public PipeConfig get(String pipeName) {
+        return getConfiguredPipesMappedByName().get(pipeName);
+    }
+
 }
