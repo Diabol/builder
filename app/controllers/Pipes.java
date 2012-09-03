@@ -1,6 +1,7 @@
 package controllers;
 
 import models.Pipe;
+import models.config.PipeValidationException;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.PipeConfReader;
@@ -15,7 +16,7 @@ public class Pipes extends Controller {
         return ok(pipeconfiglist.render(configReader.getConfiguredPipes()));
     }
 
-    public static Result start(String name) {
+    public static Result start(String name) throws PipeValidationException {
         Pipe newPipe = new Pipe(configReader.get(name));
         newPipe.start();
         return ok(pipe.render(newPipe));

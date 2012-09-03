@@ -9,6 +9,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
+      "org.mockito" % "mockito-core" % "1.9.0" % "test"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(

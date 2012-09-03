@@ -1,39 +1,49 @@
 package models;
 
+import java.util.List;
+
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
+import models.config.PipeValidationException;
 import models.result.PhaseResult;
 import models.result.PipeResult;
 
+/**
+ * An instance of a pipeline, ie a specific run of a pipe.
+ * Config is taken from {@link PipeConfig}.
+ * Result is stored in {@link PipeResult}.
+ * 
+ * @author marcus
+ */
 public class Pipe {
 
     private final PipeConfig config;
 
-    public Pipe(PipeConfig config) {
+    public Pipe(PipeConfig config) throws PipeValidationException {
+        config.validate();
         this.config = config;
     }
 
     public PipeResult start() {
         PipeResult result = new PipeResult(this);
-        PhaseConfig initialPhaseConfig = getInitialPhaseConfig();
-        Phase initialPhase = new Phase(initialPhaseConfig);
-        PhaseResult initialPhaseResult = initialPhase.start();
-        result.add(initialPhaseResult);
+
+        for (PhaseConfig phaseConfig : getPhases()) {
+            PhaseResult phaseResult = phaseConfig.createPhase().start();
+            result.add(phaseResult);
+            if (!phaseResult.success()) {
+                break;
+            }
+        }
+
         return result;
     }
 
-    /**
-     * @see models.config.PipeConfig#getName()
-     */
     public String getName() {
         return config.getName();
     }
 
-    /**
-     * @see models.config.PipeConfig#getInitialPhase()
-     */
-    public PhaseConfig getInitialPhaseConfig() {
-        return config.getInitialPhase();
+    public List<PhaseConfig> getPhases() {
+        return config.getPhases();
     }
 
 }

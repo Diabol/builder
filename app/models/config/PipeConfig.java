@@ -3,6 +3,7 @@ package models.config;
 import java.util.List;
 
 /**
+ * The config for a Pipe.
  * @author danielgronberg, marcus
  */
 public class PipeConfig {
@@ -23,5 +24,11 @@ public class PipeConfig {
 
     public void setPhases(List<PhaseConfig> phases) {
         this.phases = phases;
+    }
+
+    public void validate() throws PipeValidationException {
+        if (getPhases().size() == 0 ||
+                getName().length() == 0)
+            throw new PipeValidationException();
     }
 }

@@ -1,6 +1,7 @@
 package models.config;
 
-import java.util.List;
+import models.Phase;
+
 
 /**
  * @author danielgronberg, marcus
@@ -8,6 +9,10 @@ import java.util.List;
 public class PhaseConfig {
     private String name;
     private TaskConfig initialTask;
+
+    public Phase createPhase() {
+        return new Phase(this);
+    }
 
     public String getName() {
         return name;

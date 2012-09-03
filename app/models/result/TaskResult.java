@@ -3,7 +3,7 @@ package models.result;
 import static models.result.ResultLevel.SUCESS;
 import models.Task;
 
-public class TaskResult implements Result {
+public class TaskResult extends AbstractResult {
 
     private final Task task;
 
