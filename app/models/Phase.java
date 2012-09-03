@@ -38,6 +38,7 @@ public class Phase {
         }
         List<TaskConfig> nextTasks = task.getNextTasks();
         for (TaskConfig nextTask : nextTasks) {
+            // TODO Add isAutomatic check
             runTask(nextTask);
         }
     }

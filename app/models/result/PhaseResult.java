@@ -1,5 +1,6 @@
 package models.result;
 
+import static models.result.ResultLevel.FAILURE;
 import static models.result.ResultLevel.SUCESS;
 
 import java.util.ArrayList;
@@ -18,12 +19,23 @@ public class PhaseResult extends AbstractResult {
 
     @Override
     public ResultLevel result() {
-        // TODO Auto-generated method stub
+        // TODO We need to handle ongoing phases.
+        // A phase may be open for an extended period if it has a manual step.
+
+        for (TaskResult taskResult : taskResults) {
+            if (!taskResult.success()) {
+                return FAILURE;
+            }
+        }
         return SUCESS;
     }
 
     public void addTaskResult(TaskResult taskResult) {
         taskResults.add(taskResult);
+    }
+
+    public int executedTasks() {
+        return taskResults.size();
     }
 
 }
