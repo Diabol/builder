@@ -1,40 +1,49 @@
 {
-    "name":"ComponentB pipe",
-    "initialPhase":{
-        "name":"Dev",
-        "tasks":[
-            {
-                "name":"Build",
-                "isAutomatic":true
-            }
-        ],
-        "nextPhases":[
-            {
-                "name":"GUI Test",
-                "tasks":[
+    "name":"Component-B",
+    "phases":[
+        {
+            "name":"Build",
+            "initialTask":{
+                "name":"Compile",
+                "isAutomatic":true,
+                "nextTasks":[
                     {
-                        "name":"Deploy",
-                        "isAutomatic":false
+                        "name":"Unit test",
+                        "isAutomatic":true
                     },
                     {
-                        "name":"Run gui tests",
+                        "name":"Sonar",
                         "isAutomatic":true
                     }
                 ]
-            },
-            {
-                "name":"Robustness Test",
-                "tasks":[
+
+            }
+        },
+        {
+            "name":"CI",
+            "initialTask":{
+                "name":"Deploy",
+                "isAutomatic":true,
+                "nextTasks":[
                     {
-                        "name":"Deploy",
-                        "isAutomatic":false
-                    },
-                    {
-                        "name":"Run robustness tests",
+                        "name":"Integration tests",
                         "isAutomatic":true
                     }
                 ]
             }
-        ]
-    }
+        },
+        {
+            "name":"QA",
+            "initialTask":{
+                "name":"Deploy",
+                "isAutomatic":false,
+                "nextTasks":[
+                    {
+                        "name":"QA tests",
+                        "isAutomatic":true
+                    }
+                ]
+            }
+        }
+    ]
 }

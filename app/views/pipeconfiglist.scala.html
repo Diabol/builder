@@ -5,15 +5,17 @@
 @displayPipe(graphCount: Int, pipe: PipeConfig) = {
     //Create unique variable for the graph which the pipe will be displayed in.
     var graph@{graphCount} = new Graph();
+    graph@{graphCount}.edgeFactory.template.style.directed = true;
 
-    graph@{graphCount}.addNode("@{pipe.getInitialPhase().getName()}", {render:nodeRenderer});
-    //Set how many tasks for the phase. Used by nodeRenderer.
-    graph@{graphCount}.nodes["@{pipe.getInitialPhase().getName()}"].numTasks = @pipe.getInitialPhase().getTasks().length;
-
-    //Create nodes for coming phases, if any.
-    @if(pipe.getInitialPhase().getNextPhases() != null){
-        @for(phase <- pipe.getInitialPhase().getNextPhases())  {
-            @addPhaseWithParentEdge(graphCount,pipe.getInitialPhase(), phase)
+    var prevPhase@{graphCount};
+    @for(phase: PhaseConfig <- pipe.getPhases()){
+        graph@{graphCount}.addNode("@{phase.getName()}", {render:nodeRenderer});
+        if(prevPhase@{graphCount}) {
+            graph@{graphCount}.addEdge(prevPhase@{graphCount}, "@{phase.getName()}");
+            prevPhase@{graphCount} = "@{phase.getName()}";
+        }
+        else {
+            prevPhase@{graphCount} = "@{phase.getName()}";
         }
     }
 
@@ -21,22 +23,6 @@
     var layouter@{graphCount} = new Graph.Layout.Ordered(graph@{graphCount}, topological_sort(graph@{graphCount}));
 
     var render@{graphCount} = new Graph.Renderer.Raphael('pipe@{graphCount}', graph@{graphCount}, $(".pipe:first").width(), $(".pipe:first").height());
-}
-
-    <!--Adds a new node to the graph for a phase and connects to the given parent(privious phase).-->
-    @addPhaseWithParentEdge(graphCount: Int, parent: PhaseConfig, phase: PhaseConfig) = {
-
-    graph@{graphCount}.addNode("@{phase.getName()}", {render:nodeRenderer});
-    //Set how many tasks for the phase. Used by nodeRenderer.
-    graph@{graphCount}.nodes["@{phase.getName()}"].numTasks = @phase.getTasks().length;
-    graph@{graphCount}.addEdge("@{parent.getName()}", "@{phase.getName()}");
-
-    //Recursively add nodes in the graph for all phases
-    @if(phase.getNextPhases() != null){
-        @for(next <- phase.getNextPhases())  {
-            @addPhaseWithParentEdge(graphCount, phase, next)
-        }
-    }
 }
 
 @main("Pipe List"){
@@ -51,7 +37,7 @@
                     /* Set how the nodes should be rendered */
 
                     r.rect(n.point[0]-30, n.point[1]-13, 60, 44).attr({"fill": "lightgray", "stroke":"#bf5600", r : "10", "stroke-width" : "2" })).push(
-                    r.text(n.point[0], n.point[1] + 10, (n.label || n.id) + "\n#Tasks: " + n.numTasks));
+                    r.text(n.point[0], n.point[1] + 10, (n.label || n.id)));
             return set;
         };
 
