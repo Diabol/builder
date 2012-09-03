@@ -7,8 +7,7 @@ import java.util.List;
  */
 public class PhaseConfig {
     private String name;
-    private List<TaskConfig> tasks;
-    private List<PhaseConfig> nextPhases;
+    private TaskConfig initialTask;
 
     public String getName() {
         return name;
@@ -18,19 +17,11 @@ public class PhaseConfig {
         this.name = name;
     }
 
-    public List<TaskConfig> getTasks() {
-        return tasks;
+    public TaskConfig getInitialTask() {
+        return initialTask;
     }
 
-    public void setTasks(List<TaskConfig> tasks) {
-        this.tasks = tasks;
-    }
-
-    public List<PhaseConfig> getNextPhases() {
-        return nextPhases;
-    }
-
-    public void setNextPhases(List<PhaseConfig> nextPhases) {
-        this.nextPhases = nextPhases;
+    public void setInitialTask(TaskConfig initialTask) {
+        this.initialTask = initialTask;
     }
 }

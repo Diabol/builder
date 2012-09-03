@@ -1,5 +1,7 @@
 package models.config;
 
+import java.util.List;
+
 /**
  * @author danielgronberg, marcus
  */
@@ -7,6 +9,7 @@ public class TaskConfig {
 
     private String name;
     private boolean isAutomatic;
+    private List<TaskConfig> nextTasks;
 
     public String getName() {
         return name;
@@ -16,7 +19,7 @@ public class TaskConfig {
         this.name = name;
     }
 
-    public Boolean getIsAutomatic() {
+    public Boolean isAutomatic() {
         return isAutomatic;
     }
 
@@ -24,4 +27,11 @@ public class TaskConfig {
         this.isAutomatic = isAutomatic;
     }
 
+    public List<TaskConfig> getNextTasks() {
+        return nextTasks;
+    }
+
+    public void setNextTasks(List<TaskConfig> nextTasks) {
+        this.nextTasks = nextTasks;
+    }
 }

@@ -1,11 +1,13 @@
 package models.config;
 
+import java.util.List;
+
 /**
  * @author danielgronberg, marcus
  */
 public class PipeConfig {
     private String name;
-    private PhaseConfig initialPhase;
+    private List<PhaseConfig> phases;
 
     public String getName() {
         return name;
@@ -15,11 +17,11 @@ public class PipeConfig {
         this.name = name;
     }
 
-    public PhaseConfig getInitialPhase() {
-        return initialPhase;
+    public List<PhaseConfig> getPhases() {
+        return phases;
     }
 
-    public void setInitialPhase(PhaseConfig initialPhase) {
-        this.initialPhase = initialPhase;
+    public void setPhases(List<PhaseConfig> phases) {
+        this.phases = phases;
     }
 }
