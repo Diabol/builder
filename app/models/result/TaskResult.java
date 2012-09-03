@@ -1,6 +1,6 @@
 package models.result;
 
-import static models.result.Result.ResultLevel.SUCESS;
+import static models.result.ResultLevel.SUCESS;
 import models.Task;
 
 public class TaskResult implements Result {

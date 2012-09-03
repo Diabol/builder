@@ -1,7 +1,7 @@
-package models;
+package models.result;
 
-import static models.result.Result.ResultLevel.SUCESS;
-import models.result.Result;
+import static models.result.ResultLevel.SUCESS;
+import models.Phase;
 
 public class PhaseResult implements Result {
 

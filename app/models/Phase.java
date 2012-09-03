@@ -1,6 +1,7 @@
 package models;
 
 import models.config.PhaseConfig;
+import models.result.PhaseResult;
 
 public class Phase {
 

@@ -2,6 +2,7 @@ package models;
 
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
+import models.result.PhaseResult;
 import models.result.PipeResult;
 
 public class Pipe {
@@ -14,7 +15,10 @@ public class Pipe {
 
     public PipeResult start() {
         PipeResult result = new PipeResult(this);
-
+        PhaseConfig initialPhaseConfig = getInitialPhaseConfig();
+        Phase initialPhase = new Phase(initialPhaseConfig);
+        PhaseResult initialPhaseResult = initialPhase.start();
+        result.add(initialPhaseResult);
         return result;
     }
 
@@ -28,7 +32,7 @@ public class Pipe {
     /**
      * @see models.config.PipeConfig#getInitialPhase()
      */
-    public PhaseConfig getInitialPhase() {
+    public PhaseConfig getInitialPhaseConfig() {
         return config.getInitialPhase();
     }
 
