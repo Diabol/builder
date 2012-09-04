@@ -12,6 +12,7 @@ public class TaskConfig {
 
     private String name;
     private boolean isAutomatic;
+    private String cmd;
     private List<TaskConfig> nextTasks = new ArrayList<TaskConfig>();
 
     public Task createTask() {
@@ -32,6 +33,14 @@ public class TaskConfig {
 
     public void setIsAutomatic(Boolean isAutomatic) {
         this.isAutomatic = isAutomatic;
+    }
+
+    public String getCommand() {
+        return cmd;
+    }
+
+    public void setCommand(String cmd) {
+        this.cmd = cmd;
     }
 
     public List<TaskConfig> getNextTasks() {

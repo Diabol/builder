@@ -1,24 +1,30 @@
 package models;
 
+import static models.Task.State.FINISHED;
+import static models.Task.State.IN_PROGRESS;
+
 import java.util.List;
 
 import models.config.TaskConfig;
 import models.result.TaskResult;
+import executor.TaskExecutor;
 
 public class Task {
 
     public enum State {NOT_STARTED, IN_PROGRESS, FINISHED}
 
-    private final TaskConfig config;
     private State state = State.NOT_STARTED;
+    private final TaskConfig config;
+    private TaskResult result;
 
     public Task(TaskConfig config) {
         this.config = config;
     }
 
     public TaskResult start() {
-        TaskResult result = new TaskResult(this);
-        // TODO
+        setState(IN_PROGRESS);
+        result = new TaskExecutor(this).execute();
+        setState(FINISHED);
         return result;
     }
 
@@ -40,6 +46,10 @@ public class Task {
 
     public List<TaskConfig> getNextTasks() {
         return config.getNextTasks();
+    }
+
+    public String getCommand() {
+        return config.getCommand();
     }
 
 }
