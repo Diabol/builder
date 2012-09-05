@@ -1,6 +1,9 @@
 package models.config;
 
 import models.Phase;
+import play.Logger;
+
+import java.util.List;
 
 
 /**
@@ -8,7 +11,7 @@ import models.Phase;
  */
 public class PhaseConfig {
     private String name;
-    private TaskConfig initialTask;
+    private List<TaskConfig> tasks;
 
     public Phase createPhase() {
         return new Phase(this);
@@ -22,11 +25,32 @@ public class PhaseConfig {
         this.name = name;
     }
 
-    public TaskConfig getInitialTask() {
-        return initialTask;
+    public List<TaskConfig> getTasks() {
+        return tasks;
     }
 
-    public void setInitialTask(TaskConfig initialTask) {
-        this.initialTask = initialTask;
+    public void setTasks(List<TaskConfig> tasks) {
+        this.tasks = tasks;
+    }
+
+    public TaskConfig getInitialTask() throws PipeValidationException {
+        if(getTasks() != null && getTasks().size() > 0){
+            return getTasks().get(0);
+        }
+        else {
+
+            Logger.error("Can't get initial task when no tasks found for phase '" + getName() + "'");
+            throw new PipeValidationException();
+        }
+    }
+
+    public TaskConfig getTaskByName(String name) throws PipeValidationException {
+        for(TaskConfig task: getTasks()){
+            if(task.getTaskName().equals(name)) {
+                return task;
+            }
+        }
+        Logger.error("No task found with name '" + name + "'");
+        throw new PipeValidationException();
     }
 }

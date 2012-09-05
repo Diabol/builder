@@ -3,9 +3,11 @@ package models;
 import java.util.List;
 
 import models.config.PhaseConfig;
+import models.config.PipeValidationException;
 import models.config.TaskConfig;
 import models.result.PhaseResult;
 import models.result.TaskResult;
+import play.Play;
 
 /**
  * An instance of a phase, i.e. a specific run of a phase in a pipeline.
@@ -23,32 +25,28 @@ public class Phase {
         this.config = config;
     }
 
-    public PhaseResult start() {
+    public PhaseResult start() throws PipeValidationException {
         result = new PhaseResult(this);
-        runTask(getInitialTaskConfig());
+        runTask(config.getInitialTask());
         return result;
     }
 
-    private void runTask(TaskConfig taskConfig) {
+    private void runTask(TaskConfig taskConfig) throws PipeValidationException{
         Task task = taskConfig.createTask();
         TaskResult taskResult = task.start();
         result.addTaskResult(taskResult);
         if (!taskResult.success()) {
             return;
         }
-        List<TaskConfig> nextTasks = task.getNextTasks();
-        for (TaskConfig nextTask : nextTasks) {
+        List<String> nextTasks = task.getNextTasks();
+        for (String nextTaskName : nextTasks) {
             // TODO Add isAutomatic check
-            runTask(nextTask);
+            runTask(config.getTaskByName(nextTaskName));
         }
     }
 
     public String getName() {
         return config.getName();
-    }
-
-    public TaskConfig getInitialTaskConfig() {
-        return config.getInitialTask();
     }
 
 }

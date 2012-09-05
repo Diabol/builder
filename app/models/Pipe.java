@@ -24,7 +24,7 @@ public class Pipe {
         this.config = config;
     }
 
-    public PipeResult start() {
+    public PipeResult start() throws PipeValidationException {
         PipeResult result = new PipeResult(this);
 
         for (PhaseConfig phaseConfig : getPhases()) {

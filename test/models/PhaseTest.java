@@ -12,6 +12,7 @@ import models.config.TaskConfig;
 import models.result.PhaseResult;
 import models.result.TaskResult;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -20,7 +21,7 @@ import test.MockitoTestBase;
 public class PhaseTest extends MockitoTestBase {
 
     @Mock private PhaseConfig phaseConfig;
-    @Mock private TaskConfig taskConfig;
+    @Mock private TaskConfig initialTaskConfig;
     @Mock private TaskConfig taskConfig2;
     @Mock private TaskConfig taskConfig3;
     @Mock private Task task;
@@ -30,13 +31,28 @@ public class PhaseTest extends MockitoTestBase {
     @Mock private TaskResult taskResult2;
     @Mock private TaskResult taskResult3;
 
-    @Test
-    public void testOneTaskThatSucceeds() {
-        Phase target = new Phase(phaseConfig);
+    private Phase target;
 
-        when(phaseConfig.getInitialTask()).thenReturn(taskConfig);
-        when(taskConfig.createTask()).thenReturn(task);
+    @Before
+    public void prepare() throws Exception{
+        when(phaseConfig.getTaskByName("task3")).thenReturn(taskConfig3);
+        when(taskConfig3.createTask()).thenReturn(task3);
+        when(task3.start()).thenReturn(taskResult3);
+
+        when(phaseConfig.getTaskByName("task2")).thenReturn(taskConfig2);
+        when(taskConfig2.createTask()).thenReturn(task2);
+        when(task2.start()).thenReturn(taskResult2);
+
+        when(initialTaskConfig.createTask()).thenReturn(task);
         when(task.start()).thenReturn(taskResult);
+        when(phaseConfig.getInitialTask()).thenReturn(initialTaskConfig);
+
+        target = new Phase(phaseConfig);
+    }
+
+    @Test
+    public void testOneTaskThatSucceeds() throws Exception {
+
         when(taskResult.success()).thenReturn(true);
         when(taskResult.result()).thenReturn(SUCESS);
 
@@ -45,12 +61,8 @@ public class PhaseTest extends MockitoTestBase {
     }
 
     @Test
-    public void testOneTaskThatFails() {
-        Phase target = new Phase(phaseConfig);
+    public void testOneTaskThatFails() throws Exception {
 
-        when(phaseConfig.getInitialTask()).thenReturn(taskConfig);
-        when(taskConfig.createTask()).thenReturn(task);
-        when(task.start()).thenReturn(taskResult);
         when(taskResult.success()).thenReturn(false);
         when(taskResult.result()).thenReturn(FAILURE);
 
@@ -60,18 +72,14 @@ public class PhaseTest extends MockitoTestBase {
     }
 
     @Test
-    public void testTwoTaskWhereSecondFails() {
-        Phase target = new Phase(phaseConfig);
+    public void testTwoTaskWhereSecondFails() throws Exception {
 
-        when(phaseConfig.getInitialTask()).thenReturn(taskConfig);
-        when(taskConfig.createTask()).thenReturn(task);
-        when(task.start()).thenReturn(taskResult);
+
         when(taskResult.success()).thenReturn(true);
         when(taskResult.result()).thenReturn(SUCESS);
 
-        when(task.getNextTasks()).thenReturn(Arrays.asList(taskConfig2));
-        when(taskConfig2.createTask()).thenReturn(task2);
-        when(task2.start()).thenReturn(taskResult2);
+        when(task.getNextTasks()).thenReturn(Arrays.asList("task2"));
+
         when(taskResult2.success()).thenReturn(false);
         when(taskResult2.result()).thenReturn(FAILURE);
 
@@ -81,24 +89,13 @@ public class PhaseTest extends MockitoTestBase {
     }
 
     @Test
-    public void testBothForkedTasksAreExecutedEvenIfSecondFailAndThatPhaseFail() {
-        Phase target = new Phase(phaseConfig);
+    public void testBothForkedTasksAreExecutedEvenIfSecondFailAndThatPhaseFail() throws Exception {
 
-        when(phaseConfig.getInitialTask()).thenReturn(taskConfig);
-        when(taskConfig.createTask()).thenReturn(task);
-        when(task.start()).thenReturn(taskResult);
         when(taskResult.success()).thenReturn(true);
         when(taskResult.result()).thenReturn(SUCESS);
 
-        when(task.getNextTasks()).thenReturn(Arrays.asList(taskConfig2, taskConfig3));
+        when(task.getNextTasks()).thenReturn(Arrays.asList("task2", "task3"));
 
-        when(taskConfig2.createTask()).thenReturn(task2);
-        when(task2.start()).thenReturn(taskResult2);
-        when(taskResult2.success()).thenReturn(false);
-        when(taskResult2.result()).thenReturn(FAILURE);
-
-        when(taskConfig3.createTask()).thenReturn(task3);
-        when(task3.start()).thenReturn(taskResult3);
         when(taskResult3.success()).thenReturn(true);
         when(taskResult3.result()).thenReturn(SUCESS);
 

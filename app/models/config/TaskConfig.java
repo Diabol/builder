@@ -10,21 +10,21 @@ import models.Task;
  */
 public class TaskConfig {
 
-    private String name;
+    private String taskName;
     private boolean isAutomatic;
     private String cmd;
-    private List<TaskConfig> nextTasks = new ArrayList<TaskConfig>();
+    private List<String> triggersTasks;
 
     public Task createTask() {
         return new Task(this);
     }
 
-    public String getName() {
-        return name;
+    public String getTaskName() {
+        return taskName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String taskName) {
+        this.taskName = taskName;
     }
 
     public Boolean isAutomatic() {
@@ -43,11 +43,11 @@ public class TaskConfig {
         this.cmd = cmd;
     }
 
-    public List<TaskConfig> getNextTasks() {
-        return nextTasks;
+    public List<String> getTriggersTasks() {
+        return triggersTasks;
     }
 
-    public void setNextTasks(List<TaskConfig> nextTasks) {
-        this.nextTasks = nextTasks;
+    public void setTriggersTasks(List<String> triggersTasks) {
+        this.triggersTasks = triggersTasks;
     }
 }

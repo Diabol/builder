@@ -1,25 +1,37 @@
 package controllers;
 
 import models.Pipe;
+import models.config.PhaseConfig;
 import models.config.PipeValidationException;
+import models.config.TaskConfig;
+import play.api.templates.Html;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.PipeConfReader;
 import views.html.pipe;
-import views.html.pipeconfiglist;
+import views.html.pipeconfgraphit;
 
 public class Pipes extends Controller {
 
     private static PipeConfReader configReader = PipeConfReader.getInstance() ;
 
     public static Result list() {
-        return ok(pipeconfiglist.render(configReader.getConfiguredPipes()));
+        return ok(pipeconfgraphit.render(configReader.getConfiguredPipes()));
     }
 
     public static Result start(String name) throws PipeValidationException {
         Pipe newPipe = new Pipe(configReader.get(name));
         newPipe.start();
         return ok(pipe.render(newPipe));
+    }
+
+    public static Html generateMarkupForTaskTree(PhaseConfig ph) throws PipeValidationException{
+        StringBuffer buf = new StringBuffer();
+        //Create the nodes
+        for(int counter = 0; counter < ph.getTasks().size(); counter++){
+            buf.append("<h2 id=task"+counter+" class='block draggable' style='left:"+(30+counter*150)+"px; top: 100px;'>"+ph.getTasks().get(counter).getTaskName()+"</h2>");
+        }
+        return new Html(buf.toString());
     }
 
 }

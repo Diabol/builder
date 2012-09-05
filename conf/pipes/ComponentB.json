@@ -3,47 +3,54 @@
     "phases":[
         {
             "name":"Build",
-            "initialTask":{
-                "name":"Compile",
-                "isAutomatic":true,
-                "nextTasks":[
-                    {
-                        "name":"Unit test",
-                        "isAutomatic":true
-                    },
-                    {
-                        "name":"Sonar",
-                        "isAutomatic":true
-                    }
-                ]
-
-            }
+            "tasks":[
+                {
+                    "taskName":"Compile",
+                    "isAutomatic":true,
+                    "triggersTasks":["Unit test", "Sonar"]
+                },
+                {
+                    "taskName":"Unit test",
+                    "isAutomatic":true,
+                    "triggersTasks":["Package"]
+                },
+                {
+                    "taskName":"Sonar",
+                    "isAutomatic":true
+                },
+                {
+                    "taskName":"Package",
+                    "isAutomatic":true
+                }
+            ]
         },
         {
             "name":"CI",
-            "initialTask":{
-                "name":"Deploy",
-                "isAutomatic":true,
-                "nextTasks":[
-                    {
-                        "name":"Integration tests",
-                        "isAutomatic":true
-                    }
-                ]
-            }
+            "tasks":[
+                {
+                    "taskName":"Deploy",
+                    "isAutomatic":false,
+                    "triggersTasks":["Integration test"]
+                },
+                {
+                    "taskName":"Integration test",
+                    "isAutomatic":true
+                }
+            ]
         },
         {
             "name":"QA",
-            "initialTask":{
-                "name":"Deploy",
-                "isAutomatic":false,
-                "nextTasks":[
-                    {
-                        "name":"QA tests",
-                        "isAutomatic":true
-                    }
-                ]
-            }
+            "tasks":[
+                {
+                    "taskName":"Deploy",
+                    "isAutomatic":false,
+                    "triggersTasks":["Unit test"]
+                },
+                {
+                    "taskName":"Unit test",
+                    "isAutomatic":true
+                }
+            ]
         }
     ]
 }

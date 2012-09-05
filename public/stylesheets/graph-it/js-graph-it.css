@@ -1,6 +1,5 @@
 .draggable
 {
-	position: absolute;
 	cursor: move;
 	z-index: 1;
 }
@@ -25,6 +24,7 @@
 
 div.block, h1.block, h2.block, p.block
 {
+    position: absolute;
     border: 1px solid #9DA3B3;
     background-color: orange;
     padding: 5px;

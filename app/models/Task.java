@@ -37,15 +37,15 @@ public class Task {
     }
 
     public String getName() {
-        return config.getName();
+        return config.getTaskName();
     }
 
     public Boolean isAutomatic() {
         return config.isAutomatic();
     }
 
-    public List<TaskConfig> getNextTasks() {
-        return config.getNextTasks();
+    public List<String> getNextTasks() {
+        return config.getTriggersTasks();
     }
 
     public String getCommand() {

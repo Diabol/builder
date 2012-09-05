@@ -33,7 +33,19 @@
             else
                 return url;
         }
-    </script>
+        </script>
+}
+
+@createPipeScripts(pipeCount: Int, pipe: PipeConfig) = {
+    @for(phaseCount <- 0 until pipe.getPhases().length){
+        function displayPhase@{pipeCount}@{phaseCount}() {
+            function fadeInTaskDiv(){
+                $("#taskCanvas").html("@{Pipes.generateMarkupForTaskTree(pipe.getPhases.get(phaseCount))}");
+                $("#taskCanvas").fadeIn('slow');
+            }
+            $("#taskCanvas").fadeOut('slow', fadeInTaskDiv);
+        }
+    }
 }
 
 @addEdge(parentId: String, childId: String) = {
@@ -46,23 +58,9 @@
     @{phase.getName()}<br>Last success: N/A</br><br>Status: NOT STARTED</br>
 }
 
-@createTaskTreeMarkup(phase: PhaseConfig) = {
-    Woop woop!
-}
-
-@showTasksForPhase(phase: PhaseConfig) = {
-    var fadeInTaskDiv = function(){
-        $('#taskCanvas').html('@createTaskTreeMarkup(phase)');
-        $('#taskCanvas').fadeIn('slow');
-    }
-    $('#taskCanvas').fadeOut('slow', fadeInTaskDiv);
-
-
-}
-
 @createPipeMarkup(pipeCount: Int, pipe: PipeConfig) = {
     @for(phaseCount <- 0 until pipe.getPhases().length){
-        <h2 id="@{pipe.getName()}@{pipe.getPhases().get(phaseCount).getName()}" onclick="@{showTasksForPhase(pipe.getPhases().get(phaseCount))}" class="block" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@createPhaseText(pipe.getPhases().get(phaseCount))</h2>
+        <h2 id="@{pipe.getName()}@{pipe.getPhases().get(phaseCount).getName()}" onclick="displayPhase@{pipeCount}@{phaseCount}();" class="block" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@createPhaseText(pipe.getPhases().get(phaseCount))</h2>
         @if(phaseCount > 0) {
              @addEdge(pipe.getName()+pipe.getPhases().get(phaseCount-1).getName(), pipe.getName()+pipe.getPhases().get(phaseCount).getName())
         }
@@ -70,12 +68,27 @@
 }
 
 @html =  {
+<script>
+    <!--Generated javascript functions for displaying the task trees-->
+    @for(i <- 0 until pipes.length){
+        @createPipeScripts(i, pipes(i))
+    }
+</script>
+<script type="text/javascript">
+    var taskRenderer = function(r, n) {
+        /* the Raphael set is obligatory, containing all you want to display */
+        var set = r.set().push(
+        /* Set how the nodes should be rendered */
+        r.rect(n.point[0]-30, n.point[1]-13, 60, 44).attr({"fill": "lightgray", "stroke":"#bf5600", r : "10", "stroke-width" : "2" })).push(
+        r.text(n.point[0], n.point[1] + 10, (n.label || n.id)));
+        return set;
+    };
+</script>
 <table class="main_table" style="height: 100%;">
     <tr>
         <td style="vertical-align: top; padding: 0px;">
-            <div id="taskCanvas" class="canvas" style="width: 100%; height: 200px;">TaskCanvas</div>
+            <div id="taskCanvas" class="canvas" style="width: 100%; height: 200px;"></div></div>
             <div id="mainCanvas" class="canvas" style="width: 100%; height: 500px;">
-
                 @for(i <- 0 until pipes.length){
                     @createPipeMarkup(i, pipes(i))
                 }
@@ -83,7 +96,6 @@
          </td>
     </tr>
 </table>
-
-                }
+}
 
 @main("Pipe List", headers)(html)
