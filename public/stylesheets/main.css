@@ -38,6 +38,12 @@
     font-size: 15px;
 }
 
+#taskHeader, #pipeList {
+    padding-left: 10px;
+    padding-top: 10px;
+    font-size: 18px;
+}
+
 .left {
     text-align: left;
 }

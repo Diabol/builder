@@ -25,13 +25,4 @@ public class Pipes extends Controller {
         return ok(pipe.render(newPipe));
     }
 
-    public static Html generateMarkupForTaskTree(PhaseConfig ph) throws PipeValidationException{
-        StringBuffer buf = new StringBuffer();
-        //Create the nodes
-        for(int counter = 0; counter < ph.getTasks().size(); counter++){
-            buf.append("<div id=task"+counter+" class='task' style='left: "+(30+150*counter)+"px; top: 50px;'><span>"+ph.getTasks().get(counter).getTaskName()+"</span></div>");
-        }
-        return new Html(buf.toString());
-    }
-
 }
