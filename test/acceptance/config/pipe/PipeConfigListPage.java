@@ -29,11 +29,11 @@ public class PipeConfigListPage extends FluentPage {
     @Override
     public void isAt() {
         assertThat(title()).isEqualTo("Pipe List");
-        assertThat(find("ul", withId("pipeList")).size()).isEqualTo(1);
+        assertThat(find("div", withId("pipeList")).size()).isEqualTo(1);
     }
 
     FluentList<?> getPipeDivList() {
-        return find("ul", withId("pipeList")).find(".pipe");
+        return find("div", withId("pipeList")).find(".pipe");
     }
 
     String getUri() {

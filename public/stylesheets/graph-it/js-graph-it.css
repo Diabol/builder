@@ -26,7 +26,6 @@ div.block, h1.block, h2.block, p.block
 {
     position: absolute;
     border: 1px solid #9DA3B3;
-    background-color: orange;
     padding: 5px;
     -webkit-border-radius: 15px;
     -moz-border-radius: 15px;
@@ -36,11 +35,14 @@ div.block, h1.block, h2.block, p.block
 div.canvas
 {
     border: 1px solid #262A37;
-    background-color: white;
     background-image: url('gradient.jpg');
     background-repeat: no-repeat;
     background-position: top right;
     padding: 0px;
+    border: 2px solid #999999;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;
 }
 
 .highlighter
@@ -69,9 +71,7 @@ html
 
 body
 {
-    font-family: verdana;
     font-size: 11px;
-    color: #33333F;
     padding: 3px;
     margin: 0px;
     background-color: white;
@@ -112,7 +112,7 @@ a
 
 div.connector
 {
-    background-color: #FF9900;
+    background-color: white;
     z-index: 1000;
 }
 
@@ -132,6 +132,5 @@ table.main_table
 
 .code
 {
-    font-family: monospace;
     line-height: 1.5em !important;
 }

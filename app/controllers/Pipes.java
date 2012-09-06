@@ -29,7 +29,7 @@ public class Pipes extends Controller {
         StringBuffer buf = new StringBuffer();
         //Create the nodes
         for(int counter = 0; counter < ph.getTasks().size(); counter++){
-            buf.append("<h2 id=task"+counter+" class='block draggable' style='left:"+(30+counter*150)+"px; top: 100px;'>"+ph.getTasks().get(counter).getTaskName()+"</h2>");
+            buf.append("<div id=task"+counter+" class='task' style='left: "+(30+150*counter)+"px; top: 50px;'><span>"+ph.getTasks().get(counter).getTaskName()+"</span></div>");
         }
         return new Html(buf.toString());
     }

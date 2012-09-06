@@ -25,7 +25,7 @@ public class PipeConfigListTemplateTest {
         assertThat(html.body()).satisfies(new Condition<String>("Html body should contain the pipe list even for empty list") {
             @Override
             public boolean matches(String body) {
-                Pattern pattern = Pattern.compile("<ul.*id=\"pipeList\".*>");
+                Pattern pattern = Pattern.compile("<div.*id=\"pipeList\".*>");
                 Matcher matcher = pattern.matcher(body);
                 return matcher.find();
             }

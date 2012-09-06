@@ -9,7 +9,15 @@
         <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
         @scripts
     </head>
-    <body>
+    <body id="mainBody">
+         <div id="header">
+            <table>
+                <tr>
+                    <td class="left"><a href="http://www.diabol.se"><img id="logo-img" src="@routes.Assets.at("/images/diabol-logo.jpg")"/></a></td>
+                    <td class="right"><a class="nostyle"><h3>Pipe It</h3></a></td>
+                </tr>
+            </table>
+        </div>
         @content
     </body>
 </html>
