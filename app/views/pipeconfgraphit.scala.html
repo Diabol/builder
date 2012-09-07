@@ -12,6 +12,8 @@
 @createPipeScripts(pipeCount: Int, pipe: PipeConfig) = {
     @for(phaseCount <- 0 until pipe.getPhases().length){
         function displayPhase@{pipeCount}@{phaseCount}() {
+            taskSelected = undefined;
+            highlightPhase('@{pipe.getName()}@{pipe.getPhases().get(phaseCount).getName()}');
             $("#tasks").html("@{PipeListHelper.generateMarkupForTaskTree(pipe.getPhases.get(phaseCount))}");
         }
     }
@@ -38,8 +40,18 @@
 
 @html =  {
     <script>
+        //Variable used for keeping track of which phase is selected.
+        var phaseIdSelected;
         window.onload = function() {
             initPageObjects();
+        }
+
+        function highlightPhase(id) {
+            if(phaseIdSelected){
+                $('#'+phaseIdSelected).removeClass('phaseHighlighted');
+            }
+            $('#'+id).addClass('phaseHighlighted');
+            phaseIdSelected = id;
         }
 
         <!--Generated javascript functions for displaying the task trees-->
