@@ -7,6 +7,10 @@ GET     /                           controllers.Application.index()
 
 # Show list of all pipes
 GET     /pipes                      controllers.Pipes.list()
+GET     /pipes/setupSocket          controllers.Pipes.setupSocket()
+
+GET     /startButtons               controllers.Pipes.startButtons()
+POST    /startPipeExec/:name        controllers.Pipes.startPipeExecutor(name: String)
 
 # Start a pipe, ie create a new Pipe instance
 POST    /pipe/:name                 controllers.Pipes.start(name: String)

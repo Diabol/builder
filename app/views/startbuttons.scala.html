@@ -1,0 +1,26 @@
+@(pipes: List[models.config.PipeConfig])
+
+@import models.config._
+
+@headers = {
+}
+
+@html =  {
+    <script>
+        function startPipe(name) {
+            $.ajax({
+                url: "/startPipeExec/"+name,
+                type: "POST",
+                //success
+                success: function () {
+                    alert("Pipe sucessfully started!");
+                }
+            });
+        }
+    </script>
+    @for(i <- 0 until pipes.length){
+        <button id=@{i} class="btn" onclick="startPipe('@{pipes.get(i).getName()}');">Click to start executing @{pipes.get(i).getName()}</button>
+    }
+}
+
+@main("Pipe List", headers)(html)

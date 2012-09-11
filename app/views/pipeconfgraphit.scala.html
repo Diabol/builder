@@ -54,10 +54,40 @@
             phaseIdSelected = id;
         }
 
+        function updatePhase(phaseId) {
+            $('#'+phaseId).addClass("successfull");
+        }
+
         <!--Generated javascript functions for displaying the task trees-->
         @for(i <- 0 until pipes.length){
             @createPipeScripts(i, pipes(i))
         }
+    </script>
+    <script>
+        $(function() {
+            var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+            var chatSocket = new WS("@routes.Pipes.setupSocket().webSocketURL(request)")
+
+            var sendMessage = function() {
+            }
+
+            var receiveEvent = function(event) {
+                var data = JSON.parse(event.data)
+
+                // Handle errors
+                if(data.error) {
+                    chatSocket.close()
+                    alert('An has occured while executing a pipe line. Please refer to server log.');
+                    return
+                } else {
+                    updatePhase(data.pipeName+data.phaseName);
+                }
+
+            }
+
+            chatSocket.onmessage = receiveEvent
+
+        })
     </script>
     <table class="main_table" style="height: 100%;">
         <tr>
