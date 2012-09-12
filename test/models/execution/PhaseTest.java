@@ -1,4 +1,4 @@
-package models;
+package models.execution;
 
 import static models.result.ResultLevel.FAILURE;
 import static models.result.ResultLevel.SUCESS;
