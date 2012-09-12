@@ -3,7 +3,7 @@ package models.result;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.Pipe;
+import models.execution.Pipe;
 
 public class PipeResult extends AbstractResult {
 

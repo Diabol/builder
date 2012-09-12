@@ -1,7 +1,7 @@
-package models;
+package models.execution;
 
-import static models.Task.State.FINISHED;
-import static models.Task.State.IN_PROGRESS;
+import static models.execution.Task.State.FINISHED;
+import static models.execution.Task.State.IN_PROGRESS;
 
 import java.util.List;
 

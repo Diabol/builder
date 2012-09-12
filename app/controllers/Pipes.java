@@ -2,9 +2,10 @@ package controllers;
 
 import executor.SimplePipeExecutor;
 import models.NotificationHandler;
-import models.Pipe;
 import models.config.PipeConfig;
 import models.config.PipeValidationException;
+import models.execution.Pipe;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;

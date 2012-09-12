@@ -6,7 +6,7 @@ import static models.result.ResultLevel.SUCESS;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.Phase;
+import models.execution.Phase;
 
 public class PhaseResult extends AbstractResult {
 

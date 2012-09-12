@@ -2,7 +2,7 @@ package executor;
 
 import java.io.IOException;
 
-import models.Task;
+import models.execution.Task;
 import models.result.TaskResult;
 
 public class TaskExecutor {

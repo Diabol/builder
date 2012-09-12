@@ -1,6 +1,6 @@
 package executor;
 
-import models.Pipe;
+import models.execution.Pipe;
 
 public class PipeExecutor {
 

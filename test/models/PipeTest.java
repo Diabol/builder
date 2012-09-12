@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
+import models.execution.Phase;
+import models.execution.Pipe;
 import models.result.PhaseResult;
 import models.result.PipeResult;
 

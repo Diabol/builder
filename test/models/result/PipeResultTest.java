@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import models.Pipe;
 import models.config.PhaseConfig;
+import models.execution.Pipe;
 
 import org.junit.Test;
 import org.mockito.Mock;

@@ -3,7 +3,7 @@ package models.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.Task;
+import models.execution.Task;
 
 /**
  * @author danielgronberg, marcus

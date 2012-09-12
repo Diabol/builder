@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import models.config.PhaseConfig;
 import models.config.TaskConfig;
+import models.execution.Phase;
+import models.execution.Task;
 import models.result.PhaseResult;
 import models.result.TaskResult;
 

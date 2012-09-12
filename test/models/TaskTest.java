@@ -3,6 +3,7 @@ package models;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import models.config.TaskConfig;
+import models.execution.Task;
 import models.result.TaskResult;
 
 import org.junit.Test;

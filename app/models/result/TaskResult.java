@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import models.Task;
+import models.execution.Task;
 
 public class TaskResult extends AbstractResult implements Result {
 
