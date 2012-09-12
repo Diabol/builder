@@ -1,4 +1,4 @@
-package models.result;
+package models.state;
 
 public interface Result {
 

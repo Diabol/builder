@@ -1,4 +1,4 @@
-package models.result;
+package models.state;
 
 public enum ResultLevel {
     /** Activity succeeded and all is OK */

@@ -1,4 +1,4 @@
-package models.result;
+package models.state;
 
 import java.util.ArrayList;
 import java.util.List;

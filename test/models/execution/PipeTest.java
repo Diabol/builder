@@ -1,7 +1,7 @@
 package models.execution;
 
-import static models.result.ResultLevel.FAILURE;
-import static models.result.ResultLevel.SUCESS;
+import static models.state.ResultLevel.FAILURE;
+import static models.state.ResultLevel.SUCESS;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -11,8 +11,8 @@ import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.execution.Phase;
 import models.execution.Pipe;
-import models.result.PhaseResult;
-import models.result.PipeResult;
+import models.state.PhaseResult;
+import models.state.PipeResult;
 
 import org.junit.Test;
 import org.mockito.Mock;

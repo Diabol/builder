@@ -3,7 +3,7 @@ package executor;
 import java.io.IOException;
 
 import models.execution.Task;
-import models.result.TaskResult;
+import models.state.TaskResult;
 
 public class TaskExecutor {
 

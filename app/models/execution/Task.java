@@ -6,7 +6,7 @@ import static models.execution.Task.State.IN_PROGRESS;
 import java.util.List;
 
 import models.config.TaskConfig;
-import models.result.TaskResult;
+import models.state.TaskResult;
 import executor.TaskExecutor;
 
 public class Task {

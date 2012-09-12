@@ -1,6 +1,6 @@
-package models.result;
+package models.state;
 
-import static models.result.ResultLevel.SUCESS;
+import static models.state.ResultLevel.SUCESS;
 
 public abstract class AbstractResult implements Result {
 

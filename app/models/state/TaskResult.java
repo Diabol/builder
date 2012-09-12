@@ -1,7 +1,7 @@
-package models.result;
+package models.state;
 
-import static models.result.ResultLevel.FAILURE;
-import static models.result.ResultLevel.SUCESS;
+import static models.state.ResultLevel.FAILURE;
+import static models.state.ResultLevel.SUCESS;
 
 import java.io.BufferedReader;
 import java.io.IOException;

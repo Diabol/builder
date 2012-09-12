@@ -5,8 +5,8 @@ import java.util.List;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.PipeValidationException;
-import models.result.PhaseResult;
-import models.result.PipeResult;
+import models.state.PhaseResult;
+import models.state.PipeResult;
 
 /**
  * An instance of a pipeline, ie a specific run of a pipe.

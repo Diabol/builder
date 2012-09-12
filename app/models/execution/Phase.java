@@ -5,8 +5,8 @@ import java.util.List;
 import models.config.PhaseConfig;
 import models.config.PipeValidationException;
 import models.config.TaskConfig;
-import models.result.PhaseResult;
-import models.result.TaskResult;
+import models.state.PhaseResult;
+import models.state.TaskResult;
 import play.Play;
 
 /**
