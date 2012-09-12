@@ -26,6 +26,21 @@ public class PipeConfig {
         this.phases = phases;
     }
 
+    public PhaseConfig getFirstPhaseConfig() throws PipeValidationException {
+        PhaseConfig phaseConfig = getPhases().get(0);
+        phaseConfig.validate();
+        return phaseConfig;
+    }
+
+    public PhaseConfig getPhaseByName(String name) throws PipeValidationException {
+        for(PhaseConfig phase: getPhases()){
+            if(phase.getName().equals(name)) {
+                return phase;
+            }
+        }
+        throw new PipeValidationException("No phase found with name: '" + name + "' in pipe: '" + getName());
+    }
+
     public void validate() throws PipeValidationException {
         if (getPhases() == null ||
                 getName() == null ||

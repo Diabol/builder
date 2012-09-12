@@ -1,9 +1,7 @@
 package models.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import models.execution.Task;
 
 /**
  * @author danielgronberg, marcus
@@ -14,10 +12,6 @@ public class TaskConfig {
     private boolean isAutomatic;
     private String cmd;
     private List<String> triggersTasks;
-
-    public Task createTask() {
-        return new Task(this);
-    }
 
     public String getTaskName() {
         return taskName;

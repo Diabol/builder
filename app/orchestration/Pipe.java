@@ -1,12 +1,11 @@
-package models.execution;
+package orchestration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.PipeValidationException;
-import models.state.PhaseResult;
-import models.state.PipeResult;
 
 /**
  * An instance of a pipeline, ie a specific run of a pipe.
@@ -15,27 +14,29 @@ import models.state.PipeResult;
  * 
  * @author marcus
  */
-public class Pipe {
+class Pipe {
+
+    // TODO This logic should be aligned with new Orchestrator or logic.
 
     private final PipeConfig config;
 
-    public Pipe(PipeConfig config) throws PipeValidationException {
+    Pipe(PipeConfig config) throws PipeValidationException {
         config.validate();
         this.config = config;
     }
 
-    public PipeResult start() throws PipeValidationException {
-        PipeResult result = new PipeResult(this);
+    PipeResult start() throws PipeValidationException {
+        List<PhaseResult> phaseResultList = new ArrayList<PhaseResult>();
 
         for (PhaseConfig phaseConfig : getPhases()) {
-            PhaseResult phaseResult = phaseConfig.createPhase().start();
-            result.add(phaseResult);
-            if (!phaseResult.success()) {
-                break;
-            }
+            PhaseResult phaseResult = new Phase(phaseConfig).start();
+            phaseResultList.add(phaseResult);
+//            if (!phaseResult.success()) {
+//                break;
+//            }
         }
 
-        return result;
+        return new PipeResult(this, phaseResultList);
     }
 
     public String getName() {

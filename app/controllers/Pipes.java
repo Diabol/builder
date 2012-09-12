@@ -1,35 +1,47 @@
 package controllers;
 
-import executor.SimplePipeExecutor;
 import models.NotificationHandler;
-import models.config.PipeConfig;
 import models.config.PipeValidationException;
-import models.execution.Pipe;
+import orchestration.Orchestrator;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
+
 import play.Logger;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import utils.PipeConfReader;
-import views.html.pipe;
 import views.html.pipeconfgraphit;
 import views.html.startbuttons;
 
 public class Pipes extends Controller {
 
-    private static PipeConfReader configReader = PipeConfReader.getInstance() ;
+    private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
     public static Result list() {
         return ok(pipeconfgraphit.render(configReader.getConfiguredPipes()));
     }
 
-    public static Result startPipeExecutor(String name) {
-        PipeConfig pipe = PipeConfReader.getInstance().get(name);
-        (new Thread(new SimplePipeExecutor(pipe))).run();
+    public static Result start(String pipeName) {
+        // (new Thread(new SimplePipeExecutor(pipe))).run();
+        try {
+            new Orchestrator().start(pipeName);
+        } catch (PipeValidationException e) {
+            Logger.error("Could not start pipe: " + pipeName + " due to invalid config.", e);
+            return internalServerError();
+        }
+        return ok();
+    }
+
+    public static Result startTask(String taskName, String phaseName, String pipeName) {
+        try {
+            new Orchestrator().startTask(taskName, phaseName, pipeName);
+        } catch (PipeValidationException e) {
+            Logger.error("Could not start task: " + taskName + " of phase: " + phaseName + " of pipe: " + pipeName + " due to invalid config.", e);
+            return internalServerError();
+        }
         return ok();
     }
 
@@ -37,16 +49,11 @@ public class Pipes extends Controller {
         return ok(startbuttons.render(configReader.getConfiguredPipes()));
     }
 
-    public static Result start(String name) throws PipeValidationException {
-        Pipe newPipe = new Pipe(configReader.get(name));
-        newPipe.start();
-        return ok(pipe.render(newPipe));
-    }
-
     public static WebSocket<JsonNode> setupSocket() {
         return new WebSocket<JsonNode>() {
 
             // Called when the Websocket Handshake is done.
+            @Override
             public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out){
 
                 // Add add socket to notification handler.

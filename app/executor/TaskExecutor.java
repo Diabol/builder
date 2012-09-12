@@ -1,38 +1,28 @@
 package executor;
 
-import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-import models.execution.Task;
-import models.state.TaskResult;
+import models.config.TaskConfig;
+
 
 public class TaskExecutor {
 
-    private final Task task;
+    private static final TaskExecutor INSTANCE = new TaskExecutor();
 
-    public TaskExecutor(Task task) {
-        this.task = task;
+    private final Executor executor = Executors.newFixedThreadPool(3);
+
+    public static final TaskExecutor getInstance() {
+        return INSTANCE;
     }
 
-    public TaskResult execute() {
-        TaskResult result = new TaskResult(task);
-        Process process = null;
-        try {
-            process = new ProcessBuilder(task.getCommand()).start();
-            // TODO For now synchronous. We can use Executor framework later...
-            process.waitFor();
-            result.setResult(process);
-        } catch (IOException e) {
-            // TODO Logging
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Logging
-            e.printStackTrace();
-        } finally {
-            if (process != null) {
-                process.destroy();
-            }
-        }
-        return result;
+    private TaskExecutor() {
+        // Singleton
+    }
+
+    public void execute(TaskConfig taskConfig, ExecutionContext context, TaskCallback callback) {
+        Task task = new Task(taskConfig, callback);
+        executor.execute(task);
     }
 
 }

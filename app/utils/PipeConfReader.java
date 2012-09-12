@@ -83,6 +83,7 @@ public class PipeConfReader {
     }
 
     public PipeConfig get(String pipeName) {
+        // PipeConfig was validated at init so need not be done here
         return getConfiguredPipesMappedByName().get(pipeName);
     }
 
