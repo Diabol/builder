@@ -1,9 +1,8 @@
 package models.config;
 
-import models.Phase;
-import play.Logger;
-
 import java.util.List;
+
+import models.Phase;
 
 
 /**
@@ -38,9 +37,7 @@ public class PhaseConfig {
             return getTasks().get(0);
         }
         else {
-
-            Logger.error("Can't get initial task when no tasks found for phase '" + getName() + "'");
-            throw new PipeValidationException();
+            throw new PipeValidationException("Can't get initial task when no tasks found for phase '" + getName() + "'");
         }
     }
 
@@ -50,7 +47,6 @@ public class PhaseConfig {
                 return task;
             }
         }
-        Logger.error("No task found with name '" + name + "'");
-        throw new PipeValidationException();
+        throw new PipeValidationException("No task found with name '" + name + "'");
     }
 }

@@ -7,4 +7,12 @@ package models.config;
  */
 public class PipeValidationException extends Exception {
 
+    public PipeValidationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PipeValidationException(String message) {
+        super(message);
+    }
+
 }
