@@ -8,17 +8,17 @@ import play.Logger;
 
 public class TaskResult {
 
-    public static final TaskResult EMPTY_FAILED_RESULT = new TaskResult();
-
     private final StringBuilder out = new StringBuilder();
     private final StringBuilder err = new StringBuilder();
     private final int exitValue;
+    private ExecutionContext context;
 
     /** Only call this for a finished process */
-    TaskResult(Process process) {
+    TaskResult(Process process, ExecutionContext context) {
         readOut(new BufferedReader(new InputStreamReader(process.getInputStream())));
         readErr(new BufferedReader(new InputStreamReader(process.getErrorStream())));
         exitValue = process.exitValue();
+        this.context = context;
     }
 
     /** Creates an empty result (failed) */
@@ -26,6 +26,12 @@ public class TaskResult {
         err.append("Unknown error");
         out.append("");
         exitValue = 666;
+    }
+
+    static TaskResult getEmptyFailedResult(ExecutionContext context) {
+        TaskResult result = new TaskResult();
+        result.context = context;
+        return result;
     }
 
     public String out() {

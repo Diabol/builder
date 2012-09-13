@@ -4,4 +4,6 @@ public interface TaskCallback {
 
     void receiveTaskResult(TaskResult result);
 
+    void receiveTaskStarted(ExecutionContext context);
+
 }

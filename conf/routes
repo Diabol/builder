@@ -12,7 +12,7 @@ GET     /pipes/setupSocket          controllers.Pipes.setupSocket()
 GET     /startButtons               controllers.Pipes.startButtons()
 
 # Start a task in a pipe, eg if a task is manual
-POST    /pipe/:pipe/:phase/:task    controllers.Pipes.startTask(task: String, phase: String, pipe: String)
+POST    /pipe/:pipe/:version/:phase/:task   controllers.Pipes.startTask(task: String, phase: String, pipe: String, version: String)
 
 # Start a pipe, ie create a new Pipe instance
 POST    /pipe/:pipe                 controllers.Pipes.start(pipe: String)

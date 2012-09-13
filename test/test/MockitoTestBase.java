@@ -10,7 +10,7 @@ import org.mockito.MockitoAnnotations;
 public class MockitoTestBase {
 
     @Before
-    public void setUp() {
+    public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
 

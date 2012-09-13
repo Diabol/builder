@@ -7,17 +7,18 @@ import play.Logger;
 
 public class Task implements Runnable {
 
-    private final TaskConfig config;
+    private final ExecutionContext context;
     private final TaskCallback callback;
     private TaskResult result;
 
-    public Task(TaskConfig config, TaskCallback callback) {
-        this.config = config;
+    public Task(ExecutionContext context, TaskCallback callback) {
+        this.context = context;
         this.callback = callback;
     }
 
     @Override
     public void run() {
+        callback.receiveTaskStarted(context);
         execute();
         callback.receiveTaskResult(result);
     }
@@ -35,24 +36,28 @@ public class Task implements Runnable {
             Logger.error("Failed while running task: '" + getName() + "'.", e);
         } finally {
             if (process != null) {
-                result = new TaskResult(process);
+                result = new TaskResult(process, context);
                 process.destroy();
             } else {
-                result = TaskResult.EMPTY_FAILED_RESULT;
+                result = TaskResult.getEmptyFailedResult(context);
             }
         }
     }
 
     public String getName() {
-        return config.getTaskName();
+        return getConfig().getTaskName();
     }
 
     public boolean isAutomatic() {
-        return config.isAutomatic();
+        return getConfig().isAutomatic();
     }
 
     public String getCommand() {
-        return config.getCommand();
+        return getConfig().getCommand();
+    }
+
+    private TaskConfig getConfig() {
+        return context.getTaskConfig();
     }
 
 }

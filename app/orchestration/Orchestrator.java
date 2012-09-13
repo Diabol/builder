@@ -26,29 +26,48 @@ public class Orchestrator implements TaskCallback {
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
     /** Start first task of first phase of pipe */
-    public void start(String pipeName) throws PipeValidationException {
+    public PipeVersion<?> start(String pipeName) throws PipeValidationException {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getFirstPhaseConfig();
         TaskConfig task = phase.getInitialTask();
-        startTask(task, phase, pipe);
+
+        PipeVersion<?> version = getNextPipeVersion(pipe);
+
+        startTask(task, phase, pipe, version);
+
+        return version;
     }
 
-    /** Try to start given task in given phase and pipe. */
-    public void startTask(String taskName, String phaseName, String pipeName) throws PipeValidationException {
+    private PipeVersion<?> getNextPipeVersion(PipeConfig pipe) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /** Try to start given task in given phase and pipe version. */
+    public void startTask(String taskName, String phaseName, String pipeName, String pipeVersion)
+            throws PipeValidationException {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getPhaseByName(phaseName);
         TaskConfig task = phase.getTaskByName(taskName);
-        startTask(task, phase, pipe);
+        PipeVersion<?> version = createPipeVersion(pipeVersion);
+        startTask(task, phase, pipe, version);
     }
 
-    private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig) {
-        // TODO: Implement main logic
-        // Pipe version...
-        ExecutionContext context = new ExecutionContext();
+    private PipeVersion<?> createPipeVersion(String pipeVersion) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-        TaskExecutor.getInstance().execute(taskConfig, context, this);
+    private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig, PipeVersion<?> pipeVersion) {
+        // TODO: Persistence...
+        ExecutionContext context = new ExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
 
-        // notify via handler?
+        TaskExecutor.getInstance().execute(context, this);
+    }
+
+    @Override
+    public void receiveTaskStarted(ExecutionContext context) {
+        // TODO notify via handler
 
     }
 

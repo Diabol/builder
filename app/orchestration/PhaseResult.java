@@ -1,13 +1,13 @@
 package orchestration;
 
 // TODO: This should be modified
-public class PhaseResult {
+class PhaseResult {
 
     private final Phase phase;
 
 //    private final List<TaskResult> taskResults = new ArrayList<TaskResult>();
 
-    public PhaseResult(Phase phase) {
+    PhaseResult(Phase phase) {
         this.phase = phase;
     }
 

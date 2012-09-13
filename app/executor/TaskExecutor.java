@@ -3,8 +3,6 @@ package executor;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import models.config.TaskConfig;
-
 
 public class TaskExecutor {
 
@@ -20,8 +18,8 @@ public class TaskExecutor {
         // Singleton
     }
 
-    public void execute(TaskConfig taskConfig, ExecutionContext context, TaskCallback callback) {
-        Task task = new Task(taskConfig, callback);
+    public void execute(ExecutionContext context, TaskCallback callback) {
+        Task task = new Task(context, callback);
         executor.execute(task);
     }
 

@@ -1,8 +1,12 @@
 package controllers;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import models.NotificationHandler;
 import models.config.PipeValidationException;
 import orchestration.Orchestrator;
+import orchestration.PipeVersion;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -21,28 +25,32 @@ public class Pipes extends Controller {
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
     public static Result list() {
+        // TODO We need to include current status in this list: Wrap PipeConfig with statuses
         return ok(pipeconfgraphit.render(configReader.getConfiguredPipes()));
     }
 
     public static Result start(String pipeName) {
         // (new Thread(new SimplePipeExecutor(pipe))).run();
         try {
-            new Orchestrator().start(pipeName);
+            PipeVersion<?> pipeVersion = new Orchestrator().start(pipeName);
+            URL pipeUrl = createNewPipeUrl(pipeVersion);
+            return generatePipeStartedResult(pipeVersion, pipeUrl);
         } catch (PipeValidationException e) {
             Logger.error("Could not start pipe: " + pipeName + " due to invalid config.", e);
             return internalServerError();
         }
-        return ok();
     }
 
-    public static Result startTask(String taskName, String phaseName, String pipeName) {
+    public static Result startTask(String taskName, String phaseName, String pipeName, String pipeVersion) {
+        String msg = "task: '" + taskName + "' in phase: '" + phaseName + "' in pipe: '" + pipeName;
         try {
-            new Orchestrator().startTask(taskName, phaseName, pipeName);
+            new Orchestrator().startTask(taskName, phaseName, pipeName, pipeVersion);
+            return ok("Started " + msg + "' of version: '" + pipeVersion);
         } catch (PipeValidationException e) {
-            Logger.error("Could not start task: " + taskName + " of phase: " + phaseName + " of pipe: " + pipeName + " due to invalid config.", e);
-            return internalServerError();
+            String errMsg = "Could not start " + msg + " due to invalid config.";
+            Logger.error(errMsg, e);
+            return internalServerError(errMsg);
         }
-        return ok();
     }
 
     public static Result startButtons() {
@@ -67,5 +75,20 @@ public class Pipes extends Controller {
                 }
             }
         };
+    }
+
+    private static Status generatePipeStartedResult(PipeVersion<?> version, URL newPipeUrl) {
+        response().setContentType("text/html");
+        response().setHeader(LOCATION, newPipeUrl.toString());
+        return created("Version '" + version.getVersion() + "' of Pipe '" + version.getPipeName() + "' started! <ul><li>" + newPipeUrl + "</li></ul>");
+    }
+
+    private static URL createNewPipeUrl(PipeVersion<?> pipeVersion) {
+        try {
+            return new URL("/pipe/" + pipeVersion.getPipeName() + "/" + pipeVersion.getVersion());
+        } catch (MalformedURLException e) {
+            Logger.error("Could not create url for pipe: " + pipeVersion, e);
+            return null;
+        }
     }
 }
