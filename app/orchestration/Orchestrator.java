@@ -6,9 +6,7 @@ import models.config.PipeValidationException;
 import models.config.TaskConfig;
 import utils.PipeConfReader;
 import executor.ExecutionContext;
-import executor.TaskCallback;
 import executor.TaskExecutor;
-import executor.TaskResult;
 
 /**
  * Service/Controller that orchestrates the pipe execution.
@@ -21,7 +19,7 @@ import executor.TaskResult;
  * 
  * @author marcus
  */
-public class Orchestrator implements TaskCallback {
+public class Orchestrator {
 
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
@@ -38,11 +36,6 @@ public class Orchestrator implements TaskCallback {
         return version;
     }
 
-    private PipeVersion<?> getNextPipeVersion(PipeConfig pipe) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     /** Try to start given task in given phase and pipe version. */
     public void startTask(String taskName, String phaseName, String pipeName, String pipeVersion)
             throws PipeValidationException {
@@ -53,7 +46,12 @@ public class Orchestrator implements TaskCallback {
         startTask(task, phase, pipe, version);
     }
 
-    private PipeVersion<?> createPipeVersion(String pipeVersion) {
+    private PipeVersion<?> getNextPipeVersion(PipeConfig pipe) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private static PipeVersion<?> createPipeVersion(String pipeVersion) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -61,20 +59,7 @@ public class Orchestrator implements TaskCallback {
     private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig, PipeVersion<?> pipeVersion) {
         // TODO: Persistence...
         ExecutionContext context = new ExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
-
-        TaskExecutor.getInstance().execute(context, this);
-    }
-
-    @Override
-    public void receiveTaskStarted(ExecutionContext context) {
-        // TODO notify via handler
-
-    }
-
-    @Override
-    public void receiveTaskResult(TaskResult result) {
-        // TODO notify via handler
-
+        TaskExecutor.getInstance().execute(context);
     }
 
     private PipeConfig getPipe(String pipeName) throws PipeValidationException {

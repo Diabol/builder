@@ -3,7 +3,6 @@ package executor;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-
 public class TaskExecutor {
 
     private static final TaskExecutor INSTANCE = new TaskExecutor();
@@ -18,8 +17,8 @@ public class TaskExecutor {
         // Singleton
     }
 
-    public void execute(ExecutionContext context, TaskCallback callback) {
-        Task task = new Task(context, callback);
+    public void execute(ExecutionContext context) {
+        Task task = new Task(context);
         executor.execute(task);
     }
 
