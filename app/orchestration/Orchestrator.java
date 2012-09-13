@@ -5,7 +5,7 @@ import models.config.PipeConfig;
 import models.config.PipeValidationException;
 import models.config.TaskConfig;
 import utils.PipeConfReader;
-import executor.ExecutionContext;
+import executor.TaskExecutionContext;
 import executor.TaskExecutor;
 
 /**
@@ -58,7 +58,7 @@ public class Orchestrator {
 
     private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig, PipeVersion<?> pipeVersion) {
         // TODO: Persistence...
-        ExecutionContext context = new ExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
+        TaskExecutionContext context = new TaskExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
         TaskExecutor.getInstance().execute(context);
     }
 

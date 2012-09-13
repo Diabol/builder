@@ -7,10 +7,10 @@ import play.Logger;
 
 public class Task implements Runnable {
 
-    private final ExecutionContext context;
+    private final TaskExecutionContext context;
     private TaskResult result;
 
-    public Task(ExecutionContext context) {
+    public Task(TaskExecutionContext context) {
         this.context = context;
     }
 

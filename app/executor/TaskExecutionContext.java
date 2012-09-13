@@ -6,24 +6,25 @@ import models.config.TaskConfig;
 import orchestration.PipeVersion;
 
 /**
- * Encapsulates the information that the Executor need to execute a task that is
- * not in task itself.
+ * Encapsulates the information that the {@link Task} need to execute a task and
+ * receieves callbacks from the task which are sent to PipeNotificationHandler.
  * 
  * @author marcus
  */
-public class ExecutionContext implements TaskCallback {
+public class TaskExecutionContext implements TaskCallback {
 
     private final TaskConfig task;
     private PipeConfig pipe;
     private PhaseConfig phase;
     private PipeVersion<?> version;
 
-    public ExecutionContext(TaskConfig task, PipeConfig pipe, PhaseConfig phase, PipeVersion<?> version) {
-        // TODO Rest of fields
+    public TaskExecutionContext(TaskConfig task, PipeConfig pipe, PhaseConfig phase, PipeVersion<?> version) {
         this.task = task;
+        // TODO Rest of fields
     }
+
     @Override
-    public void receiveTaskStarted(ExecutionContext context) {
+    public void receiveTaskStarted(TaskExecutionContext context) {
         // TODO notify via handler
 
     }

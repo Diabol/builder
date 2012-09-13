@@ -11,10 +11,10 @@ public class TaskResult {
     private final StringBuilder out = new StringBuilder();
     private final StringBuilder err = new StringBuilder();
     private final int exitValue;
-    private ExecutionContext context;
+    private TaskExecutionContext context;
 
     /** Only call this for a finished process */
-    TaskResult(Process process, ExecutionContext context) {
+    TaskResult(Process process, TaskExecutionContext context) {
         readOut(new BufferedReader(new InputStreamReader(process.getInputStream())));
         readErr(new BufferedReader(new InputStreamReader(process.getErrorStream())));
         exitValue = process.exitValue();
@@ -28,7 +28,7 @@ public class TaskResult {
         exitValue = 666;
     }
 
-    static TaskResult getEmptyFailedResult(ExecutionContext context) {
+    static TaskResult getEmptyFailedResult(TaskExecutionContext context) {
         TaskResult result = new TaskResult();
         result.context = context;
         return result;

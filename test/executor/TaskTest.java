@@ -13,19 +13,19 @@ import test.MockitoTestBase;
 public class TaskTest extends MockitoTestBase {
 
     private TaskResult result;
-    private ExecutionContext context;
+    private TaskExecutionContext context;
     @Mock private TaskConfig config;
     private boolean hasReceiveTaskStartedCallback = false;
 
     @Before
     public void createContext() {
-        context = new ExecutionContext(config, null, null, null) {
+        context = new TaskExecutionContext(config, null, null, null) {
             @Override
             public void receiveTaskResult(TaskResult taskResult) {
                 result = taskResult;
             }
             @Override
-            public void receiveTaskStarted(ExecutionContext context) {
+            public void receiveTaskStarted(TaskExecutionContext context) {
                 // we already have the context
                 hasReceiveTaskStartedCallback = true;
             }
