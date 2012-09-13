@@ -1,4 +1,4 @@
-package acceptance.config.pipe;
+package acceptance.config;
 
 import static acceptance.AbstractBrowserFluentTest.LOCALHOST_BASE_TEST_URL;
 import static org.fest.assertions.Assertions.assertThat;

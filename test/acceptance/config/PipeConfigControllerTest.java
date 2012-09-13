@@ -1,4 +1,4 @@
-package acceptance.config.pipe;
+package acceptance.config;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
