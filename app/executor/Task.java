@@ -16,7 +16,7 @@ public class Task implements Runnable {
 
     @Override
     public void run() {
-        context.receiveTaskStarted(context);
+        context.receiveTaskStarted();
         execute();
         context.receiveTaskResult(result);
     }

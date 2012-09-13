@@ -25,7 +25,7 @@ public class TaskTest extends MockitoTestBase {
                 result = taskResult;
             }
             @Override
-            public void receiveTaskStarted(TaskExecutionContext context) {
+            public void receiveTaskStarted() {
                 // we already have the context
                 hasReceiveTaskStartedCallback = true;
             }

@@ -3,11 +3,12 @@ package executor;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
+import notification.PipeNotificationHandler;
 import orchestration.PipeVersion;
 
 /**
  * Encapsulates the information that the {@link Task} need to execute a task and
- * receieves callbacks from the task which are sent to PipeNotificationHandler.
+ * receives callbacks from the task which are sent to PipeNotificationHandler.
  * 
  * @author marcus
  */
@@ -24,14 +25,15 @@ public class TaskExecutionContext implements TaskCallback {
     }
 
     @Override
-    public void receiveTaskStarted(TaskExecutionContext context) {
-        // TODO notify via handler
-
+    public void receiveTaskStarted() {
+        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
+        // TODO Create TaskStatus and PhaseStatus and notify
     }
 
     @Override
     public void receiveTaskResult(TaskResult result) {
-        // TODO notify via handler
+        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
+        // TODO Create TaskStatus and PhaseStatus and notify
 
     }
 
