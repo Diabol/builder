@@ -49,7 +49,7 @@ public class TaskResult {
         return exitValue() == 0;
     }
 
-    public TaskExecutionContext getContext() {
+    public TaskExecutionContext context() {
         return context;
     }
 

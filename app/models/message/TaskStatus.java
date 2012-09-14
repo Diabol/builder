@@ -15,26 +15,34 @@ import executor.TaskResult;
  */
 public class TaskStatus extends StatusMessage {
 
-    // TODO Add task details field
-
-    /** Use the factory method */
-    private TaskStatus(Status status, PipeVersion<?> version, PhaseConfig phase, ReadableDateTime started,
-            ReadableDateTime finished) {
-        super(status, version, phase, started, finished);
-    }
-
-    /** Use the factory method */
-    private TaskStatus(Status status, PipeVersion<?> version, PhaseConfig phase, ReadableDateTime started) {
-        super(status, version, phase, started, null);
-    }
+    private final String out;
+    private final String err;
 
     public static TaskStatus newRunningTaskStatus(TaskExecutionContext context) {
-        return new TaskStatus(Status.RUNNING, context.getVersion(), context.getPhase(), context.getStarted());
+        return new TaskStatus(Status.RUNNING, context.getVersion(), context.getPhase(), context.getStarted(), null,
+                null, null);
     }
 
     public static TaskStatus newFinishedTaskStatus(TaskResult result) {
-        TaskExecutionContext context = result.getContext();
+        TaskExecutionContext context = result.context();
         return new TaskStatus(Status.status(result.success()), context.getVersion(), context.getPhase(),
-                context.getStarted(), context.getFinished());
+                context.getStarted(), context.getFinished(), result.out(), result.err());
     }
+
+    public String getOut() {
+        return out;
+    }
+
+    public String getErr() {
+        return err;
+    }
+
+    /** Use the factory methods */
+    private TaskStatus(Status status, PipeVersion<?> version, PhaseConfig phase, ReadableDateTime started,
+            ReadableDateTime finished, String out, String err) {
+        super(status, version, phase, started, finished);
+        this.out = out;
+        this.err = err;
+    }
+
 }
