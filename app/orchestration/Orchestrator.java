@@ -54,6 +54,7 @@ public class Orchestrator {
 
     private static PipeVersion<?> createPipeVersion(PipeConfig pipe, String pipeVersion)
             throws PipeVersionValidationException {
+        // TODO: Here we could look up the version implementation we would like to use from config...
         return new PipeStringVersion(pipeVersion, pipe);
     }
 
