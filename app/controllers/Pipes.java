@@ -17,7 +17,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import utils.PipeConfReader;
-import views.html.pipeconfgraphit;
+import views.html.pipeslist;
 import views.html.startbuttons;
 
 public class Pipes extends Controller {
@@ -26,7 +26,7 @@ public class Pipes extends Controller {
 
     public static Result list() {
         // TODO We need to include current status in this list: Wrap PipeConfig with statuses
-        return ok(pipeconfgraphit.render(configReader.getConfiguredPipes()));
+        return ok(pipeslist.render(configReader.getConfiguredPipes()));
     }
 
     public static Result start(String pipeName) {
