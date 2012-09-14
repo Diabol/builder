@@ -4,6 +4,7 @@ import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.PipeValidationException;
 import models.config.TaskConfig;
+import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import notification.PipeNotificationHandler;
 import utils.PipeConfReader;
@@ -56,15 +57,14 @@ public class Orchestrator implements TaskCallback {
         return null;
     }
 
-    private static PipeVersion<?> createPipeVersion(PipeConfig pipe, String pipeVersion)
-            throws PipeVersionValidationException {
+    private PipeVersion<?> createPipeVersion(PipeConfig pipe, String pipeVersion) throws PipeVersionValidationException {
         // TODO: Here we could look up the version implementation we would like to use from config...
         return new PipeStringVersion(pipeVersion, pipe);
     }
 
     private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig,
             PipeVersion<?> pipeVersion) {
-        // TODO: Persistence...
+        // TODO: Persist new state
         TaskExecutionContext context = new TaskExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
         TaskExecutor.getInstance().execute(context, this);
     }
@@ -74,9 +74,10 @@ public class Orchestrator implements TaskCallback {
         TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
         handler.recieveTaskStatusChanged(taskStatus);
-
-        // TODO If new phase status: createPhaseStatus and notify
-
+        if (isNewPhaseStatus(context)) {
+            PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
+            handler.recievePhaseStatusChanged(phaseStatus);
+        }
     }
 
     @Override
@@ -85,8 +86,27 @@ public class Orchestrator implements TaskCallback {
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
         handler.recieveTaskStatusChanged(taskStatus);
 
-        // TODO If new phase status: createPhaseStatus and notify
+        PhaseStatus phaseStatus = getNewPhaseStatus(result);
+        if (phaseStatus != null) {
+            handler.recievePhaseStatusChanged(phaseStatus);
+        }
+    }
 
+    private boolean isNewPhaseStatus(TaskExecutionContext context) {
+        // TODO Implement logic to compute if this means new phase status.
+        // Phase changes status when:
+        //   1. First task starts
+        //   2. Any task fails
+        //   3. All tasks finished successful (there is no 'last' task)
+        return true;
+    }
+
+    /**
+     * @return new {@link PhaseStatus}, null if no status change.
+     */
+    private PhaseStatus getNewPhaseStatus(TaskResult latestTaskResult) {
+        // TODO Implement. See isNewPhaseStatus above
+        return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), true);
     }
 
     private PipeConfig getPipe(String pipeName) throws PipeValidationException {
