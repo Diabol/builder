@@ -2,6 +2,8 @@ package orchestration;
 
 import java.util.Comparator;
 
+import models.config.PipeConfig;
+
 /**
  * Encapsulates the pipe version with the version as a string with an injectable
  * {@link Comparator} if needed. By default uses {@link String} comparison.
@@ -11,17 +13,26 @@ import java.util.Comparator;
 public class PipeStringVersion implements PipeVersion<String> {
 
     private final String version;
-    private final String pipeName;
+    private final PipeConfig pipe;
     private Comparator<PipeVersion<String>> comparator;
 
-    PipeStringVersion(String version, String pipeName) {
+    PipeStringVersion(String version, PipeConfig pipe) throws PipeVersionValidationException {
         this.version = version;
-        this.pipeName = pipeName;
+        this.pipe = pipe;
+        validate();
     }
 
-    PipeStringVersion(String version, String pipeName, Comparator<PipeVersion<String>> comparator) {
-        this(version, pipeName);
+    PipeStringVersion(String version, PipeConfig pipe, Comparator<PipeVersion<String>> comparator)
+            throws PipeVersionValidationException {
+        this(version, pipe);
         this.comparator = comparator;
+    }
+
+    private void validate() throws PipeVersionValidationException {
+        // TODO More validation
+        if (version == null) {
+            throw new PipeVersionValidationException("Could not create pipe version from: '" + version + "'.");
+        }
     }
 
     @Override
@@ -31,7 +42,7 @@ public class PipeStringVersion implements PipeVersion<String> {
 
     @Override
     public String getPipeName() {
-        return pipeName;
+        return pipe.getName();
     }
 
     @Override

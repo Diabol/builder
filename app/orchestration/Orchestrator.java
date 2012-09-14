@@ -12,9 +12,10 @@ import executor.TaskExecutor;
  * Service/Controller that orchestrates the pipe execution.
  * 
  * <ul>
- *  <li>Uses the Executor to execute tasks.</li>
- *  <li>Notifies the client of status changes.</li>
- *  <li>Notifies persistence manager of status changes.</li>
+ * <li>Uses the Executor to execute tasks.</li>
+ * <li>Manages/creates pipe versions</li>
+ * <li>Notifies the client of status changes.</li>
+ * <li>Notifies persistence manager of status changes.</li>
  * </ul>
  * 
  * @author marcus
@@ -42,7 +43,7 @@ public class Orchestrator {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getPhaseByName(phaseName);
         TaskConfig task = phase.getTaskByName(taskName);
-        PipeVersion<?> version = createPipeVersion(pipeVersion);
+        PipeVersion<?> version = createPipeVersion(pipe, pipeVersion);
         startTask(task, phase, pipe, version);
     }
 
@@ -51,12 +52,13 @@ public class Orchestrator {
         return null;
     }
 
-    private static PipeVersion<?> createPipeVersion(String pipeVersion) {
-        // TODO Auto-generated method stub
-        return null;
+    private static PipeVersion<?> createPipeVersion(PipeConfig pipe, String pipeVersion)
+            throws PipeVersionValidationException {
+        return new PipeStringVersion(pipeVersion, pipe);
     }
 
-    private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig, PipeVersion<?> pipeVersion) {
+    private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig,
+            PipeVersion<?> pipeVersion) {
         // TODO: Persistence...
         TaskExecutionContext context = new TaskExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
         TaskExecutor.getInstance().execute(context);
