@@ -4,9 +4,13 @@ import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.PipeValidationException;
 import models.config.TaskConfig;
+import models.message.TaskStatus;
+import notification.PipeNotificationHandler;
 import utils.PipeConfReader;
+import executor.TaskCallback;
 import executor.TaskExecutionContext;
 import executor.TaskExecutor;
+import executor.TaskResult;
 
 /**
  * Service/Controller that orchestrates the pipe execution.
@@ -20,7 +24,7 @@ import executor.TaskExecutor;
  * 
  * @author marcus
  */
-public class Orchestrator {
+public class Orchestrator implements TaskCallback {
 
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
@@ -62,7 +66,27 @@ public class Orchestrator {
             PipeVersion<?> pipeVersion) {
         // TODO: Persistence...
         TaskExecutionContext context = new TaskExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
-        TaskExecutor.getInstance().execute(context);
+        TaskExecutor.getInstance().execute(context, this);
+    }
+
+    @Override
+    public void handleTaskStarted(TaskExecutionContext context) {
+        TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
+        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
+        handler.recieveTaskStatusChanged(taskStatus);
+
+        // TODO If new phase status: createPhaseStatus and notify
+
+    }
+
+    @Override
+    public void handleTaskResult(TaskResult result) {
+        TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
+        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
+        handler.recieveTaskStatusChanged(taskStatus);
+
+        // TODO If new phase status: createPhaseStatus and notify
+
     }
 
     private PipeConfig getPipe(String pipeName) throws PipeValidationException {

@@ -8,17 +8,21 @@ import play.Logger;
 public class Task implements Runnable {
 
     private final TaskExecutionContext context;
+    private final TaskCallback callback;
     private TaskResult result;
 
-    public Task(TaskExecutionContext context) {
+    Task(TaskExecutionContext context, TaskCallback callback) {
         this.context = context;
+        this.callback = callback;
     }
 
     @Override
     public void run() {
-        context.receiveTaskStarted();
+        context.startedNow();
+        callback.handleTaskStarted(context);
         execute();
-        context.receiveTaskResult(result);
+        context.finishedNow();
+        callback.handleTaskResult(result);
     }
 
     private void execute() {
@@ -55,7 +59,7 @@ public class Task implements Runnable {
     }
 
     private TaskConfig getConfig() {
-        return context.getTaskConfig();
+        return context.getTask();
     }
 
 }

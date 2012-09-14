@@ -2,8 +2,8 @@ package executor;
 
 public interface TaskCallback {
 
-    void receiveTaskResult(TaskResult result);
+    void handleTaskResult(TaskResult result);
 
-    void receiveTaskStarted();
+    void handleTaskStarted(TaskExecutionContext context);
 
 }

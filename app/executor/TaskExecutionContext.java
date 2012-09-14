@@ -3,42 +3,63 @@ package executor;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
-import notification.PipeNotificationHandler;
 import orchestration.PipeVersion;
+
+import org.joda.time.DateTime;
+import org.joda.time.ReadableDateTime;
 
 /**
  * Encapsulates the information that the {@link Task} need to execute a task and
- * receives callbacks from the task which are sent to PipeNotificationHandler.
+ * the task result receivers need to handle the result.
  * 
  * @author marcus
  */
-public class TaskExecutionContext implements TaskCallback {
+public class TaskExecutionContext {
 
     private final TaskConfig task;
-    private PipeConfig pipe;
-    private PhaseConfig phase;
-    private PipeVersion<?> version;
+    private final PhaseConfig phase;
+    private final PipeConfig pipe;
+    private final PipeVersion<?> version;
+    private ReadableDateTime started;
+    private ReadableDateTime finished;
 
     public TaskExecutionContext(TaskConfig task, PipeConfig pipe, PhaseConfig phase, PipeVersion<?> version) {
         this.task = task;
-        // TODO Rest of fields
+        this.pipe = pipe;
+        this.phase = phase;
+        this.version = version;
     }
 
-    @Override
-    public void receiveTaskStarted() {
-        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
-        // TODO Create TaskStatus and PhaseStatus and notify
-    }
-
-    @Override
-    public void receiveTaskResult(TaskResult result) {
-        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
-        // TODO Create TaskStatus and PhaseStatus and notify
-
-    }
-
-    public TaskConfig getTaskConfig() {
+    public TaskConfig getTask() {
         return task;
+    }
+
+    public PhaseConfig getPhase() {
+        return phase;
+    }
+
+    public PipeConfig getPipe() {
+        return pipe;
+    }
+
+    public PipeVersion<?> getVersion() {
+        return version;
+    }
+
+    public ReadableDateTime getStarted() {
+        return started;
+    }
+
+    public ReadableDateTime getFinished() {
+        return finished;
+    }
+
+    void startedNow() {
+        this.started = new DateTime();
+    }
+
+    void finishedNow() {
+        this.finished = new DateTime();
     }
 
 }

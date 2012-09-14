@@ -17,8 +17,8 @@ public class TaskExecutor {
         // Singleton
     }
 
-    public void execute(TaskExecutionContext context) {
-        Task task = new Task(context);
+    public void execute(TaskExecutionContext context, TaskCallback callback) {
+        Task task = new Task(context, callback);
         executor.execute(task);
     }
 

@@ -11,7 +11,7 @@ public class TaskResult {
     private final StringBuilder out = new StringBuilder();
     private final StringBuilder err = new StringBuilder();
     private final int exitValue;
-    private TaskExecutionContext context;
+    private final TaskExecutionContext context;
 
     /** Only call this for a finished process */
     TaskResult(Process process, TaskExecutionContext context) {
@@ -22,16 +22,15 @@ public class TaskResult {
     }
 
     /** Creates an empty result (failed) */
-    private TaskResult() {
+    private TaskResult(TaskExecutionContext context) {
         err.append("Unknown error");
         out.append("");
         exitValue = 666;
+        this.context = context;
     }
 
     static TaskResult getEmptyFailedResult(TaskExecutionContext context) {
-        TaskResult result = new TaskResult();
-        result.context = context;
-        return result;
+        return new TaskResult(context);
     }
 
     public String out() {
@@ -48,6 +47,10 @@ public class TaskResult {
 
     public boolean success() {
         return exitValue() == 0;
+    }
+
+    public TaskExecutionContext getContext() {
+        return context;
     }
 
     private void readOut(BufferedReader outReader) {

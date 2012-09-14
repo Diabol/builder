@@ -10,7 +10,7 @@ import org.mockito.Mock;
 
 import test.MockitoTestBase;
 
-public class TaskTest extends MockitoTestBase {
+public class TaskTest extends MockitoTestBase implements TaskCallback {
 
     private TaskResult result;
     private TaskExecutionContext context;
@@ -19,22 +19,12 @@ public class TaskTest extends MockitoTestBase {
 
     @Before
     public void createContext() {
-        context = new TaskExecutionContext(config, null, null, null) {
-            @Override
-            public void receiveTaskResult(TaskResult taskResult) {
-                result = taskResult;
-            }
-            @Override
-            public void receiveTaskStarted() {
-                // we already have the context
-                hasReceiveTaskStartedCallback = true;
-            }
-        };
+        context = new TaskExecutionContext(config, null, null, null);
     }
 
     @Test
     public void testRun_ls_Successful() {
-        Task target = new Task(context);
+        Task target = new Task(context, this);
 
         when(config.getCommand()).thenReturn("ls");
 
@@ -52,7 +42,7 @@ public class TaskTest extends MockitoTestBase {
 
     @Test
     public void testRunFail() {
-        Task target = new Task(context);
+        Task target = new Task(context, this);
 
         when(config.getCommand()).thenReturn("cmdDoesNotExist");
         when(config.getTaskName()).thenReturn("test cmd that does not exist");
@@ -66,6 +56,17 @@ public class TaskTest extends MockitoTestBase {
         assertThat(result.exitValue()).isNotEqualTo(0);
         assertThat(result.success()).isEqualTo(false);
         assertThat(result.err()).contains("Unknown error");
+    }
+
+    @Override
+    public void handleTaskResult(TaskResult taskResult) {
+        result = taskResult;
+    }
+
+    @Override
+    public void handleTaskStarted(TaskExecutionContext context) {
+        // we already have the context
+        hasReceiveTaskStartedCallback = true;
     }
 
 }

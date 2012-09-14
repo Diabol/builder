@@ -8,7 +8,11 @@ import org.joda.time.ReadableDateTime;
 public abstract class StatusMessage {
 
     public enum Status {
-        NOT_STARTED, RUNNING, SUCCESS, FAILURE
+        NOT_STARTED, RUNNING, SUCCESS, FAILURE;
+
+        public static Status status(boolean success) {
+            return success ? SUCCESS: FAILURE;
+        }
     };
 
     private final Status status;

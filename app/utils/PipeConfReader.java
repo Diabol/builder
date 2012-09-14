@@ -29,6 +29,7 @@ public class PipeConfReader {
 
     private static PipeConfReader instance;
     private final List<PipeConfig> jsonAsObjects =  new ArrayList<PipeConfig>();
+    private final Map<String, PipeConfig> pipeMap = new HashMap<String, PipeConfig>();
     private final String urlToJson = "conf/pipes/";
 
     static {
@@ -60,6 +61,10 @@ public class PipeConfReader {
             validate(jsonAsPipe);
             jsonAsObjects.add(jsonAsPipe);
         }
+
+        for (int i = 0; i < jsonAsObjects.size(); i++) {
+            pipeMap.put(jsonAsObjects.get(i).getName(), jsonAsObjects.get(i));
+        }
     }
 
     private void validate(PipeConfig confToValidate) throws PipeValidationException {
@@ -75,10 +80,6 @@ public class PipeConfReader {
     }
 
     public Map<String, PipeConfig> getConfiguredPipesMappedByName() {
-        Map<String, PipeConfig> pipeMap = new HashMap<String, PipeConfig>();
-        for (int i = 0; i < jsonAsObjects.size(); i++) {
-            pipeMap.put(jsonAsObjects.get(i).getName(), jsonAsObjects.get(i));
-        }
         return pipeMap;
     }
 
