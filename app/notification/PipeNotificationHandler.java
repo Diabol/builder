@@ -1,10 +1,10 @@
 package notification;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Singleton that keeps track of listeners and notifies them of relevant events.
@@ -17,8 +17,8 @@ public class PipeNotificationHandler {
 
     private static final PipeNotificationHandler INSTANCE = new PipeNotificationHandler();
 
-    private final List<PhaseStatusChangedListener> phaseListeners = new ArrayList<PhaseStatusChangedListener>();
-    private final List<TaskStatusChangedListener> taskListeners = new ArrayList<TaskStatusChangedListener>();
+    private final Set<PhaseStatusChangedListener> phaseListeners = new HashSet<PhaseStatusChangedListener>();
+    private final Set<TaskStatusChangedListener> taskListeners = new HashSet<TaskStatusChangedListener>();
 
     public static PipeNotificationHandler getInstance() {
         return INSTANCE;
@@ -48,7 +48,7 @@ public class PipeNotificationHandler {
         }
     }
 
-    public void recievePhaseStatusChanged(PhaseStatus status) {
+    public void notifyPhaseStatusListeners(PhaseStatus status) {
         synchronized (phaseListeners) {
             for (PhaseStatusChangedListener listener : phaseListeners) {
                 listener.recieveStatusChanged(status);
@@ -56,11 +56,35 @@ public class PipeNotificationHandler {
         }
     }
 
-    public void recieveTaskStatusChanged(TaskStatus status) {
+    public void notifyTaskStatusListeners(TaskStatus status) {
         synchronized (taskListeners) {
             for (TaskStatusChangedListener listener : taskListeners) {
                 listener.recieveStatusChanged(status);
             }
+        }
+    }
+
+    public int getNumberOfTaskStatusListeners() {
+        synchronized(taskListeners) {
+            return taskListeners.size();
+        }
+    }
+
+    public int getNumberOfPhaseStatusListeners() {
+        synchronized (phaseListeners) {
+            return phaseListeners.size();
+        }
+    }
+
+    public void removeAllTaskListeners() {
+        synchronized (taskListeners) {
+            taskListeners.clear();
+        }
+    }
+
+    public void removeAllPhaseListeners() {
+        synchronized (phaseListeners) {
+            phaseListeners.clear();
         }
     }
 }

@@ -79,7 +79,7 @@
                     chatSocket.close()
                     alert('An has occured while executing a pipe line. Please refer to server log.');
                     return
-                } else {
+                } else if(data.phaseUpdate) {
                     updatePhase(data.pipeName+data.phaseName);
                 }
 

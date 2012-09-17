@@ -73,10 +73,10 @@ public class Orchestrator implements TaskCallback {
     public void handleTaskStarted(TaskExecutionContext context) {
         TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
-        handler.recieveTaskStatusChanged(taskStatus);
+        handler.notifyTaskStatusListeners(taskStatus);
         if (isNewPhaseStatus(context)) {
             PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
-            handler.recievePhaseStatusChanged(phaseStatus);
+            handler.notifyPhaseStatusListeners(phaseStatus);
         }
     }
 
@@ -84,11 +84,11 @@ public class Orchestrator implements TaskCallback {
     public void handleTaskResult(TaskResult result) {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
-        handler.recieveTaskStatusChanged(taskStatus);
+        handler.notifyTaskStatusListeners(taskStatus);
 
         PhaseStatus phaseStatus = getNewPhaseStatus(result);
         if (phaseStatus != null) {
-            handler.recievePhaseStatusChanged(phaseStatus);
+            handler.notifyPhaseStatusListeners(phaseStatus);
         }
     }
 

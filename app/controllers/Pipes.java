@@ -1,17 +1,14 @@
 package controllers;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import models.NotificationHandler;
 import models.config.PipeValidationException;
+import notification.PipeNotificationHandler;
+import notification.impl.PipeListStatusChangeListener;
 import orchestration.Orchestrator;
 import orchestration.PipeVersion;
-
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
-
 import play.Logger;
+import play.libs.F;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -19,6 +16,9 @@ import play.mvc.WebSocket;
 import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class Pipes extends Controller {
 
@@ -30,7 +30,6 @@ public class Pipes extends Controller {
     }
 
     public static Result start(String pipeName) {
-        // (new Thread(new SimplePipeExecutor(pipe))).run();
         try {
             PipeVersion<?> pipeVersion = new Orchestrator().start(pipeName);
             URL pipeUrl = createNewPipeUrl(pipeVersion);
@@ -59,20 +58,32 @@ public class Pipes extends Controller {
 
     public static WebSocket<JsonNode> setupSocket() {
         return new WebSocket<JsonNode>() {
-
             // Called when the Websocket Handshake is done.
             @Override
             public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out){
-
-                // Add add socket to notification handler.
                 try {
+                    final PipeListStatusChangeListener listener = new PipeListStatusChangeListener(in,out);
+                    PipeNotificationHandler.getInstance().addPhaseStatusChangedListener(listener);
+                    PipeNotificationHandler.getInstance().addTaskStatusChangedListener(listener);
+
+                    //Make sure the listeners are removed when socket is closed.
+                    // When the socket is closed.
+                    in.onClose(new F.Callback0() {
+                        public void invoke() {
+                            // Send a Quit message to the room.
+                            PipeNotificationHandler.getInstance().removePhaseStatusChangedListener(listener);
+                            PipeNotificationHandler.getInstance().removeTaskStatusChangedListener(listener);
+                        }
+                    });
+
+                    //Notify the client tha
                     ObjectNode json = Json.newObject();
                     json.put("socket", "ready");
                     out.write(json);
-                    NotificationHandler.addSocket(in,out);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+
             }
         };
     }

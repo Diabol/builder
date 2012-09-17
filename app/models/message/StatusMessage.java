@@ -34,6 +34,10 @@ public abstract class StatusMessage {
         return status;
     }
 
+    public String getPipeName() {
+        return version.getPipeName();
+    }
+
     public String getVersion() {
         return version.getVersion().toString();
     }
