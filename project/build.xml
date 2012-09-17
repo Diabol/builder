@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="builder-static_analysis" default="static-analysis" basedir="..">
+
+  <property name="sbt.location" location="/usr/local/bin/sbt" />
+  <property name="findbugs.home" value="${basedir}/lib" />
+
+  <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="${basedir}/lib/findbugs-ant.jar" />
+
+  <target name="static-analysis" depends="findbugs" />
+
+  <target name="findbugs">
+    <findbugs home="${findbugs.home}" output="xml:withMessages" outputFile="target/findbugs.xml">
+      <sourcePath path="${basedir}/app" />
+      <class location="${basedir}/target/scala-2.9.1/classes" />
+      <auxclasspath description="The full classpath of app">
+        <pathelement location="${basedir}/target/scala-2.9.1/classes_managed" />
+        <fileset dir="target/staged" id="id">
+          <include name="**/*.jar" />
+        </fileset>
+      </auxclasspath>
+    </findbugs>
+  </target>
+
+  <target name="findbugs-dev" depends="sbt-stage, findbugs" 
+          description="In CI we run sbt outside ant. Local dev can use this target." />
+
+  <target name="sbt-stage" description="Build app classpath">
+    <exec executable="${sbt.location}">
+      <arg line="clean compile stage" />
+    </exec>
+  </target>
+
+</project>
