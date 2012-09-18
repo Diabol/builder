@@ -1,6 +1,7 @@
 package models.message;
 
 import models.config.PhaseConfig;
+import models.config.TaskConfig;
 import orchestration.PipeVersion;
 
 import org.joda.time.ReadableDateTime;
@@ -13,20 +14,21 @@ import executor.TaskResult;
  * 
  * @author marcus
  */
-public class TaskStatus extends StatusMessage {
+public class TaskStatus extends PhaseStatus {
 
+    private final TaskConfig task;
     private final String out;
     private final String err;
 
     public static TaskStatus newRunningTaskStatus(TaskExecutionContext context) {
-        return new TaskStatus(Status.RUNNING, context.getVersion(), context.getPhase(), context.getStarted(), null,
-                null, null);
+        return new TaskStatus(State.RUNNING, context.getVersion(), context.getPhase(), context.getTask(),
+                context.getStarted(), null, null, null);
     }
 
     public static TaskStatus newFinishedTaskStatus(TaskResult result) {
         TaskExecutionContext context = result.context();
-        return new TaskStatus(Status.status(result.success()), context.getVersion(), context.getPhase(),
-                context.getStarted(), context.getFinished(), result.out(), result.err());
+        return new TaskStatus(State.state(result.success()), context.getVersion(), context.getPhase(),
+                context.getTask(), context.getStarted(), context.getFinished(), result.out(), result.err());
     }
 
     public String getOut() {
@@ -37,10 +39,12 @@ public class TaskStatus extends StatusMessage {
         return err;
     }
 
-    /** Use the factory methods */
-    private TaskStatus(Status status, PipeVersion<?> version, PhaseConfig phase, ReadableDateTime started,
-            ReadableDateTime finished, String out, String err) {
-        super(status, version, phase, started, finished);
+    /** Use the factory methods
+     * @param task TODO*/
+    private TaskStatus(State state, PipeVersion<?> version, PhaseConfig phase, TaskConfig task,
+            ReadableDateTime started, ReadableDateTime finished, String out, String err) {
+        super(version, phase, state, started, finished);
+        this.task = task;
         this.out = out;
         this.err = err;
     }

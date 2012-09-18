@@ -12,21 +12,28 @@ import executor.TaskExecutionContext;
  * 
  * @author marcus
  */
-public class PhaseStatus extends StatusMessage {
+public class PhaseStatus extends PipeStatus {
+
+    private final PhaseConfig phase;
 
     public static PhaseStatus newRunningPhaseStatus(TaskExecutionContext context) {
-        return new PhaseStatus(Status.RUNNING, context.getVersion(), context.getPhase(), context.getStarted(), null);
+        return new PhaseStatus(context.getVersion(), context.getPhase(), State.RUNNING, context.getStarted(), null);
     }
 
     public static PhaseStatus newFinishedPhaseStatus(TaskExecutionContext context, boolean success) {
-        return new PhaseStatus(Status.status(success), context.getVersion(), context.getPhase(), context.getStarted(),
+        return new PhaseStatus(context.getVersion(), context.getPhase(), State.state(success), context.getStarted(),
                 context.getFinished());
     }
 
     /** Use the factory methods */
-    private PhaseStatus(Status status, PipeVersion<?> version, PhaseConfig phase, ReadableDateTime started,
+    PhaseStatus(PipeVersion<?> version, PhaseConfig phase, State state, ReadableDateTime started,
             ReadableDateTime finished) {
-        super(status, version, phase, started, finished);
+        super(version, state, started, finished);
+        this.phase = phase;
+    }
+
+    public String getPhaseName() {
+        return phase.getName();
     }
 
 }
