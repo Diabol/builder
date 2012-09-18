@@ -39,6 +39,16 @@ public class PipeConfig {
         throw new IllegalArgumentException("No phase found with name: '" + name + "' in: " + this);
     }
 
+    public PhaseConfig getNextPhase(PhaseConfig currentPhase) {
+        for (int i = 0; i < getPhases().size(); i++) {
+            PhaseConfig phase = getPhases().get(i);
+            if (currentPhase.equals(phase) && getPhases().size() > i + 1) {
+                return getPhases().get(i+1);
+            }
+        }
+        return null;
+    }
+
     public void validate() throws PipeValidationException {
         if (getPhases() == null ||
                 getName() == null ||

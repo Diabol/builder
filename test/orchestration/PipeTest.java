@@ -15,10 +15,10 @@ public class PipeTest extends MockitoTestBase {
     @Mock private PipeConfig pipeConfig;
     @Mock private PhaseConfig phaseConfig;
     @Mock private PhaseConfig phaseConfig2;
-    @Mock private Phase phase;
-    @Mock private Phase phase2;
-    @Mock private PhaseResult phaseResult;
-    @Mock private PhaseResult phaseResult2;
+//    @Mock private Phase phase;
+//    @Mock private Phase phase2;
+//    @Mock private PhaseResult phaseResult;
+//    @Mock private PhaseResult phaseResult2;
 
     @Test
     public void testSuccessfulPipe() throws Exception {

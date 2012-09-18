@@ -63,11 +63,14 @@ public class Orchestrator implements TaskCallback {
         return new PipeStringVersion(pipeVersion, pipe);
     }
 
-    private void startTask(TaskConfig taskConfig, PhaseConfig phaseConfig, PipeConfig pipeConfig,
-            PipeVersion<?> pipeVersion) {
+    private void startTask(TaskConfig task, PhaseConfig phase, PipeConfig pipe, PipeVersion<?> version) {
+        TaskExecutionContext executionContext = new TaskExecutionContext(task, pipe, phase, version);
+        startTask(executionContext);
+    }
+
+    private void startTask(TaskExecutionContext executionContext) {
         // TODO: Persist new state
-        TaskExecutionContext context = new TaskExecutionContext(taskConfig, pipeConfig, phaseConfig, pipeVersion);
-        TaskExecutor.getInstance().execute(context, this);
+        TaskExecutor.getInstance().execute(executionContext, this);
     }
 
     @Override
@@ -100,14 +103,30 @@ public class Orchestrator implements TaskCallback {
      * Decide if we should start a new task and then start it.
      */
     private void startNextTask(TaskResult lastTaskResult) {
-        // 1. Start triggered tasks
-        TaskExecutionContext context = lastTaskResult.context();
-        List<TaskConfig> triggeredTasks = context.getTriggedTasks();
-        for (TaskConfig taskConfig : triggeredTasks) {
-            startTask(taskConfig, context.getPhase(), context.getPipe(), context.getVersion());
+        // 1. Check if task was successful
+        if (!lastTaskResult.success()) {
+            return;
         }
-        // 2. Trigger first task in next phase if all tasks in this phase is finished.
+        // 2. Start triggered tasks if automatic
+        TaskExecutionContext taskContext = lastTaskResult.context();
+        List<TaskConfig> triggeredTasks = taskContext.getTriggedTasks();
+        for (TaskConfig task : triggeredTasks) {
+            if (task.isAutomatic()) {
+                startTask(task, taskContext.getPhase(), taskContext.getPipe(), taskContext.getVersion());
+            }
+        }
+        // 3. Trigger first task in next phase if all tasks in this phase is finished.
+        if(allTasksInPhaseFinishedSuccessfully(taskContext)) {
+            TaskExecutionContext newTaskContext = taskContext.getFirstTaskInNextPhase();
+            if (newTaskContext != null) {
+                startTask(newTaskContext);
+            }
+        }
+    }
 
+    private boolean allTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
+        // TODO We need to call persistence to know this
+        return false;
     }
 
     private boolean isNewPhaseStatus(TaskExecutionContext context) {
@@ -120,7 +139,8 @@ public class Orchestrator implements TaskCallback {
     }
 
     /**
-     * @return new finsihed {@link PhaseStatus}, success or fail, null if no status change.
+     * @return new finsihed {@link PhaseStatus}, success or fail, null if no
+     *         status change.
      */
     private PhaseStatus getNewPhaseStatus(TaskResult latestTaskResult) {
         // TODO Implement. See isNewPhaseStatus(context) above

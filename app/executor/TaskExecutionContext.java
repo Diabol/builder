@@ -78,4 +78,12 @@ public class TaskExecutionContext {
         return triggedTasks;
     }
 
+    public TaskExecutionContext getFirstTaskInNextPhase() {
+        PhaseConfig nextPhase = pipe.getNextPhase(phase);
+        if (nextPhase == null) {
+            return null;
+        }
+        return new TaskExecutionContext(nextPhase.getInitialTask(), getPipe(), nextPhase, getVersion());
+    }
+
 }

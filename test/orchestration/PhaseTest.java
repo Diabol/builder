@@ -24,7 +24,7 @@ public class PhaseTest extends MockitoTestBase {
 //    @Mock private TaskResult taskResult2;
 //    @Mock private TaskResult taskResult3;
 
-    private Phase target;
+//    private Phase target;
 
     @Before
     public void prepare() throws Exception{
