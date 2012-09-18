@@ -38,6 +38,10 @@ public class TaskStatus extends PhaseStatus {
     public String getErr() {
         return err;
     }
+    
+    public String getTaskName() {
+    	return task.getTaskName();
+    }
 
     /** Use the factory methods
      * @param task TODO*/

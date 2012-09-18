@@ -32,11 +32,6 @@ div.block, h1.block, h2.block, p.block
     border-radius: 15px;
 }
 
-.successfull
-{
-    background-color: green;
-}
-
 div.canvas
 {
     border: 1px solid #999999;

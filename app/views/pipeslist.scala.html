@@ -26,7 +26,7 @@
 }
 
 @createPhaseText(phase: PhaseConfig) = {
-    @{phase.getName()}<br>Last success: N/A</br><br>Status: NOT STARTED</br>
+	<div id="phaseName">@{phase.getName()}</div><div id="lastSuccess">Last success: N/A</div><div id="currentStatus">Current status: NOT STARTED</div>
 }
 
 @createPipeMarkup(pipeCount: Int, pipe: PipeConfig) = {
@@ -53,9 +53,40 @@
             $('#'+id).addClass('phaseHighlighted');
             phaseIdSelected = id;
         }
+        
+        function updateTask(updateTaskData) {
+        	function colorizeTask(colour) {
+        		$('#'+updateTaskData.taskName).animate({ backgroundColor: colour }, 'fast', function(){$('#'+updateTaskData.taskName).css('color', 'black');});
+        	}
+        	switch(updateTaskData.status) {
+        	case "RUNNING":
+        		colorizeTask("blue");
+    			break;
+        	case "SUCCESS":
+        		colorizeTask("green")
+    			break;
+        	case "FAILURE":
+        		colorizeTask("red");
+    			break;
+        	}
+        }
 
-        function updatePhase(phaseId) {
-            $('#'+phaseId).addClass("successfull");
+        function updatePhase(updatePhaseData) {
+        	var domNodeId = updatePhaseData.pipeName+updatePhaseData.phaseName;
+        	function colorizePhase(colour) {
+        		$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast', function(){$('#'+domNodeId).css('color', 'black');});
+        	}
+        	switch(updatePhaseData.status) {
+        	case "RUNNING":
+        		colorizePhase('blue');
+    			break;
+        	case "SUCCESS":
+        		colorizePhase('green');
+    			break;
+        	case "FAILURE":
+        		colorizePhase('red');
+    			break;
+        	}
         }
 
         <!--Generated javascript functions for displaying the task trees-->
@@ -73,14 +104,18 @@
 
             var receiveEvent = function(event) {
                 var data = JSON.parse(event.data)
-
                 // Handle errors
                 if(data.error) {
                     chatSocket.close()
-                    alert('An has occured while executing a pipe line. Please refer to server log.');
+                    alert('An error has occured while executing a pipeline. Please refer to server log.');
                     return
                 } else if(data.phaseUpdate) {
-                    updatePhase(data.pipeName+data.phaseName);
+                    updatePhase(data);
+                } else if(data.taskUpdate) {
+                	if(phaseIdSelected && (phaseIdSelected == (data.pipeName + data.phaseName))){
+                		//The updated task is visible
+                		updateTask(data);
+                	}
                 }
 
             }

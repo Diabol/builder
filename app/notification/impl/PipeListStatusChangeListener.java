@@ -6,6 +6,8 @@ import notification.PhaseStatusChangedListener;
 import notification.TaskStatusChangedListener;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
+
+import play.Logger;
 import play.libs.Json;
 import play.mvc.WebSocket;
 
@@ -32,12 +34,18 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("phaseUpdate", true);
         json.put("pipeName", status.getPipeName());
         json.put("phaseName", status.getPhaseName());
-        json.put("status", status.getStatus().name());
+        json.put("status", status.getStatus().toString());
         out.write(json);
     }
 
     @Override
     public void recieveStatusChanged(TaskStatus status) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        ObjectNode json = Json.newObject();
+        json.put("taskUpdate", true);
+        json.put("pipeName", status.getPipeName());
+        json.put("phaseName", status.getPhaseName());
+        json.put("taskName", status.getTaskName());
+        json.put("status", status.getStatus().toString());
+        out.write(json);
     }
 }
