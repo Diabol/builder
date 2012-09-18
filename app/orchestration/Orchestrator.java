@@ -53,7 +53,7 @@ public class Orchestrator implements TaskCallback {
     }
 
     private PipeVersion<?> getNextPipeVersion(PipeConfig pipe) {
-        // TODO Auto-generated method stub
+        // TODO Implement getNextPipeVersion. We need to check persistence...
         return null;
     }
 
@@ -72,8 +72,9 @@ public class Orchestrator implements TaskCallback {
     @Override
     public void handleTaskStarted(TaskExecutionContext context) {
         TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
-        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
+        PipeNotificationHandler handler = getPipeNotificationHandler();
         handler.notifyTaskStatusListeners(taskStatus);
+
         if (isNewPhaseStatus(context)) {
             PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
             handler.notifyPhaseStatusListeners(phaseStatus);
@@ -83,13 +84,20 @@ public class Orchestrator implements TaskCallback {
     @Override
     public void handleTaskResult(TaskResult result) {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
-        PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
+        PipeNotificationHandler handler = getPipeNotificationHandler();
         handler.notifyTaskStatusListeners(taskStatus);
 
         PhaseStatus phaseStatus = getNewPhaseStatus(result);
         if (phaseStatus != null) {
             handler.notifyPhaseStatusListeners(phaseStatus);
         }
+
+        startNextTask(result);
+    }
+
+    private void startNextTask(TaskResult lastTaskResult) {
+        // TODO Decide if we should start a new task, in that case which one, and then start it.
+
     }
 
     private boolean isNewPhaseStatus(TaskExecutionContext context) {
@@ -107,6 +115,10 @@ public class Orchestrator implements TaskCallback {
     private PhaseStatus getNewPhaseStatus(TaskResult latestTaskResult) {
         // TODO Implement. See isNewPhaseStatus above
         return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), true);
+    }
+
+    private PipeNotificationHandler getPipeNotificationHandler() {
+        return PipeNotificationHandler.getInstance();
     }
 
     private PipeConfig getPipe(String pipeName) throws PipeValidationException {
