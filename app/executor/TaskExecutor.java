@@ -18,7 +18,7 @@ public class TaskExecutor {
     }
 
     public void execute(TaskExecutionContext context, TaskCallback callback) {
-        Task task = new Task(context, callback);
+        TaskRunner task = new TaskRunner(context, callback);
         executor.execute(task);
     }
 

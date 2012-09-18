@@ -24,7 +24,7 @@ public class TaskTest extends MockitoTestBase implements TaskCallback {
 
     @Test
     public void testRun_ls_Successful() {
-        Task target = new Task(context, this);
+        TaskRunner target = new TaskRunner(context, this);
 
         when(config.getCommand()).thenReturn("ls");
 
@@ -42,7 +42,7 @@ public class TaskTest extends MockitoTestBase implements TaskCallback {
 
     @Test
     public void testRunFail() {
-        Task target = new Task(context, this);
+        TaskRunner target = new TaskRunner(context, this);
 
         when(config.getCommand()).thenReturn("cmdDoesNotExist");
         when(config.getTaskName()).thenReturn("test cmd that does not exist");

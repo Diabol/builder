@@ -5,13 +5,13 @@ import java.io.IOException;
 import models.config.TaskConfig;
 import play.Logger;
 
-public class Task implements Runnable {
+class TaskRunner implements Runnable {
 
     private final TaskExecutionContext context;
     private final TaskCallback callback;
     private TaskResult result;
 
-    Task(TaskExecutionContext context, TaskCallback callback) {
+    TaskRunner(TaskExecutionContext context, TaskCallback callback) {
         this.context = context;
         this.callback = callback;
     }

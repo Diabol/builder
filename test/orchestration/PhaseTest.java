@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import test.MockitoTestBase;
-import executor.Task;
 
 public class PhaseTest extends MockitoTestBase {
 
@@ -18,9 +17,9 @@ public class PhaseTest extends MockitoTestBase {
     @Mock private TaskConfig initialTaskConfig;
     @Mock private TaskConfig taskConfig2;
     @Mock private TaskConfig taskConfig3;
-    @Mock private Task task;
-    @Mock private Task task2;
-    @Mock private Task task3;
+//    @Mock private TaskRunner task;
+//    @Mock private TaskRunner task2;
+//    @Mock private TaskRunner task3;
 //    @Mock private TaskResult taskResult;
 //    @Mock private TaskResult taskResult2;
 //    @Mock private TaskResult taskResult3;

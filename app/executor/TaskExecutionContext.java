@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 import org.joda.time.ReadableDateTime;
 
 /**
- * Encapsulates the information that the {@link Task} need to execute a task and
+ * Encapsulates the information that the {@link TaskRunner} need to execute a task and
  * the task result receivers need to handle the result.
  * 
  * @author marcus
