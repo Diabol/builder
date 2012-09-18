@@ -26,19 +26,17 @@ public class PipeConfig {
         this.phases = phases;
     }
 
-    public PhaseConfig getFirstPhaseConfig() throws PipeValidationException {
-        PhaseConfig phaseConfig = getPhases().get(0);
-        phaseConfig.validate();
-        return phaseConfig;
+    public PhaseConfig getFirstPhaseConfig() {
+        return getPhases().get(0);
     }
 
-    public PhaseConfig getPhaseByName(String name) throws PipeValidationException {
+    public PhaseConfig getPhaseByName(String name) {
         for(PhaseConfig phase: getPhases()){
             if(phase.getName().equals(name)) {
                 return phase;
             }
         }
-        throw new PipeValidationException("No phase found with name: '" + name + "' in pipe: '" + getName());
+        throw new IllegalArgumentException("No phase found with name: '" + name + "' in: " + this);
     }
 
     public void validate() throws PipeValidationException {
@@ -48,11 +46,15 @@ public class PipeConfig {
                 getName().length() == 0) {
             throw new PipeValidationException("Invalid: " + this);
         }
+
+        for (PhaseConfig phaseConfig : getPhases()) {
+            phaseConfig.validate();
+        }
     }
 
     @Override
     public String toString() {
-        final int maxLen = 3;
+        final int maxLen = 9;
         StringBuilder builder = new StringBuilder();
         builder.append("PipeConfig [name=");
         builder.append(name);

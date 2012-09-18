@@ -1,7 +1,7 @@
 package models.config;
 
+import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * @author danielgronberg, marcus
@@ -9,9 +9,9 @@ import java.util.List;
 public class TaskConfig {
 
     private String taskName;
-    private boolean isAutomatic;
     private String cmd;
-    private List<String> triggersTasks;
+    private boolean isAutomatic = true;
+    private List<String> triggersTasks = new ArrayList<String>();
 
     public String getTaskName() {
         return taskName;
@@ -44,4 +44,30 @@ public class TaskConfig {
     public void setTriggersTasks(List<String> triggersTasks) {
         this.triggersTasks = triggersTasks;
     }
+
+    public void validate() throws PipeValidationException {
+        if (getTaskName() == null ||
+                getCommand() == null ||
+                getTaskName().isEmpty() ||
+                getCommand().isEmpty()) {
+            throw new PipeValidationException("Invalid: " + this);
+        }
+    }
+
+    @Override
+    public String toString() {
+        final int maxLen = 3;
+        StringBuilder builder = new StringBuilder();
+        builder.append("TaskConfig [taskName=");
+        builder.append(taskName);
+        builder.append(", cmd=");
+        builder.append(cmd);
+        builder.append(", isAutomatic=");
+        builder.append(isAutomatic);
+        builder.append(", triggersTasks=");
+        builder.append(triggersTasks != null ? triggersTasks.subList(0, Math.min(triggersTasks.size(), maxLen)) : null);
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

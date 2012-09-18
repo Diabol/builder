@@ -68,6 +68,7 @@ public class PipeConfReader {
     }
 
     private void validate(PipeConfig confToValidate) throws PipeValidationException {
+        confToValidate.validate();
         for (PipeConfig conf : jsonAsObjects) {
             if (conf.getName().equals(confToValidate.getName())) {
                 throw new PipeValidationException("Failed to read PipeConfig: Cannot have two pipes with same name: " + conf.getName());

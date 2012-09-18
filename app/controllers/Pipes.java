@@ -1,12 +1,16 @@
 package controllers;
 
-import models.config.PipeValidationException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import notification.PipeNotificationHandler;
 import notification.impl.PipeListStatusChangeListener;
 import orchestration.Orchestrator;
 import orchestration.PipeVersion;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
+
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
@@ -16,9 +20,6 @@ import play.mvc.WebSocket;
 import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class Pipes extends Controller {
 
@@ -34,19 +35,20 @@ public class Pipes extends Controller {
             PipeVersion<?> pipeVersion = new Orchestrator().start(pipeName);
             URL pipeUrl = createNewPipeUrl(pipeVersion);
             return generatePipeStartedResult(pipeVersion, pipeUrl);
-        } catch (PipeValidationException e) {
-            Logger.error("Could not start pipe: " + pipeName + " due to invalid config.", e);
-            return internalServerError();
+        } catch (Exception e) {
+            String errMsg = "Could not start pipe: " + pipeName;
+            Logger.error(errMsg, e);
+            return internalServerError(errMsg);
         }
     }
 
     public static Result startTask(String taskName, String phaseName, String pipeName, String pipeVersion) {
-        String msg = "task: '" + taskName + "' in phase: '" + phaseName + "' in pipe: '" + pipeName;
+        String msg = "task: '" + taskName + "' in phase: '" + phaseName + "' in pipe: '" + pipeName + "'";
         try {
             new Orchestrator().startTask(taskName, phaseName, pipeName, pipeVersion);
             return ok("Started " + msg + "' of version: '" + pipeVersion);
-        } catch (PipeValidationException e) {
-            String errMsg = "Could not start " + msg + " due to invalid config.";
+        } catch (Exception e) {
+            String errMsg = "Could not start " + msg;
             Logger.error(errMsg, e);
             return internalServerError(errMsg);
         }
@@ -69,6 +71,7 @@ public class Pipes extends Controller {
                     //Make sure the listeners are removed when socket is closed.
                     // When the socket is closed.
                     in.onClose(new F.Callback0() {
+                        @Override
                         public void invoke() {
                             // Send a Quit message to the room.
                             PipeNotificationHandler.getInstance().removePhaseStatusChangedListener(listener);

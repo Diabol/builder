@@ -1,7 +1,6 @@
 package orchestration;
 
 import models.config.PhaseConfig;
-import models.config.PipeValidationException;
 import models.config.TaskConfig;
 
 /**
@@ -22,13 +21,13 @@ class Phase {
         this.config = config;
     }
 
-    PhaseResult start() throws PipeValidationException {
+    PhaseResult start(){
         result = new PhaseResult(this);
 //        runTask(config.getInitialTask());
         return result;
     }
 
-    private void runTask(TaskConfig taskConfig) throws PipeValidationException{
+    private void runTask(TaskConfig taskConfig) {
 //        Task task = taskConfig.createTask();
 //        TaskResult taskResult = task.start();
 //        result.addTaskResult(taskResult);

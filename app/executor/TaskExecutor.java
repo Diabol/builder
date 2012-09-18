@@ -17,6 +17,7 @@ public class TaskExecutor {
         // Singleton
     }
 
+    /** Execute asynchronously the task in context with callback */
     public void execute(TaskExecutionContext context, TaskCallback callback) {
         TaskRunner task = new TaskRunner(context, callback);
         executor.execute(task);

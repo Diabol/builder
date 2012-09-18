@@ -2,25 +2,29 @@
     "name":"Component-B",
     "phases":[
         {
-            "name":"Build",
+            "name":"Commit",
             "tasks":[
                 {
                     "taskName":"Compile",
                     "isAutomatic":true,
-                    "triggersTasks":["Unit test", "Sonar"]
+                    "command":"sleep 3 && echo Commit:Compile done",
+                    "triggersTasks":["Unit-test", "Sonar"]
                 },
                 {
-                    "taskName":"Unit test",
+                    "taskName":"Unit-test",
                     "isAutomatic":true,
+                    "command":"sleep 3 && echo Commit:Unit-Test done",
                     "triggersTasks":["Package"]
                 },
                 {
                     "taskName":"Sonar",
-                    "isAutomatic":true
+                    "isAutomatic":true,
+                    "command":"sleep 3 && echo Commit:Sonar done"
                 },
                 {
                     "taskName":"Package",
-                    "isAutomatic":true
+                    "isAutomatic":true,
+                    "command":"sleep 3 && echo Commit:Package done"
                 }
             ]
         },
@@ -29,12 +33,14 @@
             "tasks":[
                 {
                     "taskName":"Deploy",
-                    "isAutomatic":false,
-                    "triggersTasks":["Integration test"]
+                    "isAutomatic":true,
+                    "command":"sleep 3 && echo CI:Deploy done",
+                    "triggersTasks":["Integration-test"]
                 },
                 {
-                    "taskName":"Integration test",
-                    "isAutomatic":true
+                    "taskName":"Integration-test",
+                    "isAutomatic":true,
+                    "command":"sleep 3 && echo CI:Integration-test done"
                 }
             ]
         },
@@ -44,11 +50,13 @@
                 {
                     "taskName":"Deploy",
                     "isAutomatic":false,
-                    "triggersTasks":["Unit test"]
+                    "command":"sleep 3 && echo QA:Deploy done",
+                    "triggersTasks":["Manual-test"]
                 },
                 {
-                    "taskName":"Unit test",
-                    "isAutomatic":true
+                    "taskName":"Manual-test",
+                    "isAutomatic":true,
+                    "command":"sleep 3 && echo QA:Manual-test done"
                 }
             ]
         }

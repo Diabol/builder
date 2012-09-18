@@ -1,8 +1,9 @@
 package orchestration;
 
+import java.util.List;
+
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
-import models.config.PipeValidationException;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
@@ -19,6 +20,7 @@ import executor.TaskResult;
  * <ul>
  * <li>Uses the Executor to execute tasks.</li>
  * <li>Manages/creates pipe versions</li>
+ * <li>Starts tasks triggered by finished tasks.</li>
  * <li>Notifies the client of status changes.</li>
  * <li>Notifies persistence manager of status changes.</li>
  * </ul>
@@ -30,7 +32,7 @@ public class Orchestrator implements TaskCallback {
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
     /** Start first task of first phase of pipe */
-    public PipeVersion<?> start(String pipeName) throws PipeValidationException {
+    public PipeVersion<?> start(String pipeName) {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getFirstPhaseConfig();
         TaskConfig task = phase.getInitialTask();
@@ -43,8 +45,7 @@ public class Orchestrator implements TaskCallback {
     }
 
     /** Try to start given task in given phase and pipe version. */
-    public void startTask(String taskName, String phaseName, String pipeName, String pipeVersion)
-            throws PipeValidationException {
+    public void startTask(String taskName, String phaseName, String pipeName, String pipeVersion) {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getPhaseByName(phaseName);
         TaskConfig task = phase.getTaskByName(taskName);
@@ -95,8 +96,17 @@ public class Orchestrator implements TaskCallback {
         startNextTask(result);
     }
 
+    /**
+     * Decide if we should start a new task and then start it.
+     */
     private void startNextTask(TaskResult lastTaskResult) {
-        // TODO Decide if we should start a new task, in that case which one, and then start it.
+        // 1. Start triggered tasks
+        TaskExecutionContext context = lastTaskResult.context();
+        List<TaskConfig> triggeredTasks = context.getTriggedTasks();
+        for (TaskConfig taskConfig : triggeredTasks) {
+            startTask(taskConfig, context.getPhase(), context.getPipe(), context.getVersion());
+        }
+        // 2. Trigger first task in next phase if all tasks in this phase is finished.
 
     }
 
@@ -110,18 +120,19 @@ public class Orchestrator implements TaskCallback {
     }
 
     /**
-     * @return new {@link PhaseStatus}, null if no status change.
+     * @return new finsihed {@link PhaseStatus}, success or fail, null if no status change.
      */
     private PhaseStatus getNewPhaseStatus(TaskResult latestTaskResult) {
-        // TODO Implement. See isNewPhaseStatus above
-        return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), true);
+        // TODO Implement. See isNewPhaseStatus(context) above
+        boolean success = true;
+        return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), success);
     }
 
     private PipeNotificationHandler getPipeNotificationHandler() {
         return PipeNotificationHandler.getInstance();
     }
 
-    private PipeConfig getPipe(String pipeName) throws PipeValidationException {
+    private PipeConfig getPipe(String pipeName) {
         return configReader.get(pipeName);
     }
 }

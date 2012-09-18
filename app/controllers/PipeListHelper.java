@@ -1,14 +1,13 @@
 package controllers;
 
 import models.config.PhaseConfig;
-import models.config.PipeValidationException;
 import play.api.templates.Html;
 
 /**
  * Helper class for the pipe list view.
  */
 public class PipeListHelper {
-    public static Html generateMarkupForTaskTree(PhaseConfig ph) throws PipeValidationException {
+    public static Html generateMarkupForTaskTree(PhaseConfig ph) {
         StringBuffer buf = new StringBuffer();
         //Create the nodes
         buf.append("<div id='taskHeader'>Tasks for "+ph.getName()+"</div>");

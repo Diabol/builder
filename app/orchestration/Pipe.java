@@ -5,7 +5,6 @@ import java.util.List;
 
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
-import models.config.PipeValidationException;
 
 /**
  * An instance of a pipeline, ie a specific run of a pipe.
@@ -20,12 +19,11 @@ class Pipe {
 
     private final PipeConfig config;
 
-    Pipe(PipeConfig config) throws PipeValidationException {
-        config.validate();
+    Pipe(PipeConfig config) {
         this.config = config;
     }
 
-    PipeResult start() throws PipeValidationException {
+    PipeResult start() {
         List<PhaseResult> phaseResultList = new ArrayList<PhaseResult>();
 
         for (PhaseConfig phaseConfig : getPhases()) {

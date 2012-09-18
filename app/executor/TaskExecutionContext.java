@@ -1,5 +1,8 @@
 package executor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -60,6 +63,19 @@ public class TaskExecutionContext {
 
     void finishedNow() {
         this.finished = new DateTime();
+    }
+
+    /**
+     * @return the tasks that this task triggers
+     */
+    public List<TaskConfig> getTriggedTasks() {
+        List<TaskConfig> triggedTasks = new ArrayList<TaskConfig>();
+        List<String> triggedTaskNames = getTask().getTriggersTasks();
+        for (String taskName : triggedTaskNames) {
+            TaskConfig task = getPhase().getTaskByName(taskName);
+            triggedTasks.add(task);
+        }
+        return triggedTasks;
     }
 
 }

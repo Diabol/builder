@@ -25,33 +25,35 @@ public class PhaseConfig {
         this.tasks = tasks;
     }
 
-    public TaskConfig getInitialTask() throws PipeValidationException {
-        if (getTasks() != null && getTasks().size() > 0) {
-            return getTasks().get(0);
-        } else {
-            throw new PipeValidationException("Can't get initial task when no tasks found for phase '" + getName()
-                    + "'");
-        }
+    public TaskConfig getInitialTask() {
+        return getTasks().get(0);
     }
 
-    public TaskConfig getTaskByName(String name) throws PipeValidationException {
+    public TaskConfig getTaskByName(String name) {
         for (TaskConfig task : getTasks()) {
             if (task.getTaskName().equals(name)) {
                 return task;
             }
         }
-        throw new PipeValidationException("No task found with name '" + name + "' for phase: " + getName());
+        throw new IllegalArgumentException("No task found with name '" + name + "' for: " + this);
     }
 
     public void validate() throws PipeValidationException {
-        if (getInitialTask() == null || getName() == null || getTasks().size() == 0 || getName().length() == 0) {
+        if (getName() == null ||
+                getTasks() == null ||
+                getName().isEmpty() ||
+                getTasks().isEmpty()) {
             throw new PipeValidationException("Invalid: " + this);
+        }
+
+        for (TaskConfig taskConfig : getTasks()) {
+            taskConfig.validate();
         }
     }
 
     @Override
     public String toString() {
-        final int maxLen = 3;
+        final int maxLen = 5;
         StringBuilder builder = new StringBuilder();
         builder.append("PhaseConfig [name=");
         builder.append(name);
