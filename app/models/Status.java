@@ -1,5 +1,8 @@
 package models;
 
+import static models.Status.State.RUNNING;
+import static models.Status.State.SUCCESS;
+
 import org.joda.time.ReadableDateTime;
 
 public class Status {
@@ -32,5 +35,13 @@ public class Status {
 
     public ReadableDateTime getFinished() {
         return finished;
+    }
+
+    public boolean isSuccess() {
+        return getStatus().equals(SUCCESS);
+    }
+
+    public boolean isRunning() {
+        return getStatus().equals(RUNNING);
     }
 }

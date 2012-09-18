@@ -79,7 +79,7 @@ public class Orchestrator implements TaskCallback {
         PipeNotificationHandler handler = getPipeNotificationHandler();
         handler.notifyTaskStatusListeners(taskStatus);
 
-        if (isNewPhaseStatus(context)) {
+        if (isNewPhaseStatus(context, taskStatus)) {
             PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
             handler.notifyPhaseStatusListeners(phaseStatus);
         }
@@ -115,11 +115,13 @@ public class Orchestrator implements TaskCallback {
                 startTask(task, taskContext.getPhase(), taskContext.getPipe(), taskContext.getVersion());
             }
         }
-        // 3. Trigger first task in next phase if all tasks in this phase is finished.
+        // 3. Trigger first task in next phase if all tasks in this phase finished and auto.
         if(allTasksInPhaseFinishedSuccessfully(taskContext)) {
             TaskExecutionContext newTaskContext = taskContext.getFirstTaskInNextPhase();
             if (newTaskContext != null) {
-                startTask(newTaskContext);
+                if (newTaskContext.getTask().isAutomatic()) {
+                    startTask(newTaskContext);
+                }
             }
         }
     }
@@ -129,13 +131,11 @@ public class Orchestrator implements TaskCallback {
         return false;
     }
 
-    private boolean isNewPhaseStatus(TaskExecutionContext context) {
-        // TODO Implement logic to compute if this means new phase status.
-        // Phase changes status when:
-        //   1. First task starts
-        //   2. Any task fails
-        //   3. All tasks finished successful (there is no 'last' task)
-        return true;
+    private boolean isNewPhaseStatus(TaskExecutionContext context, TaskStatus taskStatus) {
+        TaskConfig currentTask = context.getTask();
+        boolean firstTaskJustStarted = currentTask.equals(context.getPhase().getInitialTask()) && taskStatus.isRunning();
+        boolean taskSuccceeded = taskStatus.isSuccess();
+        return firstTaskJustStarted || !taskSuccceeded || allTasksInPhaseFinishedSuccessfully(context);
     }
 
     /**
