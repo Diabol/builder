@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import play.Logger;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 public class TaskResult {
 
@@ -14,6 +15,7 @@ public class TaskResult {
     private final TaskExecutionContext context;
 
     /** Only call this for a finished process */
+    @SuppressWarnings(value = "DM_DEFAULT_ENCODING", justification = "The default encoding should be correct since I assume that's what process uses.")
     TaskResult(Process process, TaskExecutionContext context) {
         readOut(new BufferedReader(new InputStreamReader(process.getInputStream())));
         readErr(new BufferedReader(new InputStreamReader(process.getErrorStream())));

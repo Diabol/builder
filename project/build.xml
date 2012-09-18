@@ -11,10 +11,16 @@
   <target name="findbugs">
     <findbugs home="${findbugs.home}" output="xml:withMessages" outputFile="target/findbugs.xml">
       <sourcePath path="${basedir}/app" />
-      <class location="${basedir}/target/scala-2.9.1/classes" />
+      <!-- This is to try to avoid the play generated (scala) files -->
+      <class location="${basedir}/target/scala-2.9.1/classes/controllers" />
+      <class location="${basedir}/target/scala-2.9.1/classes/executor" />
+      <class location="${basedir}/target/scala-2.9.1/classes/models" />
+      <class location="${basedir}/target/scala-2.9.1/classes/notification" />
+      <class location="${basedir}/target/scala-2.9.1/classes/orchestration" />
+      <class location="${basedir}/target/scala-2.9.1/classes/utils" />
       <auxclasspath description="The full classpath of app">
         <pathelement location="${basedir}/target/scala-2.9.1/classes_managed" />
-        <fileset dir="target/staged" id="id">
+        <fileset dir="target/staged">
           <include name="**/*.jar" />
         </fileset>
       </auxclasspath>

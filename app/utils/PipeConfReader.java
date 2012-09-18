@@ -28,9 +28,9 @@ import play.Logger;
 public class PipeConfReader {
 
     private static PipeConfReader instance;
+    private final static String URL_TO_JSON = "conf/pipes/";
     private final List<PipeConfig> jsonAsObjects =  new ArrayList<PipeConfig>();
     private final Map<String, PipeConfig> pipeMap = new HashMap<String, PipeConfig>();
-    private final String urlToJson = "conf/pipes/";
 
     static {
         try {
@@ -54,9 +54,9 @@ public class PipeConfReader {
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = mapper.getJsonFactory();
 
-        File pipeDir = new File(urlToJson);
+        File pipeDir = new File(URL_TO_JSON);
         for(int i = 0; i < pipeDir.list().length; i++){
-            JsonParser jp = factory.createJsonParser(new File(urlToJson + pipeDir.list()[i]));
+            JsonParser jp = factory.createJsonParser(new File(URL_TO_JSON + pipeDir.list()[i]));
             PipeConfig jsonAsPipe = mapper.readValue(jp, PipeConfig.class);
             validate(jsonAsPipe);
             jsonAsObjects.add(jsonAsPipe);

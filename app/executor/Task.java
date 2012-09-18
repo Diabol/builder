@@ -28,6 +28,7 @@ public class Task implements Runnable {
     private void execute() {
         Process process = null;
         try {
+            // TODO: Maybe it's better to set ProcessBuilder.redirectErrorStream(true) and have only one output.
             process = new ProcessBuilder(getCommand()).start();
             try {
                 process.waitFor();
