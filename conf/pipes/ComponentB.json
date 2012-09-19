@@ -7,24 +7,24 @@
                 {
                     "taskName":"Compile",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo Commit:Compile done",
+                    "command":"sleep 3",
                     "triggersTasks":["Unit-test", "Sonar"]
                 },
                 {
                     "taskName":"Unit-test",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo Commit:Unit-Test done",
+                    "command":"sleep 3",
                     "triggersTasks":["Package"]
                 },
                 {
                     "taskName":"Sonar",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo Commit:Sonar done"
+                    "command":"conf/pipes/cmd/sonar.sh"
                 },
                 {
                     "taskName":"Package",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo Commit:Package done"
+                    "command":"sleep 3"
                 }
             ]
         },
@@ -34,13 +34,13 @@
                 {
                     "taskName":"Deploy",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo CI:Deploy done",
+                    "command":"conf/pipes/cmd/deploy-ci.sh",
                     "triggersTasks":["Integration-test"]
                 },
                 {
                     "taskName":"Integration-test",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo CI:Integration-test done"
+                    "command":"echo CI:Integration-test..."
                 }
             ]
         },
@@ -50,13 +50,13 @@
                 {
                     "taskName":"Deploy",
                     "isAutomatic":false,
-                    "command":"sleep 3 && echo QA:Deploy done",
+                    "command":"sleep 3",
                     "triggersTasks":["Manual-test"]
                 },
                 {
                     "taskName":"Manual-test",
                     "isAutomatic":true,
-                    "command":"sleep 3 && echo QA:Manual-test done"
+                    "command":"sleep 3"
                 }
             ]
         }

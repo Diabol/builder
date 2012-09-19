@@ -3,11 +3,11 @@ package executor;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class TaskExecutor {
+public final class TaskExecutor {
 
     private static final TaskExecutor INSTANCE = new TaskExecutor();
 
-    private final Executor executor = Executors.newFixedThreadPool(3);
+    private final Executor executor = Executors.newFixedThreadPool(4);
 
     public static final TaskExecutor getInstance() {
         return INSTANCE;

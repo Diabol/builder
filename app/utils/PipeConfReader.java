@@ -56,10 +56,13 @@ public class PipeConfReader {
 
         File pipeDir = new File(URL_TO_JSON);
         for(int i = 0; i < pipeDir.list().length; i++){
-            JsonParser jp = factory.createJsonParser(new File(URL_TO_JSON + pipeDir.list()[i]));
-            PipeConfig jsonAsPipe = mapper.readValue(jp, PipeConfig.class);
-            validate(jsonAsPipe);
-            jsonAsObjects.add(jsonAsPipe);
+            File file = new File(URL_TO_JSON + pipeDir.list()[i]);
+            if (file.isFile()) {
+                JsonParser jp = factory.createJsonParser(file);
+                PipeConfig jsonAsPipe = mapper.readValue(jp, PipeConfig.class);
+                validate(jsonAsPipe);
+                jsonAsObjects.add(jsonAsPipe);
+            }
         }
 
         for (int i = 0; i < jsonAsObjects.size(); i++) {

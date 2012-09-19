@@ -70,6 +70,20 @@ public class TaskTest extends MockitoTestBase implements TaskCallback {
         assertThat(result.out()).contains("models");
     }
 
+    @Test
+    public void testRunShell() {
+        TaskRunner target = new TaskRunner(context, this);
+        // This is a bit fragile but seems to work...
+        String cmd = "conf/test/" + getClass().getName() + ".sh";
+        when(config.getCommand()).thenReturn(cmd);
+        target.run();
+
+        assertThat(result.exitValue()).isEqualTo(0);
+        assertThat(result.success()).isEqualTo(true);
+        assertThat(result.err()).isEmpty();
+        assertThat(result.out()).contains("1").contains("2").contains("3");
+    }
+
     @Override
     public void handleTaskResult(TaskResult taskResult) {
         result = taskResult;
