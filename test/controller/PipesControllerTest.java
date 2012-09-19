@@ -1,4 +1,4 @@
-package acceptance.config;
+package controller;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
@@ -6,11 +6,13 @@ import static play.test.Helpers.*;
 
 import org.junit.Test;
 
+import browser.pipelist.PipeListPage;
+
 import play.mvc.Result;
 
-public class PipeConfigControllerTest {
+public class PipesControllerTest {
 
-    PipeConfigListPage pipeConfigListPage = new PipeConfigListPage();
+    private final PipeListPage pipeConfigListPage = new PipeListPage();
 
     @Test
     public void testPipeConfigControllerListAction() {

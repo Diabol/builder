@@ -1,4 +1,4 @@
-package acceptance;
+package browser;
 
 import static play.test.Helpers.*;
 

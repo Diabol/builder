@@ -1,4 +1,4 @@
-package acceptance.config;
+package browser.pipelist;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.fluentlenium.FluentLeniumAssertions.assertThat;
@@ -8,17 +8,18 @@ import org.fluentlenium.core.annotation.Page;
 import org.fluentlenium.core.domain.FluentList;
 import org.junit.Test;
 
-import play.libs.WS;
-import acceptance.AbstractBrowserFluentTest;
+import browser.AbstractBrowserFluentTest;
 
-public class PipeConfigListBrowserTest extends AbstractBrowserFluentTest {
+import play.libs.WS;
+
+public class PipeListBrowserTest extends AbstractBrowserFluentTest {
 
     @Page
-    public PipeConfigListPage pipeConfigListPage;
+    private PipeListPage pipeListPage;
 
     @Test
     public void testPipeConfigListUrl() {
-        assertThat(WS.url(pipeConfigListPage.getUrl()).get().get().getStatus()).isEqualTo(OK);
+        assertThat(WS.url(pipeListPage.getUrl()).get().get().getStatus()).isEqualTo(OK);
     }
 
     /**
@@ -26,10 +27,10 @@ public class PipeConfigListBrowserTest extends AbstractBrowserFluentTest {
      */
     @Test
     public void testPipeConfigVisibleInBrowser() {
-        goTo(pipeConfigListPage);
-        assertThat(pipeConfigListPage).isAt();
+        goTo(pipeListPage);
+        assertThat(pipeListPage).isAt();
 
-        FluentList<?> pipeDivList = pipeConfigListPage.getPipeDivList();
+        FluentList<?> pipeDivList = pipeListPage.getPipeDivList();
         assertThat(pipeDivList.size()).isEqualTo(2);
     }
 

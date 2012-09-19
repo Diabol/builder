@@ -38,13 +38,12 @@ public class TaskStatus extends PhaseStatus {
     public String getErr() {
         return err;
     }
-    
+
     public String getTaskName() {
-    	return task.getTaskName();
+        return task.getTaskName();
     }
 
-    /** Use the factory methods
-     * @param task TODO*/
+    /** Use the factory methods */
     private TaskStatus(State state, PipeVersion<?> version, PhaseConfig phase, TaskConfig task,
             ReadableDateTime started, ReadableDateTime finished, String out, String err) {
         super(version, phase, state, started, finished);

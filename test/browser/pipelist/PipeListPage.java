@@ -1,6 +1,6 @@
-package acceptance.config;
+package browser.pipelist;
 
-import static acceptance.AbstractBrowserFluentTest.LOCALHOST_BASE_TEST_URL;
+import static browser.AbstractBrowserFluentTest.LOCALHOST_BASE_TEST_URL;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fluentlenium.core.filter.FilterConstructor.withId;
 
@@ -17,7 +17,7 @@ import org.fluentlenium.core.domain.FluentList;
  * 
  * @author marcus
  */
-public class PipeConfigListPage extends FluentPage {
+public class PipeListPage extends FluentPage {
 
 
 
@@ -32,11 +32,11 @@ public class PipeConfigListPage extends FluentPage {
         assertThat(find("div", withId("pipeList")).size()).isEqualTo(1);
     }
 
-    FluentList<?> getPipeDivList() {
+    public FluentList<?> getPipeDivList() {
         return find("div", withId("pipeList")).find(".pipe");
     }
 
-    String getUri() {
+    public String getUri() {
         return "/" + "pipes";
     }
 }

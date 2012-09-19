@@ -1,4 +1,4 @@
-package acceptance;
+package browser;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
