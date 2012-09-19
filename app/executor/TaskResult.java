@@ -76,7 +76,7 @@ public class TaskResult {
     private void readBuffer(BufferedReader reader, StringBuilder sb) throws IOException {
         String line = reader.readLine();
         while (line != null) {
-            sb.append(line);
+            sb.append(line).append("\n");
             line = reader.readLine();
         }
     }

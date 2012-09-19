@@ -1,3 +1,3 @@
 echo 'Executing Sonar...'
-sleep 2
+sleep 1
 echo 'Finished Sonar.'

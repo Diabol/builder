@@ -7,13 +7,13 @@
                 {
                     "taskName":"Compile",
                     "isAutomatic":true,
-                    "command":"sleep 3",
+                    "command":"sleep 2",
                     "triggersTasks":["Unit-test", "Sonar"]
                 },
                 {
                     "taskName":"Unit-test",
                     "isAutomatic":true,
-                    "command":"sleep 3",
+                    "command":"sleep 1",
                     "triggersTasks":["Package"]
                 },
                 {
@@ -24,7 +24,7 @@
                 {
                     "taskName":"Package",
                     "isAutomatic":true,
-                    "command":"sleep 3"
+                    "command":"sleep 1"
                 }
             ]
         },
