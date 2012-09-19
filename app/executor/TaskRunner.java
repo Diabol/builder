@@ -55,8 +55,8 @@ class TaskRunner implements Runnable {
         return getConfig().isAutomatic();
     }
 
-    public String getCommand() {
-        return getConfig().getCommand();
+    public String[] getCommand() {
+        return getConfig().getCommand().split(" ");
     }
 
     private TaskConfig getConfig() {

@@ -58,6 +58,18 @@ public class TaskTest extends MockitoTestBase implements TaskCallback {
         assertThat(result.err()).contains("Unknown error");
     }
 
+    @Test
+    public void testRunCommandWithArgument() {
+        TaskRunner target = new TaskRunner(context, this);
+        when(config.getCommand()).thenReturn("ls app/");
+        target.run();
+
+        assertThat(result.exitValue()).isEqualTo(0);
+        assertThat(result.success()).isEqualTo(true);
+        assertThat(result.err()).isEmpty();
+        assertThat(result.out()).contains("models");
+    }
+
     @Override
     public void handleTaskResult(TaskResult taskResult) {
         result = taskResult;

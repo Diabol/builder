@@ -55,7 +55,7 @@ public class Orchestrator implements TaskCallback {
 
     private PipeVersion<?> getNextPipeVersion(PipeConfig pipe) {
         // TODO Implement getNextPipeVersion. We need to check persistence...
-        return null;
+        return new PipeStringVersion("0.1.2", pipe);
     }
 
     private PipeVersion<?> createPipeVersion(PipeConfig pipe, String pipeVersion) throws PipeVersionValidationException {
