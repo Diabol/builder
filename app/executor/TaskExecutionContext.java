@@ -57,11 +57,11 @@ public class TaskExecutionContext {
         return finished;
     }
 
-    void startedNow() {
+    public void startedNow() {
         this.started = new DateTime();
     }
 
-    void finishedNow() {
+    public void finishedNow() {
         this.finished = new DateTime();
     }
 

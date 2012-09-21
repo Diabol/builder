@@ -30,6 +30,11 @@ public class TaskResult {
         exitValue = 666;
         this.context = context;
     }
+    
+    public TaskResult(boolean result, TaskExecutionContext context) {
+    	this.exitValue = result ? 0:1;
+    	this.context = context;
+    }
 
     static TaskResult getEmptyFailedResult(TaskExecutionContext context) {
         return new TaskResult(context);
