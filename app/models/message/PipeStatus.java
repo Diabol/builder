@@ -1,11 +1,10 @@
 package models.message;
 
-import models.Status;
 import orchestration.PipeVersion;
 
 import org.joda.time.ReadableDateTime;
 
-public class PipeStatus extends Status {
+public class PipeStatus extends AbstractMessage {
 
     private final PipeVersion<?> version;
 

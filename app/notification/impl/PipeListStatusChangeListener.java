@@ -19,7 +19,6 @@ import play.mvc.WebSocket;
  * To change this template use File | Settings | File Templates.
  */
 public class PipeListStatusChangeListener implements PhaseStatusChangedListener, TaskStatusChangedListener {
-    private WebSocket<JsonNode> socket;
     private WebSocket.In<JsonNode> in;
     private WebSocket.Out<JsonNode> out;
 
