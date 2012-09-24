@@ -6,9 +6,10 @@ import org.joda.time.ReadableDateTime;
 
 public class PipeStatus extends AbstractMessage {
 
-    private final PipeVersion<?> version;
+    private final PipeVersion version;
 
-    protected PipeStatus(PipeVersion<?> version, State state, ReadableDateTime started, ReadableDateTime finished) {
+    protected PipeStatus(PipeVersion version, State state, ReadableDateTime started,
+            ReadableDateTime finished) {
         super(state, started, finished);
         this.version = version;
     }

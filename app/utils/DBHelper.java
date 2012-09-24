@@ -15,7 +15,7 @@ import executor.TaskExecutionContext;
 import executor.TaskResult;
 
 public class DBHelper {
-    public static synchronized void persistNewPipe(PipeVersion<String> version, PipeConfig pipe) {
+    public static synchronized void persistNewPipe(PipeVersion version, PipeConfig pipe) {
         // Create the pipe
         Pipe pipeData = Pipe.createNewFromConfig(version.getVersion(), pipe);
         pipeData.save();
@@ -44,9 +44,9 @@ public class DBHelper {
 
     public static synchronized void updateTaskToFinished(TaskResult taskResult) {
         TaskExecutionContext taskContext = taskResult.context();
-        Task task = findTask(taskContext.getPipe().getName(), (String) taskContext.getVersion()
-                .getVersion(), taskContext.getPhase().getName(), taskContext.getTask()
-                .getTaskName());
+        Task task = findTask(taskContext.getPipe().getName(),
+                taskContext.getPipeVersion().getVersion(), taskContext.getPhase().getName(),
+                taskContext.getTask().getTaskName());
         if (task != null) {
             task.finishNow(taskResult.success());
             task.update();

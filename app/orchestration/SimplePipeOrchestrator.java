@@ -28,16 +28,16 @@ public class SimplePipeOrchestrator implements Runnable {
 
     @Override
     public void run() {
-        DBHelper.persistNewPipe(new PipeStringVersion(version, pipe), pipe);
+        DBHelper.persistNewPipe(new PipeVersion(version, pipe), pipe);
         for (PhaseConfig phase : pipe.getPhases()) {
             TaskExecutionContext context = new TaskExecutionContext(null, pipe, phase,
-                    new PipeStringVersion(version, pipe));
+                    new PipeVersion(version, pipe));
             context.startedNow();
             PhaseStatus ongoingPhase = PhaseStatus.newRunningPhaseStatus(context);
             PipeNotificationHandler.getInstance().notifyPhaseStatusListeners(ongoingPhase);
             for (TaskConfig task : phase.getTasks()) {
                 TaskExecutionContext taskContext = new TaskExecutionContext(task, pipe, phase,
-                        new PipeStringVersion(version, pipe));
+                        new PipeVersion(version, pipe));
                 taskContext.startedNow();
                 TaskStatus ongoing = TaskStatus.newRunningTaskStatus(taskContext);
 

@@ -12,8 +12,8 @@ import org.joda.time.DateTime;
 import org.joda.time.ReadableDateTime;
 
 /**
- * Encapsulates the information that the {@link TaskRunner} need to execute a task and
- * the task result receivers need to handle the result.
+ * Encapsulates the information that the {@link TaskRunner} need to execute a
+ * task and the task result receivers need to handle the result.
  * 
  * @author marcus
  */
@@ -22,11 +22,12 @@ public class TaskExecutionContext {
     private final TaskConfig task;
     private final PhaseConfig phase;
     private final PipeConfig pipe;
-    private final PipeVersion<?> version;
+    private final PipeVersion version;
     private ReadableDateTime started;
     private ReadableDateTime finished;
 
-    public TaskExecutionContext(TaskConfig task, PipeConfig pipe, PhaseConfig phase, PipeVersion<?> version) {
+    public TaskExecutionContext(TaskConfig task, PipeConfig pipe, PhaseConfig phase,
+            PipeVersion version) {
         this.task = task;
         this.pipe = pipe;
         this.phase = phase;
@@ -45,7 +46,7 @@ public class TaskExecutionContext {
         return pipe;
     }
 
-    public PipeVersion<?> getVersion() {
+    public PipeVersion getPipeVersion() {
         return version;
     }
 
@@ -83,7 +84,8 @@ public class TaskExecutionContext {
         if (nextPhase == null) {
             return null;
         }
-        return new TaskExecutionContext(nextPhase.getInitialTask(), getPipe(), nextPhase, getVersion());
+        return new TaskExecutionContext(nextPhase.getInitialTask(), getPipe(), nextPhase,
+                getPipeVersion());
     }
 
 }

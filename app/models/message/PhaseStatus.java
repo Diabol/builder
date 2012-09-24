@@ -17,16 +17,17 @@ public class PhaseStatus extends PipeStatus {
     private final PhaseConfig phase;
 
     public static PhaseStatus newRunningPhaseStatus(TaskExecutionContext context) {
-        return new PhaseStatus(context.getVersion(), context.getPhase(), State.RUNNING, context.getStarted(), null);
+        return new PhaseStatus(context.getPipeVersion(), context.getPhase(), State.RUNNING,
+                context.getStarted(), null);
     }
 
     public static PhaseStatus newFinishedPhaseStatus(TaskExecutionContext context, boolean success) {
-        return new PhaseStatus(context.getVersion(), context.getPhase(), State.state(success), context.getStarted(),
-                context.getFinished());
+        return new PhaseStatus(context.getPipeVersion(), context.getPhase(), State.state(success),
+                context.getStarted(), context.getFinished());
     }
 
     /** Use the factory methods */
-    PhaseStatus(PipeVersion<?> version, PhaseConfig phase, State state, ReadableDateTime started,
+    PhaseStatus(PipeVersion version, PhaseConfig phase, State state, ReadableDateTime started,
             ReadableDateTime finished) {
         super(version, state, started, finished);
         this.phase = phase;

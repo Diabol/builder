@@ -32,12 +32,12 @@ public class Orchestrator implements TaskCallback {
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
     /** Start first task of first phase of pipe */
-    public PipeVersion<?> start(String pipeName) {
+    public PipeVersion start(String pipeName) {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getFirstPhaseConfig();
         TaskConfig task = phase.getInitialTask();
 
-        PipeVersion<?> version = getNextPipeVersion(pipe);
+        PipeVersion version = getNextPipeVersion(pipe);
 
         startTask(task, phase, pipe, version);
 
@@ -49,21 +49,23 @@ public class Orchestrator implements TaskCallback {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getPhaseByName(phaseName);
         TaskConfig task = phase.getTaskByName(taskName);
-        PipeVersion<?> version = createPipeVersion(pipe, pipeVersion);
+        PipeVersion version = createPipeVersion(pipe, pipeVersion);
         startTask(task, phase, pipe, version);
     }
 
-    private PipeVersion<?> getNextPipeVersion(PipeConfig pipe) {
+    private PipeVersion getNextPipeVersion(PipeConfig pipe) {
         // TODO Implement getNextPipeVersion. We need to check persistence...
-        return new PipeStringVersion("0.1.2", pipe);
+        return new PipeVersion("0.1.2", pipe);
     }
 
-    private PipeVersion<?> createPipeVersion(PipeConfig pipe, String pipeVersion) throws PipeVersionValidationException {
-        // TODO: Here we could look up the version implementation we would like to use from config...
-        return new PipeStringVersion(pipeVersion, pipe);
+    private PipeVersion createPipeVersion(PipeConfig pipe, String pipeVersion)
+            throws PipeVersionValidationException {
+        // TODO: Here we could look up the version implementation we would like
+        // to use from config...
+        return new PipeVersion(pipeVersion, pipe);
     }
 
-    private void startTask(TaskConfig task, PhaseConfig phase, PipeConfig pipe, PipeVersion<?> version) {
+    private void startTask(TaskConfig task, PhaseConfig phase, PipeConfig pipe, PipeVersion version) {
         TaskExecutionContext executionContext = new TaskExecutionContext(task, pipe, phase, version);
         startTask(executionContext);
     }
@@ -112,11 +114,13 @@ public class Orchestrator implements TaskCallback {
         List<TaskConfig> triggeredTasks = taskContext.getTriggedTasks();
         for (TaskConfig task : triggeredTasks) {
             if (task.isAutomatic()) {
-                startTask(task, taskContext.getPhase(), taskContext.getPipe(), taskContext.getVersion());
+                startTask(task, taskContext.getPhase(), taskContext.getPipe(),
+                        taskContext.getPipeVersion());
             }
         }
-        // 3. Trigger first task in next phase if all tasks in this phase finished and auto.
-        if(allTasksInPhaseFinishedSuccessfully(taskContext)) {
+        // 3. Trigger first task in next phase if all tasks in this phase
+        // finished and auto.
+        if (allTasksInPhaseFinishedSuccessfully(taskContext)) {
             TaskExecutionContext newTaskContext = taskContext.getFirstTaskInNextPhase();
             if (newTaskContext != null) {
                 if (newTaskContext.getTask().isAutomatic()) {
@@ -133,9 +137,11 @@ public class Orchestrator implements TaskCallback {
 
     private boolean isNewPhaseStatus(TaskExecutionContext context, TaskStatus taskStatus) {
         TaskConfig currentTask = context.getTask();
-        boolean firstTaskJustStarted = currentTask.equals(context.getPhase().getInitialTask()) && taskStatus.isRunning();
+        boolean firstTaskJustStarted = currentTask.equals(context.getPhase().getInitialTask())
+                && taskStatus.isRunning();
         boolean taskSuccceeded = taskStatus.isSuccess();
-        return firstTaskJustStarted || !taskSuccceeded || allTasksInPhaseFinishedSuccessfully(context);
+        return firstTaskJustStarted || !taskSuccceeded
+                || allTasksInPhaseFinishedSuccessfully(context);
     }
 
     /**

@@ -21,14 +21,15 @@ public class TaskStatus extends PhaseStatus {
     private final String err;
 
     public static TaskStatus newRunningTaskStatus(TaskExecutionContext context) {
-        return new TaskStatus(State.RUNNING, context.getVersion(), context.getPhase(), context.getTask(),
-                context.getStarted(), null, null, null);
+        return new TaskStatus(State.RUNNING, context.getPipeVersion(), context.getPhase(),
+                context.getTask(), context.getStarted(), null, null, null);
     }
 
     public static TaskStatus newFinishedTaskStatus(TaskResult result) {
         TaskExecutionContext context = result.context();
-        return new TaskStatus(State.state(result.success()), context.getVersion(), context.getPhase(),
-                context.getTask(), context.getStarted(), context.getFinished(), result.out(), result.err());
+        return new TaskStatus(State.state(result.success()), context.getPipeVersion(),
+                context.getPhase(), context.getTask(), context.getStarted(), context.getFinished(),
+                result.out(), result.err());
     }
 
     public String getOut() {
@@ -44,7 +45,7 @@ public class TaskStatus extends PhaseStatus {
     }
 
     /** Use the factory methods */
-    private TaskStatus(State state, PipeVersion<?> version, PhaseConfig phase, TaskConfig task,
+    private TaskStatus(State state, PipeVersion version, PhaseConfig phase, TaskConfig task,
             ReadableDateTime started, ReadableDateTime finished, String out, String err) {
         super(version, phase, state, started, finished);
         this.task = task;

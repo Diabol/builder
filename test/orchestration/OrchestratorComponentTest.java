@@ -33,7 +33,7 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
         handler.addTaskStatusChangedListener(this);
 
         Orchestrator target = new Orchestrator();
-        PipeVersion<?> pipeVersion = target.start("Component-A");
+        PipeVersion pipeVersion = target.start("Component-A");
         assertThat(pipeVersion).isNotNull();
 
         while (taskFinishedSuccessfullyReceived.size() < 4) {
