@@ -36,8 +36,8 @@ public class Task extends CDEntity {
 		return new Task(taskConf.getTaskName(), State.NOT_STARTED, null, null);
 	}
 
-	public static Finder<Long, Phase> find = new Finder<Long, Phase>(
-			Long.class, Phase.class);
+	public static Finder<Long, Task> find = new Finder<Long, Task>(
+			Long.class, Task.class);
 
 	@Override
 	public String toString() {

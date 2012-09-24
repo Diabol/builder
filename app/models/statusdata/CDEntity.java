@@ -17,20 +17,21 @@ import play.db.ebean.Model;
 
 /**
  * Base class for Pipe, Phase and Task.
+ * 
  * @author danielgronberg
- *
+ * 
  */
 @MappedSuperclass
 public abstract class CDEntity extends Model implements StatusInterface {
-	
+
 	@Constraints.Required
 	@Enumerated(EnumType.STRING)
 	public State state;
 
-	@Formats.DateTime(pattern = "dd/MM/yyyy")
+	@Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
 	public Date started;
 
-	@Formats.DateTime(pattern = "dd/MM/yyyy")
+	@Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
 	public Date finished;
 
 	CDEntity(State state, Date started, Date finished) {
@@ -83,9 +84,9 @@ public abstract class CDEntity extends Model implements StatusInterface {
 		started = new Date();
 		state = State.RUNNING;
 	}
-	
+
 	public void finishNow(boolean success) {
 		finished = new Date();
-		state = success ? State.SUCCESS: State.FAILURE;
+		state = success ? State.SUCCESS : State.FAILURE;
 	}
 }
