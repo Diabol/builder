@@ -2,6 +2,7 @@ package orchestration;
 
 import java.util.List;
 
+import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -28,16 +29,16 @@ public class SimplePipeOrchestrator implements Runnable {
 
     @Override
     public void run() {
-        DBHelper.persistNewPipe(new PipeVersion(version, pipe), pipe);
+        DBHelper.persistNewPipe(PipeVersion.fromString(version, pipe), pipe);
         for (PhaseConfig phase : pipe.getPhases()) {
             TaskExecutionContext context = new TaskExecutionContext(null, pipe, phase,
-                    new PipeVersion(version, pipe));
+                    PipeVersion.fromString(version, pipe));
             context.startedNow();
             PhaseStatus ongoingPhase = PhaseStatus.newRunningPhaseStatus(context);
             PipeNotificationHandler.getInstance().notifyPhaseStatusListeners(ongoingPhase);
             for (TaskConfig task : phase.getTasks()) {
                 TaskExecutionContext taskContext = new TaskExecutionContext(task, pipe, phase,
-                        new PipeVersion(version, pipe));
+                        PipeVersion.fromString(version, pipe));
                 taskContext.startedNow();
                 TaskStatus ongoing = TaskStatus.newRunningTaskStatus(taskContext);
 

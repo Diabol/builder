@@ -1,4 +1,4 @@
-package orchestration;
+package models;
 
 import java.util.Comparator;
 
@@ -16,6 +16,10 @@ public class PipeVersion implements Comparable<PipeVersion> {
     private final PipeConfig pipe;
     private Comparator<PipeVersion> comparator;
 
+    public static PipeVersion fromString(String pipeVersion, PipeConfig pipe) {
+        return new PipeVersion(pipeVersion, pipe);
+    }
+
     PipeVersion(String version, PipeConfig pipe) throws PipeVersionValidationException {
         this.version = version;
         this.pipe = pipe;
@@ -31,8 +35,7 @@ public class PipeVersion implements Comparable<PipeVersion> {
     private void validate() throws PipeVersionValidationException {
         // TODO More validation
         if (version == null || version.isEmpty() || pipe == null || pipe.getName().isEmpty()) {
-            throw new PipeVersionValidationException("Could not create pipe version from: '"
-                    + version + "'.");
+            throw new PipeVersionValidationException("Could not create pipe version from: '" + version + "'.");
         }
     }
 

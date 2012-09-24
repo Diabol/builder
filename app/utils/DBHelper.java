@@ -2,6 +2,7 @@ package utils;
 
 import java.util.List;
 
+import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -9,7 +10,6 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
-import orchestration.PipeVersion;
 import play.Logger;
 import executor.TaskExecutionContext;
 import executor.TaskResult;

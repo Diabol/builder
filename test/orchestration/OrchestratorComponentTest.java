@@ -5,6 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.PipeVersion;
 import models.message.TaskStatus;
 import notification.PipeNotificationHandler;
 import notification.TaskStatusChangedListener;

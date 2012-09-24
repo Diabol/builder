@@ -1,8 +1,8 @@
 package models.message;
 
+import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.TaskConfig;
-import orchestration.PipeVersion;
 
 import org.joda.time.ReadableDateTime;
 

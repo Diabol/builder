@@ -3,10 +3,10 @@ package controllers;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import models.PipeVersion;
 import notification.PipeNotificationHandler;
 import notification.impl.PipeListStatusChangeListener;
 import orchestration.Orchestrator;
-import orchestration.PipeVersion;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;

@@ -1,6 +1,6 @@
 package models.message;
 
-import orchestration.PipeVersion;
+import models.PipeVersion;
 
 import org.joda.time.ReadableDateTime;
 

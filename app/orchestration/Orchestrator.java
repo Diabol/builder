@@ -2,6 +2,7 @@ package orchestration;
 
 import java.util.List;
 
+import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -49,20 +50,13 @@ public class Orchestrator implements TaskCallback {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getPhaseByName(phaseName);
         TaskConfig task = phase.getTaskByName(taskName);
-        PipeVersion version = createPipeVersion(pipe, pipeVersion);
+        PipeVersion version = PipeVersion.fromString(pipeVersion, pipe);
         startTask(task, phase, pipe, version);
     }
 
     private PipeVersion getNextPipeVersion(PipeConfig pipe) {
         // TODO Implement getNextPipeVersion. We need to check persistence...
-        return new PipeVersion("0.1.2", pipe);
-    }
-
-    private PipeVersion createPipeVersion(PipeConfig pipe, String pipeVersion)
-            throws PipeVersionValidationException {
-        // TODO: Here we could look up the version implementation we would like
-        // to use from config...
-        return new PipeVersion(pipeVersion, pipe);
+        return PipeVersion.fromString("0.1.2", pipe);
     }
 
     private void startTask(TaskConfig task, PhaseConfig phase, PipeConfig pipe, PipeVersion version) {

@@ -3,10 +3,10 @@ package executor;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
-import orchestration.PipeVersion;
 
 import org.joda.time.DateTime;
 import org.joda.time.ReadableDateTime;
