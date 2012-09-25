@@ -1,8 +1,8 @@
 package models.statusdata;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -19,44 +19,43 @@ import play.data.validation.Constraints;
 
 @Entity
 public class Phase extends CDEntity {
-	
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public long phaseId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public long phaseId;
 
-	@Constraints.Required
-	public String name;
+    @Constraints.Required
+    public String name;
 
-	@OneToOne
-	@JoinColumn(name = "pipe_id", nullable = false)
-	public Pipe pipe;
-	
-	@OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	public Set<Task> tasks;
+    @OneToOne
+    @JoinColumn(name = "pipe_id", nullable = false)
+    public Pipe pipe;
 
-	Phase(String name, State state, Date started, Date finished, Set<Task> tasks) {
-		super(state, started, finished);
-		this.name = name;
-		this.tasks = tasks;
-	}
+    @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    public List<Task> tasks;
 
-	public static Phase createNewFromConfig(PhaseConfig phaseConf) {
-		Phase phase = new Phase(phaseConf.getName(), State.NOT_STARTED, null, null, new HashSet<Task>());
-		return phase;
-	}
+    Phase(String name, State state, Date started, Date finished, List<Task> tasks) {
+        super(state, started, finished);
+        this.name = name;
+        this.tasks = tasks;
+    }
 
-	public static Finder<Long, Phase> find = new Finder<Long, Phase>(
-			Long.class, Phase.class);
+    public static Phase createNewFromConfig(PhaseConfig phaseConf) {
+        Phase phase = new Phase(phaseConf.getName(), State.NOT_STARTED, null, null,
+                new ArrayList<Task>());
+        return phase;
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("Phase name: " + name + ", status: " + super.toString()+"\n");
-		buf.append("\tTasks: \n");
-		for (Task ta : tasks) {
-			buf.append("\t\t" + ta.toString());
-		}
-		return buf.toString();
-	}
+    public static Finder<Long, Phase> find = new Finder<Long, Phase>(Long.class, Phase.class);
+
+    @Override
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("Phase name: " + name + ", status: " + super.toString() + "\n");
+        buf.append("\tTasks: \n");
+        for (Task ta : tasks) {
+            buf.append("\t\t" + ta.toString());
+        }
+        return buf.toString();
+    }
 }

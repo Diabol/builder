@@ -29,7 +29,7 @@ public class SimplePipeOrchestrator implements Runnable {
 
     @Override
     public void run() {
-        DBHelper.persistNewPipe(PipeVersion.fromString(version, pipe), pipe);
+        DBHelper.getInstance().persistNewPipe(PipeVersion.fromString(version, pipe), pipe);
         for (PhaseConfig phase : pipe.getPhases()) {
             TaskExecutionContext context = new TaskExecutionContext(null, pipe, phase,
                     PipeVersion.fromString(version, pipe));
@@ -42,7 +42,7 @@ public class SimplePipeOrchestrator implements Runnable {
                 taskContext.startedNow();
                 TaskStatus ongoing = TaskStatus.newRunningTaskStatus(taskContext);
 
-                DBHelper.updateTaskToOngoing(ongoing);
+                DBHelper.getInstance().updateTaskToOngoing(ongoing);
                 PipeNotificationHandler.getInstance().notifyTaskStatusListeners(ongoing);
                 try {
                     Thread.sleep(500);
@@ -52,7 +52,7 @@ public class SimplePipeOrchestrator implements Runnable {
                 taskContext.finishedNow();
                 TaskResult result = new TaskResult(true, taskContext);
                 TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
-                DBHelper.updateTaskToFinished(result);
+                DBHelper.getInstance().updateTaskToFinished(result);
                 PipeNotificationHandler.getInstance().notifyTaskStatusListeners(taskStatus);
             }
             context.finishedNow();
