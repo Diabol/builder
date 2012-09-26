@@ -133,7 +133,7 @@ public class DBHelper {
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No persisted pipes found for '" + pipe.getName() + "'");
         } else {
-            return foundPipes.get(0);
+            return foundPipes.get(foundPipes.size() - 1);
         }
     }
 
