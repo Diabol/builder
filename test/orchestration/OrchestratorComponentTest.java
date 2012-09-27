@@ -10,6 +10,7 @@ import models.message.TaskStatus;
 import notification.PipeNotificationHandler;
 import notification.TaskStatusChangedListener;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 
 /**
@@ -27,6 +28,12 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
 
     private final List<String> taskStartedReceived = new ArrayList<String>();
     private final List<String> taskFinishedSuccessfullyReceived = new ArrayList<String>();
+
+    @AfterClass
+    public static void after() {
+        PipeNotificationHandler.getInstance().removeAllPhaseListeners();
+        PipeNotificationHandler.getInstance().removeAllTaskListeners();
+    }
 
     @Test
     public void testStart() throws Exception {
