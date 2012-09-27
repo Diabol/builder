@@ -15,6 +15,7 @@ import models.StatusInterface.State;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
+import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
@@ -170,10 +171,7 @@ public class DBHelperTest {
             @Override
             public void run() {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
-                PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
-                TaskConfig firstTask = firstPhase.getInitialTask();
-                TaskExecutionContext context = new TaskExecutionContext(firstTask, configuredPipe,
-                        configuredPipe.getPhases().get(0), version);
+                TaskExecutionContext context = createContextForFirstTask();
                 TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                 DBHelper.getInstance().updateTaskToOngoing(taskStatus);
                 try {
@@ -193,10 +191,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
-                TaskConfig firstTask = firstPhase.getInitialTask();
-                TaskExecutionContext context = new TaskExecutionContext(firstTask, configuredPipe,
-                        configuredPipe.getPhases().get(0), version);
+                TaskExecutionContext context = createContextForFirstTask();
                 TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                 try {
                     DBHelper.getInstance().updateTaskToOngoing(taskStatus);
@@ -214,10 +209,7 @@ public class DBHelperTest {
             @Override
             public void run() {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
-                PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
-                TaskConfig firstTask = firstPhase.getInitialTask();
-                TaskExecutionContext context = new TaskExecutionContext(firstTask, configuredPipe,
-                        configuredPipe.getPhases().get(0), version);
+                TaskExecutionContext context = createContextForFirstTask();
                 TaskResult successResult = new TaskResult(true, context);
                 DBHelper.getInstance().updateTaskToFinished(successResult);
 
@@ -239,10 +231,7 @@ public class DBHelperTest {
             @Override
             public void run() {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
-                PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
-                TaskConfig firstTask = firstPhase.getInitialTask();
-                TaskExecutionContext context = new TaskExecutionContext(firstTask, configuredPipe,
-                        configuredPipe.getPhases().get(0), version);
+                TaskExecutionContext context = createContextForFirstTask();
                 TaskResult failedResult = new TaskResult(false, context);
                 DBHelper.getInstance().updateTaskToFinished(failedResult);
 
@@ -263,10 +252,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
-                TaskConfig firstTask = firstPhase.getInitialTask();
-                TaskExecutionContext context = new TaskExecutionContext(firstTask, configuredPipe,
-                        configuredPipe.getPhases().get(0), version);
+                TaskExecutionContext context = createContextForFirstTask();
                 TaskResult taskResult = new TaskResult(true, context);
                 try {
                     DBHelper.getInstance().updateTaskToFinished(taskResult);
@@ -276,5 +262,107 @@ public class DBHelperTest {
 
             }
         });
+    }
+
+    @Test
+    public void testUpdatePhaseToOngoingSetsRunningStateAndStartedDate() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                TaskExecutionContext context = createContextForFirstTask();
+                PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
+                DBHelper.getInstance().updatePhaseToOngoing(phaseStatus);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    assertEquals(State.RUNNING, persistedPipe.phases.get(0).state);
+                    assertTrue(persistedPipe.phases.get(0).started != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePhaseToOngoingThrowsDataInconsistencyExceptionWhenNotFound() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                TaskExecutionContext context = createContextForFirstTask();
+                PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
+                try {
+                    DBHelper.getInstance().updatePhaseToOngoing(phaseStatus);
+                } catch (DataInconsistencyException e) {
+                    assertTrue(e != null);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePhaseToSuccessSetsSuccessStateAndFinishedDate() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                TaskExecutionContext context = createContextForFirstTask();
+                DBHelper.getInstance().updatePhaseToFinished(context, true);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    assertEquals(State.SUCCESS, persistedPipe.phases.get(0).state);
+                    assertTrue(persistedPipe.phases.get(0).finished != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePhaseToFailureSetsFailureStateAndFinishedDate() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                TaskExecutionContext context = createContextForFirstTask();
+                DBHelper.getInstance().updatePhaseToFinished(context, false);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    assertEquals(State.FAILURE, persistedPipe.phases.get(0).state);
+                    assertTrue(persistedPipe.phases.get(0).finished != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePhaseToSuccessThrowsDataInconsistencyExceptionWhenNotFound() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                TaskExecutionContext context = createContextForFirstTask();
+                try {
+                    DBHelper.getInstance().updatePhaseToFinished(context, true);
+                } catch (DataInconsistencyException e) {
+                    assertTrue(e != null);
+                }
+
+            }
+        });
+    }
+
+    private TaskExecutionContext createContextForFirstTask() {
+        PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
+        TaskConfig firstTask = firstPhase.getInitialTask();
+        TaskExecutionContext context = new TaskExecutionContext(firstTask, configuredPipe,
+                configuredPipe.getPhases().get(0), version);
+        return context;
     }
 }

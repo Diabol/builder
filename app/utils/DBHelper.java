@@ -6,6 +6,7 @@ import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
+import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
@@ -78,6 +79,24 @@ public class DBHelper {
         }
     }
 
+    public synchronized void updatePhaseToOngoing(PhaseStatus phaseStatus) {
+        Phase phase = getPhase(phaseStatus.getPipeName(), phaseStatus.getVersion(),
+                phaseStatus.getPhaseName());
+        if (phase != null) {
+            phase.startNow();
+            phase.update();
+        }
+    }
+
+    public synchronized void updatePhaseToFinished(TaskExecutionContext context, boolean success) {
+        Phase phase = getPhase(context.getPipe().getName(), context.getPipeVersion().getVersion(),
+                context.getPhase().getName());
+        if (phase != null) {
+            phase.finishNow(success);
+            phase.update();
+        }
+    }
+
     public synchronized void updateTaskToOngoing(TaskStatus taskStatus) {
         Task task = getTask(taskStatus.getPipeName(), taskStatus.getVersion(),
                 taskStatus.getPhaseName(), taskStatus.getTaskName());
@@ -95,6 +114,20 @@ public class DBHelper {
         if (task != null) {
             task.finishNow(taskResult.success());
             task.update();
+        }
+    }
+
+    private Phase getPhase(String pipeName, String version, String phaseName) {
+        List<Phase> foundPhases = phaseFind.where().eq("name", phaseName).eq("pipe.name", pipeName)
+                .eq("pipe.version", version).findList();
+        if (foundPhases.size() != 1) {
+            throw new DataInconsistencyException("Found " + foundPhases.size()
+                    + " instances of phase with name " + phaseName + " , pipe " + pipeName
+                    + " and version " + version
+                    + " when updating the phase status. Expected to find 1 match.");
+        } else {
+            Phase phase = foundPhases.get(0);
+            return phase;
         }
     }
 
