@@ -1,6 +1,8 @@
 package orchestration;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static play.test.Helpers.fakeApplication;
+import static play.test.Helpers.running;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +42,27 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
         handler.addTaskStatusChangedListener(this);
 
-        Orchestrator target = new Orchestrator();
-        PipeVersion pipeVersion = target.start("Component-A");
-        assertThat(pipeVersion).isNotNull();
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Orchestrator target = new Orchestrator();
+                PipeVersion pipeVersion = target.start("Component-A");
+                assertThat(pipeVersion).isNotNull();
 
-        while (taskFinishedSuccessfullyReceived.size() < 4) {
-            Thread.sleep(200);
-        }
-        assertThat(taskStartedReceived.size()).isEqualTo(4);
-        assertThat(taskFinishedSuccessfullyReceived.size()).isEqualTo(4);
+                while (taskFinishedSuccessfullyReceived.size() < 4) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                assertThat(taskStartedReceived.size()).isEqualTo(4);
+                assertThat(taskFinishedSuccessfullyReceived.size()).isEqualTo(4);
+                // TODO: Verify that the result is persisted by calling
+                // DBHelper.
+            }
+        });
     }
 
     @Override

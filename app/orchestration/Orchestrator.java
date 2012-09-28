@@ -3,13 +3,11 @@ package orchestration;
 import java.util.List;
 
 import models.PipeVersion;
-import models.StatusInterface.State;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
-import models.statusdata.Task;
 import notification.PipeNotificationHandler;
 import utils.DBHelper;
 import utils.PipeConfReader;
@@ -148,12 +146,13 @@ public class Orchestrator implements TaskCallback {
     }
 
     private boolean allTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
-        for (Task task : dbHelper.getPhaseForContext(taskContext).tasks) {
-            if (task.state != State.SUCCESS) {
-                return false;
-            }
-        }
-        return true;
+        // TODO: Fix later.
+        // for (Task task : dbHelper.getPhaseForContext(taskContext).tasks) {
+        // if (task.state != State.SUCCESS) {
+        // return false;
+        // }
+        // }
+        return false;
     }
 
     private boolean isNewPhaseStatus(TaskExecutionContext context, TaskStatus taskStatus) {
