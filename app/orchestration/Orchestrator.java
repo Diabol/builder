@@ -3,12 +3,15 @@ package orchestration;
 import java.util.List;
 
 import models.PipeVersion;
+import models.StatusInterface.State;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Task;
 import notification.PipeNotificationHandler;
+import utils.DBHelper;
 import utils.PipeConfReader;
 import executor.TaskCallback;
 import executor.TaskExecutionContext;
@@ -31,6 +34,22 @@ import executor.TaskResult;
 public class Orchestrator implements TaskCallback {
 
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
+    private static DBHelper dbHelper = DBHelper.getInstance();
+    private static PipeNotificationHandler notifictionHandler = PipeNotificationHandler
+            .getInstance();
+
+    /**
+     * For test
+     * 
+     * @param dbHelper
+     */
+    public void setDBHelper(DBHelper dbHelper) {
+        this.dbHelper = dbHelper;
+    }
+
+    public void setPipeNotificationHandler(PipeNotificationHandler notifictionHandler) {
+        this.notifictionHandler = notifictionHandler;
+    }
 
     /** Start first task of first phase of pipe */
     public PipeVersion start(String pipeName) {
@@ -39,7 +58,7 @@ public class Orchestrator implements TaskCallback {
         TaskConfig task = phase.getInitialTask();
 
         PipeVersion version = getNextPipeVersion(pipe);
-
+        dbHelper.persistNewPipe(version, pipe);
         startTask(task, phase, pipe, version);
 
         return version;
@@ -65,31 +84,35 @@ public class Orchestrator implements TaskCallback {
     }
 
     private void startTask(TaskExecutionContext executionContext) {
-        // TODO: Persist new state
         TaskExecutor.getInstance().execute(executionContext, this);
     }
 
     @Override
     public void handleTaskStarted(TaskExecutionContext context) {
         TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
-        PipeNotificationHandler handler = getPipeNotificationHandler();
-        handler.notifyTaskStatusListeners(taskStatus);
-
         if (isNewPhaseStatus(context, taskStatus)) {
             PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
-            handler.notifyPhaseStatusListeners(phaseStatus);
+            dbHelper.updatePhaseToOngoing(phaseStatus);
+            notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
+            if (isContextForFirstTaskOfPipe(context)) {
+                dbHelper.updatePipeToOnging(context);
+            }
         }
+        dbHelper.updateTaskToOngoing(taskStatus);
+        notifictionHandler.notifyTaskStatusListeners(taskStatus);
+
     }
 
     @Override
     public void handleTaskResult(TaskResult result) {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
-        PipeNotificationHandler handler = getPipeNotificationHandler();
-        handler.notifyTaskStatusListeners(taskStatus);
+        dbHelper.updateTaskToFinished(result);
+        notifictionHandler.notifyTaskStatusListeners(taskStatus);
 
         PhaseStatus phaseStatus = getNewPhaseStatus(result);
         if (phaseStatus != null) {
-            handler.notifyPhaseStatusListeners(phaseStatus);
+            dbHelper.updatePhaseToFinished(result.context(), result.success());
+            notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
         }
 
         startNextTask(result);
@@ -125,8 +148,12 @@ public class Orchestrator implements TaskCallback {
     }
 
     private boolean allTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
-        // TODO We need to call persistence to know this
-        return false;
+        for (Task task : dbHelper.getPhaseForContext(taskContext).tasks) {
+            if (task.state != State.SUCCESS) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isNewPhaseStatus(TaskExecutionContext context, TaskStatus taskStatus) {
@@ -138,6 +165,11 @@ public class Orchestrator implements TaskCallback {
                 || allTasksInPhaseFinishedSuccessfully(context);
     }
 
+    private boolean isContextForFirstTaskOfPipe(TaskExecutionContext context) {
+        TaskConfig task = context.getTask();
+        return task == context.getPipe().getPhases().get(0).getInitialTask();
+    }
+
     /**
      * @return new finsihed {@link PhaseStatus}, success or fail, null if no
      *         status change.
@@ -146,10 +178,6 @@ public class Orchestrator implements TaskCallback {
         // TODO Implement. See isNewPhaseStatus(context) above
         boolean success = true;
         return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), success);
-    }
-
-    private PipeNotificationHandler getPipeNotificationHandler() {
-        return PipeNotificationHandler.getInstance();
     }
 
     private PipeConfig getPipe(String pipeName) {
