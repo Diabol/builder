@@ -170,4 +170,23 @@ public class DBHelper {
         }
     }
 
+    public Phase getPhaseForContext(TaskExecutionContext context) {
+        return getPhase(context.getPipe().getName(), context.getPipeVersion().getVersion(), context
+                .getPhase().getName());
+    }
+
+    public synchronized void updatePipeToOnging(TaskExecutionContext context) {
+        try {
+            Pipe pipe = getPipe(context.getPipeVersion());
+            pipe.startNow();
+            pipe.save();
+        } catch (DataNotFoundException ex) {
+            throw new DataInconsistencyException("Unable to update pipe with name "
+                    + context.getPipe().getName() + " and version "
+                    + context.getPipeVersion().getVersion() + " to RUNNING. Reason:"
+                    + ex.getMessage());
+        }
+
+    }
+
 }

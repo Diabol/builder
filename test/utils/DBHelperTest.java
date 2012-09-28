@@ -195,6 +195,7 @@ public class DBHelperTest {
                 TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                 try {
                     DBHelper.getInstance().updateTaskToOngoing(taskStatus);
+                    assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);
                 }
@@ -256,6 +257,7 @@ public class DBHelperTest {
                 TaskResult taskResult = new TaskResult(true, context);
                 try {
                     DBHelper.getInstance().updateTaskToFinished(taskResult);
+                    assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);
                 }
@@ -294,6 +296,7 @@ public class DBHelperTest {
                 PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
                 try {
                     DBHelper.getInstance().updatePhaseToOngoing(phaseStatus);
+                    assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);
                 }
@@ -350,6 +353,44 @@ public class DBHelperTest {
                 TaskExecutionContext context = createContextForFirstTask();
                 try {
                     DBHelper.getInstance().updatePhaseToFinished(context, true);
+                    assertTrue(false);
+                } catch (DataInconsistencyException e) {
+                    assertTrue(e != null);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePipeToOngoingSetsRunningStateAndStartedDate() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                TaskExecutionContext context = createContextForFirstTask();
+                DBHelper.getInstance().updatePipeToOnging(context);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    assertEquals(State.RUNNING, persistedPipe.state);
+                    assertTrue(persistedPipe.started != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePipeToOngoingThrowsDataInconsistencyExceptionWhenNotFound() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                TaskExecutionContext context = createContextForFirstTask();
+                try {
+                    DBHelper.getInstance().updatePipeToOnging(context);
+                    assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);
                 }
