@@ -8,12 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.PipeVersion;
+import models.StatusInterface.State;
 import models.message.TaskStatus;
+import models.statusdata.Pipe;
+import models.statusdata.Task;
 import notification.PipeNotificationHandler;
 import notification.TaskStatusChangedListener;
 
 import org.junit.AfterClass;
 import org.junit.Test;
+
+import play.Logger;
+import utils.DBHelper;
+import utils.DataNotFoundException;
 
 /**
  * 'Component' test of {@link Orchestrator}.
@@ -53,14 +60,24 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
+                        assertThat(true).isFalse();
                     }
                 }
                 assertThat(taskStartedReceived.size()).isEqualTo(4);
                 assertThat(taskFinishedSuccessfullyReceived.size()).isEqualTo(4);
-                // TODO: Verify that the result is persisted by calling
-                // DBHelper.
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
+
+                    assertThat(persistedPipe.phases.get(0).tasks.size()).isGreaterThan(0);
+                    assertThat(persistedPipe.phases.get(0).state).isEqualTo(State.SUCCESS);
+                    for (Task task : persistedPipe.phases.get(0).tasks) {
+                        assertThat(task.state).isEqualTo(State.SUCCESS);
+                    }
+                } catch (DataNotFoundException ex) {
+                    Logger.error(ex.getMessage());
+                    assertThat(true).isFalse();
+                }
             }
         });
     }

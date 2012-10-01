@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import utils.DBHelper;
 import utils.PipeConfReader;
 import executor.TaskExecutionContext;
+import executor.TaskResult;
 
 public class OrchestratorTest {
     DBHelper dbHelper;
@@ -49,9 +50,47 @@ public class OrchestratorTest {
 
         TaskStatus expectedTaskStatus = TaskStatus.newRunningTaskStatus(context);
         verifyTaskStatusForDBHelperAndNotificationHandler(expectedTaskStatus);
+
         PhaseStatus expectedPhaseStatus = PhaseStatus.newRunningPhaseStatus(context);
         verifyPhaseStatusForDBHelperAndNotificationHandler(expectedPhaseStatus);
-        verify(dbHelper).updatePipeToOnging(context);
+
+        verify(dbHelper).updatePipeToOnging(version);
+    }
+
+    @Test
+    public void testHandleTaskResultFailureSetsFailureOnTaskPhaseAndPipe() {
+        TaskExecutionContext context = createContextForFirstTask();
+        context.finishedNow();
+        TaskResult failure = new TaskResult(false, context);
+        orchestrator.handleTaskResult(failure);
+
+        TaskStatus failedTaskStatus = TaskStatus.newFinishedTaskStatus(failure);
+        verifyTaskStatusForDBHelperAndNotificationHandler(failedTaskStatus);
+
+        PhaseStatus failedPhaseStatus = PhaseStatus.newFinishedPhaseStatus(context, false);
+        verifyPhaseStatusForDBHelperAndNotificationHandler(failedPhaseStatus);
+
+        verify(dbHelper).updatePipeToFinished(version, false);
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessSetsSuccessOnTaskAndStartsNextAutomaticTasks() {
+
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessSetsSuccessOnPhaseAndTaskWhenAllTasksInPhaseSuccessful() {
+
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessSetsSuccessOnPipeWhenAllPhasesAreSuccessfull() {
+
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessStartsFirstTaskOfNextPhaseWhenAllTasksAreSuccessful() {
+
     }
 
     private TaskExecutionContext createContextForFirstTask() {
@@ -66,10 +105,15 @@ public class OrchestratorTest {
     private void verifyPhaseStatusForDBHelperAndNotificationHandler(PhaseStatus expected) {
         ArgumentCaptor<PhaseStatus> dbHelpCapt = ArgumentCaptor.forClass(PhaseStatus.class);
         ArgumentCaptor<PhaseStatus> notifyCapt = ArgumentCaptor.forClass(PhaseStatus.class);
-        verify(dbHelper).updatePhaseToOngoing(dbHelpCapt.capture());
+        if (expected.isRunning()) {
+            verify(dbHelper).updatePhaseToOngoing(dbHelpCapt.capture());
+            assertEquals(expected.getStarted(), dbHelpCapt.getValue().getStarted());
+        } else {
+            verify(dbHelper).updatePhaseToFinished(dbHelpCapt.capture());
+            assertEquals(expected.getFinished(), dbHelpCapt.getValue().getFinished());
+        }
         verify(notificationHandler).notifyPhaseStatusListeners(notifyCapt.capture());
         assertEquals(expected.getState(), dbHelpCapt.getValue().getState());
-        assertEquals(expected.getStarted(), dbHelpCapt.getValue().getStarted());
         assertEquals(expected.getVersion(), stringVersion);
         assertEquals(expected.getPhaseName(), dbHelpCapt.getValue().getPhaseName());
         assertEquals(dbHelpCapt.getValue(), notifyCapt.getValue());
@@ -78,10 +122,15 @@ public class OrchestratorTest {
     private void verifyTaskStatusForDBHelperAndNotificationHandler(TaskStatus expected) {
         ArgumentCaptor<TaskStatus> dbHelpCapt = ArgumentCaptor.forClass(TaskStatus.class);
         ArgumentCaptor<TaskStatus> notifyCapt = ArgumentCaptor.forClass(TaskStatus.class);
-        verify(dbHelper).updateTaskToOngoing(dbHelpCapt.capture());
+        if (expected.isRunning()) {
+            verify(dbHelper).updateTaskToOngoing(dbHelpCapt.capture());
+            assertEquals(expected.getStarted(), dbHelpCapt.getValue().getStarted());
+        } else {
+            verify(dbHelper).updateTaskToFinished(dbHelpCapt.capture());
+            assertEquals(expected.getFinished(), dbHelpCapt.getValue().getFinished());
+        }
         verify(notificationHandler).notifyTaskStatusListeners(notifyCapt.capture());
         assertEquals(expected.getState(), dbHelpCapt.getValue().getState());
-        assertEquals(expected.getStarted(), dbHelpCapt.getValue().getStarted());
         assertEquals(expected.getTaskName(), dbHelpCapt.getValue().getTaskName());
         assertEquals(expected.getVersion(), stringVersion);
         assertEquals(expected.getPhaseName(), dbHelpCapt.getValue().getPhaseName());

@@ -375,8 +375,7 @@ public class DBHelperTest {
             @Override
             public void run() {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
-                TaskExecutionContext context = createContextForFirstTask();
-                DBHelper.getInstance().updatePipeToOnging(context);
+                DBHelper.getInstance().updatePipeToOnging(version);
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
                     assertEquals(State.RUNNING, persistedPipe.state);
@@ -394,9 +393,62 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                TaskExecutionContext context = createContextForFirstTask();
                 try {
-                    DBHelper.getInstance().updatePipeToOnging(context);
+                    DBHelper.getInstance().updatePipeToOnging(version);
+                    assertTrue(false);
+                } catch (DataInconsistencyException e) {
+                    assertTrue(e != null);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePipeToSuccessSetsSuccessStateAndFinishedDate() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                DBHelper.getInstance().updatePipeToFinished(version, true);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    assertEquals(State.SUCCESS, persistedPipe.state);
+                    assertTrue(persistedPipe.finished != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePipeToFailureSetsFailureStateAndFinishedDate() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                DBHelper.getInstance().updatePipeToFinished(version, false);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    assertEquals(State.FAILURE, persistedPipe.state);
+                    assertTrue(persistedPipe.finished != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testUpdatePipeToSuccessThrowsDataInconsistencyExceptionWhenNotFound() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DBHelper.getInstance().updatePipeToFinished(version, true);
                     assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);

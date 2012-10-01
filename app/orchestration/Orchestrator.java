@@ -3,11 +3,13 @@ package orchestration;
 import java.util.List;
 
 import models.PipeVersion;
+import models.StatusInterface.State;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Task;
 import notification.PipeNotificationHandler;
 import utils.DBHelper;
 import utils.PipeConfReader;
@@ -93,7 +95,7 @@ public class Orchestrator implements TaskCallback {
             dbHelper.updatePhaseToOngoing(phaseStatus);
             notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
             if (isContextForFirstTaskOfPipe(context)) {
-                dbHelper.updatePipeToOnging(context);
+                dbHelper.updatePipeToOnging(context.getPipeVersion());
             }
         }
         dbHelper.updateTaskToOngoing(taskStatus);
@@ -106,14 +108,35 @@ public class Orchestrator implements TaskCallback {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
         dbHelper.updateTaskToFinished(taskStatus);
         notifictionHandler.notifyTaskStatusListeners(taskStatus);
-
+        // Check it the phase of the task should be updated with new state.
         PhaseStatus phaseStatus = getNewFinishedPhaseStatus(result);
+
         if (phaseStatus != null) {
+            // Update phase state
             dbHelper.updatePhaseToFinished(phaseStatus);
             notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
+            // Update pipe state if phase has changed to failed or it has
+            // changed to success AND it is the last phase in the pipe.
+            if (!phaseStatus.isSuccess()
+                    || (isContextForLastPhase(result.context()) && phaseStatus.isSuccess())) {
+                dbHelper.updatePipeToFinished(result.context().getPipeVersion(),
+                        phaseStatus.isSuccess());
+            }
         }
 
         startNextTask(result);
+    }
+
+    /**
+     * Check to see if the context is for the last phase of a pipe.
+     * 
+     * @param context
+     * @return
+     */
+    private boolean isContextForLastPhase(TaskExecutionContext context) {
+        PhaseConfig phase = context.getPhase();
+        List<PhaseConfig> phases = context.getPipe().getPhases();
+        return phases.indexOf(phase) == (phases.size() - 1);
     }
 
     /**
@@ -146,13 +169,12 @@ public class Orchestrator implements TaskCallback {
     }
 
     private boolean allTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
-        // TODO: Fix later.
-        // for (Task task : dbHelper.getPhaseForContext(taskContext).tasks) {
-        // if (task.state != State.SUCCESS) {
-        // return false;
-        // }
-        // }
-        return false;
+        for (Task task : dbHelper.getPhaseForContext(taskContext).tasks) {
+            if (task.state != State.SUCCESS) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isNewPhaseStatus(TaskExecutionContext context, TaskStatus taskStatus) {
@@ -174,9 +196,14 @@ public class Orchestrator implements TaskCallback {
      *         status change.
      */
     private PhaseStatus getNewFinishedPhaseStatus(TaskResult latestTaskResult) {
-        // TODO Implement. See isNewPhaseStatus(context) above
-        boolean success = true;
-        return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), success);
+        if (!latestTaskResult.success()
+                || allTasksInPhaseFinishedSuccessfully(latestTaskResult.context())) {
+            return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(),
+                    latestTaskResult.success());
+        } else {
+            return null;
+        }
+
     }
 
     private PipeConfig getPipe(String pipeName) {

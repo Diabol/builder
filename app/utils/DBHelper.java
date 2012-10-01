@@ -172,18 +172,29 @@ public class DBHelper {
                 .getPhase().getName());
     }
 
-    public synchronized void updatePipeToOnging(TaskExecutionContext context) {
+    public synchronized void updatePipeToOnging(PipeVersion pipeVersion) {
         try {
-            Pipe pipe = getPipe(context.getPipeVersion());
+            Pipe pipe = getPipe(pipeVersion);
             pipe.startNow();
             pipe.save();
         } catch (DataNotFoundException ex) {
             throw new DataInconsistencyException("Unable to update pipe with name "
-                    + context.getPipe().getName() + " and version "
-                    + context.getPipeVersion().getVersion() + " to RUNNING. Reason:"
-                    + ex.getMessage());
+                    + pipeVersion.getPipeName() + " and version " + pipeVersion.getVersion()
+                    + " to RUNNING. Reason:" + ex.getMessage());
         }
 
     }
 
+    public void updatePipeToFinished(PipeVersion pipeVersion, boolean success) {
+        try {
+            Pipe pipe = getPipe(pipeVersion);
+            pipe.finishNow(success);
+            pipe.save();
+        } catch (DataNotFoundException ex) {
+            throw new DataInconsistencyException("Unable to update pipe with name "
+                    + pipeVersion.getPipeName() + " and version " + pipeVersion.getVersion()
+                    + " to " + (success ? "SUCCESS" : "FAILURE") + ". Reason:" + ex.getMessage());
+        }
+
+    }
 }
