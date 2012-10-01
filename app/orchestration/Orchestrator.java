@@ -104,12 +104,12 @@ public class Orchestrator implements TaskCallback {
     @Override
     public void handleTaskResult(TaskResult result) {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
-        dbHelper.updateTaskToFinished(result);
+        dbHelper.updateTaskToFinished(taskStatus);
         notifictionHandler.notifyTaskStatusListeners(taskStatus);
 
-        PhaseStatus phaseStatus = getNewPhaseStatus(result);
+        PhaseStatus phaseStatus = getNewFinishedPhaseStatus(result);
         if (phaseStatus != null) {
-            dbHelper.updatePhaseToFinished(result.context(), result.success());
+            dbHelper.updatePhaseToFinished(phaseStatus);
             notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
         }
 
@@ -173,7 +173,7 @@ public class Orchestrator implements TaskCallback {
      * @return new finsihed {@link PhaseStatus}, success or fail, null if no
      *         status change.
      */
-    private PhaseStatus getNewPhaseStatus(TaskResult latestTaskResult) {
+    private PhaseStatus getNewFinishedPhaseStatus(TaskResult latestTaskResult) {
         // TODO Implement. See isNewPhaseStatus(context) above
         boolean success = true;
         return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(), success);

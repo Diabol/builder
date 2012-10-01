@@ -212,7 +212,9 @@ public class DBHelperTest {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 TaskResult successResult = new TaskResult(true, context);
-                DBHelper.getInstance().updateTaskToFinished(successResult);
+
+                DBHelper.getInstance().updateTaskToFinished(
+                        TaskStatus.newFinishedTaskStatus(successResult));
 
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
@@ -234,7 +236,8 @@ public class DBHelperTest {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 TaskResult failedResult = new TaskResult(false, context);
-                DBHelper.getInstance().updateTaskToFinished(failedResult);
+                DBHelper.getInstance().updateTaskToFinished(
+                        TaskStatus.newFinishedTaskStatus(failedResult));
 
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
@@ -256,7 +259,8 @@ public class DBHelperTest {
                 TaskExecutionContext context = createContextForFirstTask();
                 TaskResult taskResult = new TaskResult(true, context);
                 try {
-                    DBHelper.getInstance().updateTaskToFinished(taskResult);
+                    DBHelper.getInstance().updateTaskToFinished(
+                            TaskStatus.newFinishedTaskStatus(taskResult));
                     assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);
@@ -312,7 +316,8 @@ public class DBHelperTest {
             public void run() {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
-                DBHelper.getInstance().updatePhaseToFinished(context, true);
+                DBHelper.getInstance().updatePhaseToFinished(
+                        PhaseStatus.newFinishedPhaseStatus(context, true));
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
                     assertEquals(State.SUCCESS, persistedPipe.phases.get(0).state);
@@ -332,7 +337,8 @@ public class DBHelperTest {
             public void run() {
                 DBHelper.getInstance().persistNewPipe(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
-                DBHelper.getInstance().updatePhaseToFinished(context, false);
+                DBHelper.getInstance().updatePhaseToFinished(
+                        PhaseStatus.newFinishedPhaseStatus(context, false));
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
                     assertEquals(State.FAILURE, persistedPipe.phases.get(0).state);
@@ -352,7 +358,8 @@ public class DBHelperTest {
             public void run() {
                 TaskExecutionContext context = createContextForFirstTask();
                 try {
-                    DBHelper.getInstance().updatePhaseToFinished(context, true);
+                    DBHelper.getInstance().updatePhaseToFinished(
+                            PhaseStatus.newFinishedPhaseStatus(context, true));
                     assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     assertTrue(e != null);

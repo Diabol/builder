@@ -13,7 +13,6 @@ import models.statusdata.Pipe;
 import models.statusdata.Task;
 import play.db.ebean.Model.Finder;
 import executor.TaskExecutionContext;
-import executor.TaskResult;
 
 public class DBHelper {
 
@@ -88,11 +87,11 @@ public class DBHelper {
         }
     }
 
-    public synchronized void updatePhaseToFinished(TaskExecutionContext context, boolean success) {
-        Phase phase = getPhase(context.getPipe().getName(), context.getPipeVersion().getVersion(),
-                context.getPhase().getName());
+    public synchronized void updatePhaseToFinished(PhaseStatus phaseStatus) {
+        Phase phase = getPhase(phaseStatus.getPipeName(), phaseStatus.getVersion(),
+                phaseStatus.getPhaseName());
         if (phase != null) {
-            phase.finishNow(success);
+            phase.finishNow(phaseStatus.isSuccess());
             phase.update();
         }
     }
@@ -106,13 +105,11 @@ public class DBHelper {
         }
     }
 
-    public synchronized void updateTaskToFinished(TaskResult taskResult) {
-        TaskExecutionContext taskContext = taskResult.context();
-        Task task = getTask(taskContext.getPipe().getName(), taskContext.getPipeVersion()
-                .getVersion(), taskContext.getPhase().getName(), taskContext.getTask()
-                .getTaskName());
+    public synchronized void updateTaskToFinished(TaskStatus taskStatus) {
+        Task task = getTask(taskStatus.getPipeName(), taskStatus.getVersion(),
+                taskStatus.getPhaseName(), taskStatus.getTaskName());
         if (task != null) {
-            task.finishNow(taskResult.success());
+            task.finishNow(taskStatus.isSuccess());
             task.update();
         }
     }

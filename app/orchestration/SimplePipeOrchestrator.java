@@ -52,7 +52,7 @@ public class SimplePipeOrchestrator implements Runnable {
                 taskContext.finishedNow();
                 TaskResult result = new TaskResult(true, taskContext);
                 TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
-                DBHelper.getInstance().updateTaskToFinished(result);
+                DBHelper.getInstance().updateTaskToFinished(taskStatus);
                 PipeNotificationHandler.getInstance().notifyTaskStatusListeners(taskStatus);
             }
             context.finishedNow();
