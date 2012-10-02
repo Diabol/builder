@@ -9,6 +9,15 @@ public class PhaseConfig {
     private String name;
     private List<TaskConfig> tasks;
 
+    public PhaseConfig() {
+
+    }
+
+    public PhaseConfig(String name) {
+        super();
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }
@@ -39,10 +48,7 @@ public class PhaseConfig {
     }
 
     public void validate() throws PipeValidationException {
-        if (getName() == null ||
-                getTasks() == null ||
-                getName().isEmpty() ||
-                getTasks().isEmpty()) {
+        if (getName() == null || getTasks() == null || getName().isEmpty() || getTasks().isEmpty()) {
             throw new PipeValidationException("Invalid: " + this);
         }
 

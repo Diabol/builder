@@ -33,22 +33,31 @@ import executor.TaskResult;
  */
 public class Orchestrator implements TaskCallback {
 
-    private static final PipeConfReader configReader = PipeConfReader.getInstance();
+    private static PipeConfReader configReader = PipeConfReader.getInstance();
     private static DBHelper dbHelper = DBHelper.getInstance();
     private static PipeNotificationHandler notifictionHandler = PipeNotificationHandler
             .getInstance();
+    private static TaskExecutor taskExecutor = TaskExecutor.getInstance();
 
     /**
-     * For test
+     * The below setters is needed for mocking in test.
      * 
      * @param dbHelper
      */
     public void setDBHelper(DBHelper dbHelper) {
-        this.dbHelper = dbHelper;
+        Orchestrator.dbHelper = dbHelper;
     }
 
     public void setPipeNotificationHandler(PipeNotificationHandler notifictionHandler) {
-        this.notifictionHandler = notifictionHandler;
+        Orchestrator.notifictionHandler = notifictionHandler;
+    }
+
+    public void setTaskexecutor(TaskExecutor taskExecutor) {
+        Orchestrator.taskExecutor = taskExecutor;
+    }
+
+    public void setPipeConfigReader(PipeConfReader configReader) {
+        Orchestrator.configReader = configReader;
     }
 
     /** Start first task of first phase of pipe */
@@ -84,7 +93,7 @@ public class Orchestrator implements TaskCallback {
     }
 
     private void startTask(TaskExecutionContext executionContext) {
-        TaskExecutor.getInstance().execute(executionContext, this);
+        taskExecutor.execute(executionContext, this);
     }
 
     @Override
@@ -135,8 +144,8 @@ public class Orchestrator implements TaskCallback {
      */
     private boolean isContextForLastPhase(TaskExecutionContext context) {
         PhaseConfig phase = context.getPhase();
-        List<PhaseConfig> phases = context.getPipe().getPhases();
-        return phases.indexOf(phase) == (phases.size() - 1);
+        PhaseConfig nextPhase = context.getPipe().getNextPhase(phase);
+        return nextPhase == null;
     }
 
     /**

@@ -13,6 +13,17 @@ public class TaskConfig {
     private boolean isAutomatic = true;
     private List<String> triggersTasks = new ArrayList<String>();
 
+    public TaskConfig(String taskName, String cmd, boolean isAutomatic) {
+        super();
+        this.taskName = taskName;
+        this.cmd = cmd;
+        this.isAutomatic = isAutomatic;
+    }
+
+    public TaskConfig() {
+
+    }
+
     public String getTaskName() {
         return taskName;
     }
@@ -46,10 +57,8 @@ public class TaskConfig {
     }
 
     public void validate() throws PipeValidationException {
-        if (getTaskName() == null ||
-                getCommand() == null ||
-                getTaskName().isEmpty() ||
-                getCommand().isEmpty()) {
+        if (getTaskName() == null || getCommand() == null || getTaskName().isEmpty()
+                || getCommand().isEmpty()) {
             throw new PipeValidationException("Invalid: " + this);
         }
     }
@@ -65,7 +74,8 @@ public class TaskConfig {
         builder.append(", isAutomatic=");
         builder.append(isAutomatic);
         builder.append(", triggersTasks=");
-        builder.append(triggersTasks != null ? triggersTasks.subList(0, Math.min(triggersTasks.size(), maxLen)) : null);
+        builder.append(triggersTasks != null ? triggersTasks.subList(0,
+                Math.min(triggersTasks.size(), maxLen)) : null);
         builder.append("]");
         return builder.toString();
     }

@@ -4,11 +4,21 @@ import java.util.List;
 
 /**
  * The config for a Pipe.
+ * 
  * @author danielgronberg, marcus
  */
 public class PipeConfig {
     private String name;
     private List<PhaseConfig> phases;
+
+    public PipeConfig() {
+
+    }
+
+    public PipeConfig(String name) {
+        super();
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -31,8 +41,8 @@ public class PipeConfig {
     }
 
     public PhaseConfig getPhaseByName(String name) {
-        for(PhaseConfig phase: getPhases()){
-            if(phase.getName().equals(name)) {
+        for (PhaseConfig phase : getPhases()) {
+            if (phase.getName().equals(name)) {
                 return phase;
             }
         }
@@ -43,17 +53,15 @@ public class PipeConfig {
         for (int i = 0; i < getPhases().size(); i++) {
             PhaseConfig phase = getPhases().get(i);
             if (currentPhase.equals(phase) && getPhases().size() > i + 1) {
-                return getPhases().get(i+1);
+                return getPhases().get(i + 1);
             }
         }
         return null;
     }
 
     public void validate() throws PipeValidationException {
-        if (getPhases() == null ||
-                getName() == null ||
-                getPhases().size() == 0 ||
-                getName().length() == 0) {
+        if (getPhases() == null || getName() == null || getPhases().size() == 0
+                || getName().length() == 0) {
             throw new PipeValidationException("Invalid: " + this);
         }
 
@@ -73,6 +81,5 @@ public class PipeConfig {
         builder.append("]");
         return builder.toString();
     }
-
 
 }

@@ -3,7 +3,7 @@ package executor;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public final class TaskExecutor {
+public class TaskExecutor {
 
     private static final TaskExecutor INSTANCE = new TaskExecutor();
 
