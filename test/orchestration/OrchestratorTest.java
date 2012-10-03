@@ -19,6 +19,7 @@ import models.statusdata.Pipe;
 import models.statusdata.Task;
 import notification.PipeNotificationHandler;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +61,14 @@ public class OrchestratorTest {
         version = PipeVersion.fromString(stringVersion, pipeConf);
     }
 
+    @After
+    public void cleanUp() {
+        orchestrator.setDBHelper(DBHelper.getInstance());
+        orchestrator.setPipeConfigReader(PipeConfReader.getInstance());
+        orchestrator.setPipeNotificationHandler(PipeNotificationHandler.getInstance());
+        orchestrator.setTaskexecutor(TaskExecutor.getInstance());
+    }
+
     @Test
     public void testHandleTaskStartedNotifiesAndPersistsOngoinStatusForTaskPhaseAndPipe() {
         TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
@@ -98,8 +107,7 @@ public class OrchestratorTest {
         context.finishedNow();
         TaskResult success = new TaskResult(true, context);
 
-        Phase phaseWithAllTasksSuccess = createSuccessfullPhase(pipeConf
-                .getFirstPhaseConfig());
+        Phase phaseWithAllTasksSuccess = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
 
         when(dbHelper.getPhaseForContext(context)).thenReturn(phaseWithAllTasksSuccess);
 
