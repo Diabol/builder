@@ -166,6 +166,26 @@ public class DBHelperTest {
     }
 
     @Test
+    public void testGetLatestPipeThrowsDataNotFoundExceptionWhenNoPipeIsPersistedForThatSpecificPipe() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PipeConfig secondConfiguredPipe = PipeConfReader.getInstance()
+                            .getConfiguredPipes().get(1);
+                    DBHelper.getInstance().persistNewPipe(
+                            PipeVersion.fromString("Version1", secondConfiguredPipe),
+                            secondConfiguredPipe);
+                    DBHelper.getInstance().getLatestPipe(configuredPipe);
+                    assertTrue(false);
+                } catch (DataNotFoundException e) {
+                    assertTrue(e != null);
+                }
+            }
+        });
+    }
+
+    @Test
     public void testUpdateTaskToOngoingSetsRunningStateAndStartedDate() {
         running(fakeApplication(), new Runnable() {
             @Override

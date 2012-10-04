@@ -159,7 +159,7 @@ public class DBHelper {
     }
 
     public Pipe getLatestPipe(PipeConfig pipe) throws DataNotFoundException {
-        List<Pipe> foundPipes = pipeFind.all();
+        List<Pipe> foundPipes = pipeFind.where().eq("name", pipe.getName()).findList();
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No persisted pipes found for '" + pipe.getName() + "'");
         } else {
