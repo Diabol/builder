@@ -1,6 +1,6 @@
-@(pipes: List[models.config.PipeConfig])
+@(pipes: List[models.statusdata.Pipe])
 
-@import models.config._
+@import models.statusdata._
 
 @headers = {
     <script src="@routes.Assets.at("javascripts/graph-it/js-graph-it.js")" type="text/javascript"></script>
@@ -9,12 +9,12 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/graph-it/js-graph-it.css")" />
 }
 
-@createPipeScripts(pipeCount: Int, pipe: PipeConfig) = {
-    @for(phaseCount <- 0 until pipe.getPhases().length){
+@createPipeScripts(pipeCount: Int, pipe: Pipe) = {
+    @for(phaseCount <- 0 until pipe.phases.length){
         function displayPhase@{pipeCount}@{phaseCount}() {
             taskSelected = undefined;
-            highlightPhase('@{pipe.getName()}@{pipe.getPhases().get(phaseCount).getName()}');
-            $("#tasks").html("@{PipeListHelper.generateMarkupForTaskTree(pipe.getPhases.get(phaseCount))}");
+            highlightPhase('@{pipe.name}@{pipe.phases.get(phaseCount).name}');
+            //TODO: Use ajax request to fetch states with current state.
         }
     }
 }
@@ -25,17 +25,13 @@
     </div>
 }
 
-@createPhaseText(phase: PhaseConfig) = {
-	<div id="phaseName">@{phase.getName()}</div><div id="lastSuccess">Last success: N/A</div><div id="currentStatus">Current status: NOT STARTED</div>
-}
-
-@createPipeMarkup(pipeCount: Int, pipe: PipeConfig) = {
-    @for(phaseCount <- 0 until pipe.getPhases().length){
-        <h2 id="@{pipe.getName()}@{pipe.getPhases().get(phaseCount).getName()}" onclick="displayPhase@{pipeCount}@{phaseCount}();" class="block" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@createPhaseText(pipe.getPhases().get(phaseCount))</h2>
+@createPipeMarkup(pipeCount: Int, pipe: Pipe) = {
+    @for(phaseCount <- 0 until pipe.phases.length){
+        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" onclick="displayPhase@{pipeCount}@{phaseCount}();" class="block @{pipe.phases.get(phaseCount).state}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhaseText(pipe, pipe.phases.get(phaseCount))}</h2>
         @if(phaseCount > 0) {
-             @addEdge(pipe.getName()+pipe.getPhases().get(phaseCount-1).getName(), pipe.getName()+pipe.getPhases().get(phaseCount).getName())
+             @addEdge(pipe.name+pipe.phases.get(phaseCount-1).name, pipe.name+pipe.phases.get(phaseCount).name)
         }
-    }
+    } 
 }
 
 @html =  {
@@ -74,7 +70,9 @@
         function updatePhase(updatePhaseData) {
         	var domNodeId = updatePhaseData.pipeName+updatePhaseData.phaseName;
         	function colorizePhase(colour) {
-        		$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast', function(){$('#'+domNodeId).css('color', 'black');});
+        		$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');
+        		$('#'+domNodeId).find('#state').html("State: " +updatePhaseData.status);
+        		$('#'+domNodeId).find('#version').html("Version: " +updatePhaseData.version);
         	}
         	switch(updatePhaseData.status) {
         	case "RUNNING":

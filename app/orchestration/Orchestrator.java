@@ -9,9 +9,11 @@ import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Pipe;
 import models.statusdata.Task;
 import notification.PipeNotificationHandler;
 import utils.DBHelper;
+import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import executor.TaskCallback;
 import executor.TaskExecutionContext;
@@ -83,8 +85,13 @@ public class Orchestrator implements TaskCallback {
     }
 
     private PipeVersion getNextPipeVersion(PipeConfig pipe) {
-        // TODO Implement getNextPipeVersion. We need to check persistence...
-        return PipeVersion.fromString("0.1.2", pipe);
+        try {
+            Pipe latestPipe = dbHelper.getLatestPipe(pipe);
+            long latest = Long.valueOf(latestPipe.version);
+            return PipeVersion.fromString("" + ++latest, pipe);
+        } catch (DataNotFoundException ex) {
+            return PipeVersion.fromString("1", pipe);
+        }
     }
 
     private void startTask(TaskConfig task, PhaseConfig phase, PipeConfig pipe, PipeVersion version) {

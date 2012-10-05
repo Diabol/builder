@@ -1,9 +1,13 @@
 package controllers;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import models.PipeVersion;
+import models.config.PhaseConfig;
+import models.config.PipeConfig;
+import models.statusdata.Phase;
+import models.statusdata.Pipe;
 import notification.PipeNotificationHandler;
 import notification.impl.PipeListStatusChangeListener;
 import orchestration.Orchestrator;
@@ -17,6 +21,8 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
+import utils.DBHelper;
+import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
@@ -26,15 +32,37 @@ public class Pipes extends Controller {
     private static final PipeConfReader configReader = PipeConfReader.getInstance();
 
     public static Result list() {
-        // TODO We need to include current status in this list: Wrap PipeConfig
-        // with statuses
-        return ok(pipeslist.render(configReader.getConfiguredPipes()));
+        List<Pipe> latestPipes = new ArrayList<Pipe>();
+        for (PipeConfig pipeConf : configReader.getConfiguredPipes()) {
+            try {
+                Pipe latest = DBHelper.getInstance().getLatestPipe(pipeConf);
+                latestPipes.add(latest);
+            } catch (DataNotFoundException ex) {
+                Pipe notYetStarted = createNotStartedPipe(pipeConf);
+                latestPipes.add(notYetStarted);
+            }
+
+        }
+        return ok(pipeslist.render(latestPipes));
+    }
+
+    private static Pipe createNotStartedPipe(PipeConfig pipeConf) {
+        Pipe result = Pipe.createNewFromConfig("NA", pipeConf);
+        for (PhaseConfig phaseConf : pipeConf.getPhases()) {
+            Phase phase = Phase.createNewFromConfig(phaseConf);
+            result.phases.add(phase);
+            /**
+             * Tasks are not added to the initial data. Fetched when clicking on
+             * a phase.
+             */
+        }
+        return result;
     }
 
     public static Result start(String pipeName) {
         try {
             PipeVersion pipeVersion = new Orchestrator().start(pipeName);
-            URL pipeUrl = createNewPipeUrl(pipeVersion);
+            String pipeUrl = createNewPipeUrl(pipeVersion);
             return generatePipeStartedResult(pipeVersion, pipeUrl);
         } catch (Exception e) {
             String errMsg = "Could not start pipe: " + pipeName;
@@ -98,19 +126,14 @@ public class Pipes extends Controller {
         };
     }
 
-    private static Status generatePipeStartedResult(PipeVersion version, URL newPipeUrl) {
+    private static Status generatePipeStartedResult(PipeVersion version, String newPipeUrl) {
         response().setContentType("text/html");
-        response().setHeader(LOCATION, newPipeUrl.toString());
+        response().setHeader(LOCATION, newPipeUrl);
         return created("Version '" + version.getVersion() + "' of Pipe '" + version.getPipeName()
                 + "' started! <ul><li>" + newPipeUrl + "</li></ul>");
     }
 
-    private static URL createNewPipeUrl(PipeVersion pipeVersion) {
-        try {
-            return new URL("/pipe/" + pipeVersion.getPipeName() + "/" + pipeVersion.getVersion());
-        } catch (MalformedURLException e) {
-            Logger.error("Could not create url for pipe: " + pipeVersion, e);
-            return null;
-        }
+    private static String createNewPipeUrl(PipeVersion pipeVersion) {
+        return "/pipe/" + pipeVersion.getPipeName() + "/" + pipeVersion.getVersion();
     }
 }
