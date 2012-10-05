@@ -142,14 +142,32 @@ public class DBHelper {
         }
     }
 
+    public List<Task> getTasks(String pipeName, String version, String phaseName)
+            throws DataNotFoundException {
+        List<Phase> foundPhases = phaseFind.where().eq("name", phaseName).eq("pipe.name", pipeName)
+                .eq("pipe.version", version).findList();
+        if (foundPhases.size() == 0) {
+            throw new DataNotFoundException("No data found for phase with name " + phaseName
+                    + " , pipe " + pipeName + " and version " + version);
+        } else if (foundPhases.size() > 1) {
+            throw new DataInconsistencyException("Found " + foundPhases.size()
+                    + " instances of phase with name " + phaseName + " , pipe " + pipeName
+                    + " and version " + version
+                    + " when getting tasks for phase. Expected to find 1 match.");
+        } else {
+            Phase phase = foundPhases.get(0);
+            return phase.tasks;
+        }
+
+    }
+
     public Pipe getPipe(PipeVersion version) throws DataNotFoundException {
         List<Pipe> foundPipes = pipeFind.where().eq("name", version.getPipeName())
                 .eq("version", version.getVersion()).findList();
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No data found for pipe '" + version.getPipeName()
                     + "' with version " + version.getVersion());
-        }
-        if (foundPipes.size() > 1) {
+        } else if (foundPipes.size() > 1) {
             throw new DataInconsistencyException("Found " + foundPipes.size()
                     + " instances of pipe with name " + version.getPipeName() + " and version "
                     + version.getVersion() + ". Should only be 1 match.");

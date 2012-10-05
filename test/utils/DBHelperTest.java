@@ -478,6 +478,76 @@ public class DBHelperTest {
         });
     }
 
+    @Test
+    public void testGetTasksForPhase() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                List<Task> persistedTasks;
+                try {
+                    persistedTasks = DBHelper.getInstance().getTasks(configuredPipe.getName(),
+                            version.getVersion(), configuredPipe.getFirstPhaseConfig().getName());
+                    List<TaskConfig> tasksConfig = configuredPipe.getFirstPhaseConfig().getTasks();
+                    assertTrue(persistedTasks.size() == persistedTasks.size());
+                    for (int i = 0; i < persistedTasks.size() - 1; i++) {
+                        assertEquals(tasksConfig.get(i).getTaskName(), persistedTasks.get(i).name);
+                    }
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+            }
+        });
+    }
+
+    @Test
+    public void testGetTasksForPhaseThrowsDataNotFoundExceptionWhenNotFound() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DBHelper.getInstance().getTasks(configuredPipe.getName(), version.getVersion(),
+                            configuredPipe.getFirstPhaseConfig().getName());
+                    assertTrue(false);
+                } catch (DataNotFoundException e) {
+                    assertTrue(e != null);
+                }
+
+            }
+        });
+    }
+
+    @Test
+    public void testThatSeveralInstancesForTheSamePhaseVersionResultsInDataInconsistencyExceptionWhenGettingTasksForPhase() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Finder<Long, Phase> mockedFinder = mock(Finder.class);
+                    // Mock the ExpressionList to return two pipes
+                    ExpressionList<Phase> mockedExprList = mock(ExpressionList.class);
+                    when(
+                            mockedExprList.eq((String) Matchers.notNull(),
+                                    (String) Matchers.notNull())).thenReturn(mockedExprList);
+                    List<Phase> twoPhases = Arrays.asList(mock(Phase.class), mock(Phase.class));
+                    when(mockedExprList.findList()).thenReturn(twoPhases);
+                    when(mockedFinder.where()).thenReturn(mockedExprList);
+
+                    DBHelper.getInstance().setPhaseFinder(mockedFinder);
+                    DBHelper.getInstance().getTasks(configuredPipe.getName(), version.getVersion(),
+                            configuredPipe.getFirstPhaseConfig().getName());
+                    assertTrue(false);
+                } catch (DataInconsistencyException e) {
+                    // Expected exception
+                    assertTrue(e != null);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+            }
+        });
+    }
+
     private TaskExecutionContext createContextForFirstTask() {
         PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
         TaskConfig firstTask = firstPhase.getInitialTask();
