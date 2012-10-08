@@ -5,14 +5,18 @@ import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.running;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import models.PipeVersion;
 import models.StatusInterface.State;
+import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import notification.PhaseStatusChangedListener;
 import notification.PipeNotificationHandler;
+import notification.PipeStatusChangedListener;
 import notification.TaskStatusChangedListener;
 
 import org.junit.AfterClass;
@@ -33,21 +37,27 @@ import utils.DataNotFoundException;
  * 
  * @author marcus
  */
-public class OrchestratorComponentTest implements TaskStatusChangedListener {
+public class OrchestratorComponentTest implements TaskStatusChangedListener,
+        PhaseStatusChangedListener, PipeStatusChangedListener {
 
     private final List<String> taskStartedReceived = new ArrayList<String>();
     private final List<String> taskFinishedSuccessfullyReceived = new ArrayList<String>();
+    private boolean newPipeNotificationReceived = false;
+    private boolean successFullPhaseStatusReceived = false;
 
     @AfterClass
     public static void after() {
         PipeNotificationHandler.getInstance().removeAllPhaseListeners();
         PipeNotificationHandler.getInstance().removeAllTaskListeners();
+        PipeNotificationHandler.getInstance().removeAllPipeListeners();
     }
 
     @Test
     public void testStart() throws Exception {
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
         handler.addTaskStatusChangedListener(this);
+        handler.addPhaseStatusChangedListener(this);
+        handler.addPipeStatusChangedListener(this);
 
         running(fakeApplication(), new Runnable() {
             @Override
@@ -55,8 +65,9 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
                 Orchestrator target = new Orchestrator();
                 PipeVersion pipeVersion = target.start("Component-A");
                 assertThat(pipeVersion).isNotNull();
-
-                while (taskFinishedSuccessfullyReceived.size() < 4) {
+                Date started = new Date();
+                while (!successFullPhaseStatusReceived
+                        || (new Date().getTime() - started.getTime() > 60000)) {
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
@@ -74,6 +85,8 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
                     for (Task task : persistedPipe.phases.get(0).tasks) {
                         assertThat(task.state).isEqualTo(State.SUCCESS);
                     }
+                    assertThat(newPipeNotificationReceived).isTrue();
+                    assertThat(successFullPhaseStatusReceived).isTrue();
                 } catch (DataNotFoundException ex) {
                     Logger.error(ex.getMessage());
                     assertThat(true).isFalse();
@@ -93,6 +106,16 @@ public class OrchestratorComponentTest implements TaskStatusChangedListener {
         if (status.getTaskName().equals("Sonar") && status.isSuccess()) {
             assertThat(status.getOut()).contains("Sonar");
         }
+    }
+
+    @Override
+    public void receiveNewVersion(PipeVersion version) {
+        newPipeNotificationReceived = true;
+    }
+
+    @Override
+    public void recieveStatusChanged(PhaseStatus status) {
+        successFullPhaseStatusReceived = status.getState() == State.SUCCESS;
     }
 
 }
