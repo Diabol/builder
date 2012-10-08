@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import utils.DBHelper;
+import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import executor.TaskExecutionContext;
 import executor.TaskExecutor;
@@ -67,6 +68,25 @@ public class OrchestratorTest {
         orchestrator.setPipeConfigReader(PipeConfReader.getInstance());
         orchestrator.setPipeNotificationHandler(PipeNotificationHandler.getInstance());
         orchestrator.setTaskexecutor(TaskExecutor.getInstance());
+    }
+
+    @Test
+    public void testStartPipeForTheFirstTimePersistsNewVersionOfPipeAndNotifiesAboutNewVersion()
+            throws Exception {
+        when(dbHelper.getLatestPipe(pipeConf)).thenThrow(new DataNotFoundException(""));
+        orchestrator.start("ThePipe");
+        verify(dbHelper).persistNewPipe(version, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(version);
+    }
+
+    @Test
+    public void testStartPipeIncrementsVersionWhenEarlierExists() throws Exception {
+        Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
+        orchestrator.start("ThePipe");
+        PipeVersion newVersion = PipeVersion.fromString("2", pipeConf);
+        verify(dbHelper).persistNewPipe(newVersion, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
     }
 
     @Test

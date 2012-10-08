@@ -70,6 +70,7 @@ public class Orchestrator implements TaskCallback {
 
         PipeVersion version = getNextPipeVersion(pipe);
         dbHelper.persistNewPipe(version, pipe);
+        notifictionHandler.notifyNewVersionOfPipe(version);
         startTask(task, phase, pipe, version);
 
         return version;

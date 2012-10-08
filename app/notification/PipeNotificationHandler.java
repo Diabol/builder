@@ -1,10 +1,11 @@
 package notification;
 
-import models.message.PhaseStatus;
-import models.message.TaskStatus;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import models.PipeVersion;
+import models.message.PhaseStatus;
+import models.message.TaskStatus;
 
 /**
  * Singleton that keeps track of listeners and notifies them of relevant events.
@@ -19,9 +20,22 @@ public class PipeNotificationHandler {
 
     private final Set<PhaseStatusChangedListener> phaseListeners = new HashSet<PhaseStatusChangedListener>();
     private final Set<TaskStatusChangedListener> taskListeners = new HashSet<TaskStatusChangedListener>();
+    private final Set<PipeStatusChangedListener> pipeListeners = new HashSet<PipeStatusChangedListener>();
 
     public static PipeNotificationHandler getInstance() {
         return INSTANCE;
+    }
+
+    public void addPipeStatusChangedListener(PipeStatusChangedListener pipeListener) {
+        synchronized (pipeListeners) {
+            pipeListeners.add(pipeListener);
+        }
+    }
+
+    public void removePipeStatusChangedListener(PipeStatusChangedListener pipeListener) {
+        synchronized (pipeListeners) {
+            pipeListeners.remove(pipeListener);
+        }
     }
 
     public void addPhaseStatusChangedListener(PhaseStatusChangedListener phaseListener) {
@@ -65,7 +79,7 @@ public class PipeNotificationHandler {
     }
 
     public int getNumberOfTaskStatusListeners() {
-        synchronized(taskListeners) {
+        synchronized (taskListeners) {
             return taskListeners.size();
         }
     }
@@ -73,6 +87,12 @@ public class PipeNotificationHandler {
     public int getNumberOfPhaseStatusListeners() {
         synchronized (phaseListeners) {
             return phaseListeners.size();
+        }
+    }
+
+    public int getNumberOfPipeListeners() {
+        synchronized (pipeListeners) {
+            return pipeListeners.size();
         }
     }
 
@@ -85,6 +105,20 @@ public class PipeNotificationHandler {
     public void removeAllPhaseListeners() {
         synchronized (phaseListeners) {
             phaseListeners.clear();
+        }
+    }
+
+    public void removeAllPipeListeners() {
+        synchronized (pipeListeners) {
+            pipeListeners.clear();
+        }
+    }
+
+    public void notifyNewVersionOfPipe(PipeVersion version) {
+        synchronized (pipeListeners) {
+            for (PipeStatusChangedListener pipeListener : pipeListeners) {
+                pipeListener.receiveNewVersion(version);
+            }
         }
     }
 }

@@ -1,20 +1,20 @@
 package notification;
 
+import static org.junit.Assert.assertTrue;
+import models.PipeVersion;
 import models.message.PhaseStatus;
+import models.message.PipeStatus;
 import models.message.TaskStatus;
+
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+
 import test.MockitoTestBase;
 
-import static org.junit.Assert.assertTrue;
-
 /**
- * Created with IntelliJ IDEA.
- * User: danielgronberg
- * Date: 2012-09-14
- * Time: 14:26
+ * Created with IntelliJ IDEA. User: danielgronberg Date: 2012-09-14 Time: 14:26
  * To change this template use File | Settings | File Templates.
  */
 public class PipeNotificationHandlerTest extends MockitoTestBase {
@@ -32,11 +32,23 @@ public class PipeNotificationHandlerTest extends MockitoTestBase {
     private TaskStatus taskStatus;
     @Mock
     private PhaseStatus phaseStatus;
+    @Mock
+    private PipeStatus pipeStatus;
+    @Mock
+    private PipeStatusChangedListener pipeListener1;
+    @Mock
+    private PipeStatusChangedListener pipeListener2;
+    @Mock
+    private PipeVersion pipeVersion;
 
     @After
     public void after() {
         handler.removeAllPhaseListeners();
         handler.removeAllTaskListeners();
+        handler.removeAllPipeListeners();
+        assertTrue(handler.getNumberOfPhaseStatusListeners() == 0);
+        assertTrue(handler.getNumberOfTaskStatusListeners() == 0);
+        assertTrue(handler.getNumberOfPipeListeners() == 0);
     }
 
     @Test
@@ -50,13 +62,23 @@ public class PipeNotificationHandlerTest extends MockitoTestBase {
     }
 
     @Test
-    public void testThatPhaseListenersAreNotifiedOnReceivePhaseStatusChange(){
+    public void testThatPhaseListenersAreNotifiedOnReceivePhaseStatusChange() {
         handler.addPhaseStatusChangedListener(phaseListener1);
         handler.addPhaseStatusChangedListener(phaseListener2);
 
         handler.notifyPhaseStatusListeners(phaseStatus);
         Mockito.verify(phaseListener1).recieveStatusChanged(phaseStatus);
         Mockito.verify(phaseListener2).recieveStatusChanged(phaseStatus);
+    }
+
+    @Test
+    public void testThatPipeListenersAreNotifiedOnReceiveNewPipeVersion() {
+        handler.addPipeStatusChangedListener(pipeListener1);
+        handler.addPipeStatusChangedListener(pipeListener2);
+
+        handler.notifyNewVersionOfPipe(pipeVersion);
+        Mockito.verify(pipeListener1).receiveNewVersion(pipeVersion);
+        Mockito.verify(pipeListener2).receiveNewVersion(pipeVersion);
     }
 
     @Test
@@ -71,18 +93,30 @@ public class PipeNotificationHandlerTest extends MockitoTestBase {
         assertTrue(handler.getNumberOfPhaseStatusListeners() == 1);
     }
 
+    @Test
+    public void testThatTheNumberOfListenersIncreaseAfterAddingPipeListener() {
+        handler.addPipeStatusChangedListener(pipeListener1);
+        assertTrue(handler.getNumberOfPipeListeners() == 1);
+    }
 
     @Test
-    public void testThatTheNumberOfListenersDecreaseAfterRemovingTaskListener() {
+    public void testThatTheNumberOfListenersDecreaseAfterRemovingPhaseListener() {
         handler.addPhaseStatusChangedListener(phaseListener1);
         handler.removePhaseStatusChangedListener(phaseListener1);
         assertTrue(handler.getNumberOfPhaseStatusListeners() == 0);
     }
 
     @Test
-    public void testThatTheNumberOfListenersDecreaseAfterRemovingPhaseListener() {
+    public void testThatTheNumberOfListenersDecreaseAfterRemovingTaskListener() {
         handler.addTaskStatusChangedListener(taskListener1);
         handler.removeTaskStatusChangedListener(taskListener1);
+        assertTrue(handler.getNumberOfTaskStatusListeners() == 0);
+    }
+
+    @Test
+    public void testThatTheNumberOfListenersDecreaseAfterRemovingPipeListener() {
+        handler.addPipeStatusChangedListener(pipeListener1);
+        handler.removePipeStatusChangedListener(pipeListener1);
         assertTrue(handler.getNumberOfTaskStatusListeners() == 0);
     }
 

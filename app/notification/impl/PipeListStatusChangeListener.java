@@ -1,8 +1,10 @@
 package notification.impl;
 
+import models.PipeVersion;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import notification.PhaseStatusChangedListener;
+import notification.PipeStatusChangedListener;
 import notification.TaskStatusChangedListener;
 
 import org.codehaus.jackson.JsonNode;
@@ -12,11 +14,10 @@ import play.libs.Json;
 import play.mvc.WebSocket;
 
 /**
- * Created with IntelliJ IDEA. User: danielgronberg Date: 2012-09-14 Time: 10:40
- * To change this template use File | Settings | File Templates.
+ * Created by Daniel Grönberg
  */
 public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
-        TaskStatusChangedListener {
+        TaskStatusChangedListener, PipeStatusChangedListener {
     private final WebSocket.In<JsonNode> in;
     private final WebSocket.Out<JsonNode> out;
 
@@ -46,5 +47,15 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("status", status.getStatus().toString());
         json.put("version", status.getVersion());
         out.write(json);
+    }
+
+    @Override
+    public void receiveNewVersion(PipeVersion version) {
+        ObjectNode json = Json.newObject();
+        json.put("newPipeVersion", true);
+        json.put("pipeName", version.getPipeName());
+        json.put("version", version.getVersion());
+        out.write(json);
+
     }
 }

@@ -27,7 +27,7 @@
 
 @createPipeMarkup(pipeCount: Int, pipe: Pipe) = {
     @for(phaseCount <- 0 until pipe.phases.length){
-        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" onclick="displayPhase@{pipeCount}@{phaseCount}();" class="block @{pipe.phases.get(phaseCount).state}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhaseText(pipe, pipe.phases.get(phaseCount))}</h2>
+        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" onclick="displayPhase@{pipeCount}@{phaseCount}();" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhaseText(pipe, pipe.phases.get(phaseCount))}</h2>
         @if(phaseCount > 0) {
              @addEdge(pipe.name+pipe.phases.get(phaseCount-1).name, pipe.name+pipe.phases.get(phaseCount).name)
         }
@@ -36,10 +36,21 @@
 
 @html =  {
     <script>
-        //Variable used for keeping track of which phase is selected.
+    	//Variable for keeping track of which versions of each pipe is shown.
+        var shownPipeVersions = {};
+        @for(i <- 0 until pipes.length){
+        	shownPipeVersions['@{pipes.get(i).name}'] = "@{pipes.get(i).version}";
+        }
+      	//Variable used for keeping track of which phase is selected.
         var phaseIdSelected;
         window.onload = function() {
             initPageObjects();
+        }
+        
+        function resetPhasesWithVersion(className, version){
+        	$('.'+className).animate({ backgroundColor: 'black' }, 'fast');
+    		$('.'+className).find('#state').html("State: NOT_STARTED");
+    		$('.'+className).find('#version').html("Version: " + version);
         }
 
         function highlightPhase(id) {
@@ -101,19 +112,24 @@
             }
 
             var receiveEvent = function(event) {
-                var data = JSON.parse(event.data)
+                var data = JSON.parse(event.data);
                 // Handle errors
                 if(data.error) {
-                    chatSocket.close()
+                    chatSocket.close();
                     alert('An error has occured while executing a pipeline. Please refer to server log.');
                     return
                 } else if(data.phaseUpdate) {
-                    updatePhase(data);
+                	if(shownPipeVersions[data.pipeName] == data.version) {
+                    	updatePhase(data);
+                	}
                 } else if(data.taskUpdate) {
-                	if(phaseIdSelected && (phaseIdSelected == (data.pipeName + data.phaseName))){
+                	if(phaseIdSelected && (phaseIdSelected == (data.pipeName + data.phaseName)) && (shownPipeVersions[data.pipeName] == data.version)){
                 		//The updated task is visible
                 		updateTask(data);
                 	}
+                } else if(data.newPipeVersion) {
+                	shownPipeVersions[data.pipeName] = data.version;
+                	resetPhasesWithVersion(data.pipeName, data.version);
                 }
 
             }

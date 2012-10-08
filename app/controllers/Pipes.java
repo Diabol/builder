@@ -99,7 +99,7 @@ public class Pipes extends Controller {
                             in, out);
                     PipeNotificationHandler.getInstance().addPhaseStatusChangedListener(listener);
                     PipeNotificationHandler.getInstance().addTaskStatusChangedListener(listener);
-
+                    PipeNotificationHandler.getInstance().addPipeStatusChangedListener(listener);
                     // Make sure the listeners are removed when socket is
                     // closed.
                     // When the socket is closed.
@@ -110,6 +110,8 @@ public class Pipes extends Controller {
                             PipeNotificationHandler.getInstance().removePhaseStatusChangedListener(
                                     listener);
                             PipeNotificationHandler.getInstance().removeTaskStatusChangedListener(
+                                    listener);
+                            PipeNotificationHandler.getInstance().removePipeStatusChangedListener(
                                     listener);
                         }
                     });
