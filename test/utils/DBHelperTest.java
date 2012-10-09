@@ -186,6 +186,55 @@ public class DBHelperTest {
     }
 
     @Test
+    public void testGetLatestTasksReturnsTasksOfTheLatestCreatedPipe() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    DBHelper.getInstance().persistNewPipe(
+                            PipeVersion.fromString("Version1", configuredPipe), configuredPipe);
+                    DBHelper.getInstance().persistNewPipe(
+                            PipeVersion.fromString("Version2", configuredPipe), configuredPipe);
+                    PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
+                    TaskConfig firstTask = firstPhase.getInitialTask();
+                    TaskExecutionContext context = new TaskExecutionContext(firstTask,
+                            configuredPipe, configuredPipe.getPhases().get(0), PipeVersion
+                                    .fromString("Version2", configuredPipe));
+                    TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
+                    DBHelper.getInstance().updateTaskToOngoing(taskStatus);
+                    List<Task> latestTasks = DBHelper.getInstance().getLatestTasks(
+                            configuredPipe.getName(), firstPhase.getName());
+                    assertEquals(latestTasks.get(0).state, State.RUNNING);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+            }
+        });
+    }
+
+    @Test
+    public void testGetLatestTasksThrowsDataNotFoundExceptionWhenNoPipeIsPersistedForThatSpecificPipe() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PipeConfig secondConfiguredPipe = PipeConfReader.getInstance()
+                            .getConfiguredPipes().get(1);
+                    DBHelper.getInstance().persistNewPipe(
+                            PipeVersion.fromString("Version1", secondConfiguredPipe),
+                            secondConfiguredPipe);
+                    DBHelper.getInstance().getLatestTasks(configuredPipe.getName(),
+                            configuredPipe.getFirstPhaseConfig().getName());
+                    assertTrue(false);
+                } catch (DataNotFoundException e) {
+                    assertTrue(e != null);
+                }
+            }
+        });
+    }
+
+    @Test
     public void testUpdateTaskToOngoingSetsRunningStateAndStartedDate() {
         running(fakeApplication(), new Runnable() {
             @Override

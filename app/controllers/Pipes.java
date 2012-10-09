@@ -8,6 +8,7 @@ import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
+import models.statusdata.Task;
 import notification.PipeNotificationHandler;
 import notification.impl.PipeListStatusChangeListener;
 import orchestration.Orchestrator;
@@ -87,6 +88,34 @@ public class Pipes extends Controller {
 
     public static Result startButtons() {
         return ok(startbuttons.render(configReader.getConfiguredPipes()));
+    }
+
+    public static Result getTasksForLatestVersion(String pipeName, String phaseName) {
+        Logger.error("Latest");
+        try {
+            List<Task> tasks = DBHelper.getInstance().getLatestTasks(pipeName, phaseName);
+            List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
+            for (Task task : tasks) {
+                jsonList.add(task.toObjectNode());
+            }
+            return ok(Json.toJson(jsonList.toArray()));
+        } catch (DataNotFoundException ex) {
+            return notFound(ex.getMessage());
+        }
+    }
+
+    public static Result getTasks(String pipeName, String version, String phaseName) {
+        Logger.error("Version: " + version);
+        try {
+            List<Task> tasks = DBHelper.getInstance().getTasks(pipeName, version, phaseName);
+            List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
+            for (Task task : tasks) {
+                jsonList.add(task.toObjectNode());
+            }
+            return ok(Json.toJson(jsonList.toArray()));
+        } catch (DataNotFoundException ex) {
+            return notFound(ex.getMessage());
+        }
     }
 
     public static WebSocket<JsonNode> setupSocket() {

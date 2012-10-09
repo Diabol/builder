@@ -9,11 +9,13 @@ import javax.persistence.MappedSuperclass;
 
 import models.StatusInterface;
 
+import org.codehaus.jackson.node.ObjectNode;
 import org.springframework.format.datetime.DateFormatter;
 
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
+import play.libs.Json;
 
 /**
  * Base class for Pipe, Phase and Task.
@@ -24,69 +26,77 @@ import play.db.ebean.Model;
 @MappedSuperclass
 public abstract class CDEntity extends Model implements StatusInterface {
 
-	@Constraints.Required
-	@Enumerated(EnumType.STRING)
-	public State state;
+    @Constraints.Required
+    @Enumerated(EnumType.STRING)
+    public State state;
 
-	@Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
-	public Date started;
+    @Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
+    public Date started;
 
-	@Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
-	public Date finished;
+    @Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
+    public Date finished;
 
-	CDEntity(State state, Date started, Date finished) {
-		this.state = state;
-		this.started = started;
-		this.finished = finished;
-	}
+    CDEntity(State state, Date started, Date finished) {
+        this.state = state;
+        this.started = started;
+        this.finished = finished;
+    }
 
-	@Override
-	public String toString() {
-		DateFormatter formatter = new DateFormatter();
-		StringBuffer buf = new StringBuffer();
-		buf.append("state: " + state);
-		if (started != null) {
-			buf.append(", started: " + formatter.print(started, Locale.ENGLISH));
-		}
-		if (finished != null) {
-			buf.append(", finished: "
-					+ formatter.print(finished, Locale.ENGLISH));
-		}
-		return buf.toString();
-	}
+    @Override
+    public String toString() {
+        DateFormatter formatter = new DateFormatter();
+        StringBuffer buf = new StringBuffer();
+        buf.append("state: " + state);
+        if (started != null) {
+            buf.append(", started: " + formatter.print(started, Locale.ENGLISH));
+        }
+        if (finished != null) {
+            buf.append(", finished: " + formatter.print(finished, Locale.ENGLISH));
+        }
+        return buf.toString();
+    }
 
-	@Override
-	public State getState() {
-		return state;
-	}
+    @Override
+    public State getState() {
+        return state;
+    }
 
-	@Override
-	public Date getStarted() {
-		return started;
-	}
+    @Override
+    public Date getStarted() {
+        return started;
+    }
 
-	@Override
-	public Date getFinished() {
-		return finished;
-	}
+    @Override
+    public Date getFinished() {
+        return finished;
+    }
 
-	@Override
-	public boolean isSuccess() {
-		return state == State.SUCCESS;
-	}
+    @Override
+    public boolean isSuccess() {
+        return state == State.SUCCESS;
+    }
 
-	@Override
-	public boolean isRunning() {
-		return state == State.RUNNING;
-	}
+    @Override
+    public boolean isRunning() {
+        return state == State.RUNNING;
+    }
 
-	public void startNow() {
-		started = new Date();
-		state = State.RUNNING;
-	}
+    public void startNow() {
+        started = new Date();
+        state = State.RUNNING;
+    }
 
-	public void finishNow(boolean success) {
-		finished = new Date();
-		state = success ? State.SUCCESS : State.FAILURE;
-	}
+    public void finishNow(boolean success) {
+        finished = new Date();
+        state = success ? State.SUCCESS : State.FAILURE;
+    }
+
+    public ObjectNode toObjectNode() {
+        DateFormatter formatter = new DateFormatter();
+        ObjectNode result = Json.newObject();
+        result.put("state", state.toString());
+        result.put("started", started != null ? formatter.print(started, Locale.ENGLISH) : "NA");
+        result.put("finished", finished != null ? formatter.print(finished, Locale.ENGLISH) : "NA");
+        return result;
+    }
 }

@@ -161,6 +161,19 @@ public class DBHelper {
 
     }
 
+    public List<Task> getLatestTasks(String pipeName, String phaseName)
+            throws DataNotFoundException {
+        List<Phase> foundPhases = phaseFind.where().eq("name", phaseName).eq("pipe.name", pipeName)
+                .findList();
+        if (foundPhases.size() == 0) {
+            throw new DataNotFoundException("No persisted pipe found for pipe " + pipeName
+                    + " and phase " + phaseName);
+        } else {
+            Phase phase = foundPhases.get(foundPhases.size() - 1);
+            return phase.tasks;
+        }
+    }
+
     public Pipe getPipe(PipeVersion version) throws DataNotFoundException {
         List<Pipe> foundPipes = pipeFind.where().eq("name", version.getPipeName())
                 .eq("version", version.getVersion()).findList();
