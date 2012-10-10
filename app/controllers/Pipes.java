@@ -6,6 +6,7 @@ import java.util.List;
 import models.PipeVersion;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
+import models.config.TaskConfig;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
@@ -91,21 +92,21 @@ public class Pipes extends Controller {
     }
 
     public static Result getTasksForLatestVersion(String pipeName, String phaseName) {
-        Logger.error("Latest");
+        List<Task> tasks;
         try {
-            List<Task> tasks = DBHelper.getInstance().getLatestTasks(pipeName, phaseName);
-            List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
-            for (Task task : tasks) {
-                jsonList.add(task.toObjectNode());
-            }
-            return ok(Json.toJson(jsonList.toArray()));
+            tasks = DBHelper.getInstance().getLatestTasks(pipeName, phaseName);
         } catch (DataNotFoundException ex) {
-            return notFound(ex.getMessage());
+            tasks = createNotStartedTasks(pipeName, phaseName);
         }
+        List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
+        for (Task task : tasks) {
+            jsonList.add(task.toObjectNode());
+        }
+        return ok(Json.toJson(jsonList.toArray()));
+
     }
 
     public static Result getTasks(String pipeName, String version, String phaseName) {
-        Logger.error("Version: " + version);
         try {
             List<Task> tasks = DBHelper.getInstance().getTasks(pipeName, version, phaseName);
             List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
@@ -116,6 +117,20 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException ex) {
             return notFound(ex.getMessage());
         }
+    }
+
+    private static List<Task> createNotStartedTasks(String pipeName, String phaseName) {
+        List<Task> result = new ArrayList<Task>();
+        PipeConfig pipeConf = PipeConfReader.getInstance().get(pipeName);
+        for (PhaseConfig phaseConf : pipeConf.getPhases()) {
+            if (phaseConf.getName().equals(phaseName)) {
+                for (TaskConfig task : phaseConf.getTasks()) {
+                    result.add(Task.createNewFromConfig(task));
+                }
+                break;
+            }
+        }
+        return result;
     }
 
     public static WebSocket<JsonNode> setupSocket() {

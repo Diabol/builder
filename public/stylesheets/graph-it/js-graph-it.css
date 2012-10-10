@@ -34,17 +34,17 @@ div.block, h1.block, h2.block, p.block
     width: 200px;
 }
 
-h2.SUCCESS
+.SUCCESS
 {
 	background-color: green;
 }
 
-h2.FAILURE
+.FAILURE
 {
 	background-color: red;
 }
 
-h2.RUNNING
+.RUNNING
 {
 	background-color: blue;
 }

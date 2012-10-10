@@ -9,16 +9,6 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/graph-it/js-graph-it.css")" />
 }
 
-@createPipeScripts(pipeCount: Int, pipe: Pipe) = {
-    @for(phaseCount <- 0 until pipe.phases.length){
-        function displayPhase@{pipeCount}@{phaseCount}() {
-            taskSelected = undefined;
-            highlightPhase('@{pipe.name}@{pipe.phases.get(phaseCount).name}');
-            //TODO: Use ajax request to fetch states with current state.
-        }
-    }
-}
-
 @addEdge(parentId: String, childId: String) = {
     <div class="connector @{parentId} @{childId} right_start">
         <img class="connector-end" src="@routes.Assets.at("images/graph-it/arrow.gif")">
@@ -27,7 +17,7 @@
 
 @createPipeMarkup(pipeCount: Int, pipe: Pipe) = {
     @for(phaseCount <- 0 until pipe.phases.length){
-        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" onclick="displayPhase@{pipeCount}@{phaseCount}();" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhaseText(pipe, pipe.phases.get(phaseCount))}</h2>
+        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" onclick="fetchAndDisplayLatestTasksForPhase('@{pipe.name}', '@{pipe.phases.get(phaseCount).name}');" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhaseText(pipe, pipe.phases.get(phaseCount))}</h2>
         @if(phaseCount > 0) {
              @addEdge(pipe.name+pipe.phases.get(phaseCount-1).name, pipe.name+pipe.phases.get(phaseCount).name)
         }
@@ -41,10 +31,25 @@
         @for(i <- 0 until pipes.length){
         	shownPipeVersions['@{pipes.get(i).name}'] = "@{pipes.get(i).version}";
         }
-      	//Variable used for keeping track of which phase is selected.
-        var phaseIdSelected;
+      	//Variables used for keeping track of which phase and pipe is selected.
+        var selectedPhase;
+      	var selectedPipe;
         window.onload = function() {
             initPageObjects();
+        }
+        
+        function fetchAndDisplayLatestTasksForPhase(pipeName, phaseName) {
+        	var displayTasks = function(tasks) {
+	        	var html = "<div id='taskHeader'>Tasks for phase: " + phaseName + ", pipe: "+pipeName+" and version: "+shownPipeVersions[pipeName]+".</div>";
+	        	for (counter = 0; counter < tasks.length; counter++) {
+	                html = html +"<div id='" + tasks[counter].name + "' class='task "+tasks[counter].state+"' style='left: "
+	                        + (30 + 150 * counter) + "px; top: 50px;'><div style='padding-top: 40%;'>"
+	                        + tasks[counter].name + "</div></div>";
+	            }
+	        	$('#tasks').html(html);
+        	}
+            highlightPhase(pipeName, phaseName);
+        	$.get("/pipe/"+pipeName+"/latest/"+phaseName+"/tasks", displayTasks);
         }
         
         function resetPhasesWithVersion(className, version){
@@ -53,17 +58,18 @@
     		$('.'+className).find('#version').html("Version: " + version);
         }
 
-        function highlightPhase(id) {
-            if(phaseIdSelected){
-                $('#'+phaseIdSelected).removeClass('phaseHighlighted');
+        function highlightPhase(pipeName, phaseName) {
+            if(selectedPhase &&  selectedPipe){
+                $('#'+selectedPipe+selectedPhase).removeClass('phaseHighlighted');
             }
-            $('#'+id).addClass('phaseHighlighted');
-            phaseIdSelected = id;
+            $('#'+pipeName+phaseName).addClass('phaseHighlighted');
+            selectedPhase = phaseName;
+            selectedPipe = pipeName;
         }
         
         function updateTask(updateTaskData) {
         	function colorizeTask(colour) {
-        		$('#'+updateTaskData.taskName).animate({ backgroundColor: colour }, 'fast', function(){$('#'+updateTaskData.taskName).css('color', 'black');});
+        		$('#'+updateTaskData.taskName).animate({ backgroundColor: colour }, 'fast');
         	}
         	switch(updateTaskData.status) {
         	case "RUNNING":
@@ -97,11 +103,6 @@
     			break;
         	}
         }
-
-        <!--Generated javascript functions for displaying the task trees-->
-        @for(i <- 0 until pipes.length){
-            @createPipeScripts(i, pipes(i))
-        }
     </script>
     <script>
         $(function() {
@@ -123,13 +124,16 @@
                     	updatePhase(data);
                 	}
                 } else if(data.taskUpdate) {
-                	if(phaseIdSelected && (phaseIdSelected == (data.pipeName + data.phaseName)) && (shownPipeVersions[data.pipeName] == data.version)){
+                	if(selectedPipe && selectedPipe == data.pipeName && selectedPhase && selectedPhase == data.phaseName && (shownPipeVersions[data.pipeName] == data.version)){
                 		//The updated task is visible
                 		updateTask(data);
                 	}
                 } else if(data.newPipeVersion) {
                 	shownPipeVersions[data.pipeName] = data.version;
                 	resetPhasesWithVersion(data.pipeName, data.version);
+                	if(selectedPipe && selectedPipe == data.pipeName) {
+                		fetchAndDisplayLatestTasksForPhase(data.pipeName, selectedPhase)
+                	}
                 }
 
             }
