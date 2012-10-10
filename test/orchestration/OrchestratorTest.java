@@ -3,6 +3,7 @@ package orchestration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import utils.DBHelper;
+import utils.DataInconsistencyException;
 import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import executor.TaskExecutionContext;
@@ -48,6 +50,9 @@ public class OrchestratorTest {
     TaskExecutor taskExecutor;
     PipeConfig pipeConf;
     PipeVersion version;
+    Pipe runningPipe;
+    Pipe failedPipe;
+    Pipe successfullPipe;
     String stringVersion = "1";
 
     @Before
@@ -58,8 +63,14 @@ public class OrchestratorTest {
         orchestrator.setTaskexecutor(taskExecutor);
         orchestrator.setPipeConfigReader(confReader);
         pipeConf = mockConfig();
-        when(confReader.get("ThePipe")).thenReturn(pipeConf);
         version = PipeVersion.fromString(stringVersion, pipeConf);
+        runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        runningPipe.startNow();
+        failedPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        failedPipe.finishNow(false);
+        successfullPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        successfullPipe.finishNow(true);
+        when(confReader.get("ThePipe")).thenReturn(pipeConf);
     }
 
     @After
@@ -122,7 +133,8 @@ public class OrchestratorTest {
     }
 
     @Test
-    public void testHandleTaskResultSuccessSetsSuccessOnPhaseAndTaskWhenAllTasksInPhaseSuccessful() {
+    public void testHandleTaskResultSuccessSetsSuccessOnPhaseAndTaskWhenAllTasksInPhaseSuccessful()
+            throws Exception {
         TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
         context.finishedNow();
         TaskResult success = new TaskResult(true, context);
@@ -130,7 +142,7 @@ public class OrchestratorTest {
         Phase phaseWithAllTasksSuccess = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
 
         when(dbHelper.getPhaseForContext(context)).thenReturn(phaseWithAllTasksSuccess);
-
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
         orchestrator.handleTaskResult(success);
 
         TaskStatus successTaskStatus = TaskStatus.newFinishedTaskStatus(success);
@@ -152,6 +164,7 @@ public class OrchestratorTest {
         Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
         Phase lastPhase = createSuccessfullPhase(lastPhaseConf);
         when(dbHelper.getPhaseForContext(context)).thenReturn(lastPhase);
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
 
         Pipe pipeWithAllPhasesSuccess = Pipe.createNewFromConfig(stringVersion, pipeConf);
         pipeWithAllPhasesSuccess.phases.add(firstPhase);
@@ -171,13 +184,15 @@ public class OrchestratorTest {
     }
 
     @Test
-    public void testHandleTaskResultSuccessStartsFirstTaskOfNextPhaseWhenAllTasksAreSuccessful() {
+    public void testHandleTaskResultSuccessStartsFirstTaskOfNextPhaseWhenAllTasksAreSuccessful()
+            throws Exception {
         TaskExecutionContext context = createContextForLastTaskInFirstPhase();
         context.finishedNow();
         TaskResult success = new TaskResult(true, context);
 
         Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -191,13 +206,14 @@ public class OrchestratorTest {
     }
 
     @Test
-    public void testHandleTaskResultSuccessStartsNextAutomaticTaskAndNoManual() {
+    public void testHandleTaskResultSuccessStartsNextAutomaticTaskAndNoManual() throws Exception {
         TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
         context.finishedNow();
         TaskResult success = new TaskResult(true, context);
         Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
         firstPhase.tasks.get(0).finishNow(true);
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -205,6 +221,40 @@ public class OrchestratorTest {
                 .forClass(TaskExecutionContext.class);
         verify(taskExecutor).execute(taskExecCapt.capture(), (Orchestrator) Mockito.notNull());
         assertTrue(taskExecCapt.getValue().getTask().getTaskName().equals("SecondAutomatic"));
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessDoesNotStartNextTaskIfPipeIsSetToFailed()
+            throws Exception {
+        TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+        Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(0).finishNow(true);
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenReturn(failedPipe);
+
+        orchestrator.handleTaskResult(success);
+
+        verifyZeroInteractions(taskExecutor);
+    }
+
+    @Test
+    public void testHandleTaskResultThrowsDataInconsistencyExceptionIfPipeNotFound()
+            throws Exception {
+        TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+        Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(0).finishNow(true);
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenThrow(new DataNotFoundException("Message"));
+        try {
+            orchestrator.handleTaskResult(success);
+            assertTrue(false);
+        } catch (DataInconsistencyException ex) {
+            assertTrue(ex != null);
+        }
     }
 
     private Phase createPhaseFromConf(PhaseConfig phaseConfig) {

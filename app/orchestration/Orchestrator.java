@@ -12,7 +12,9 @@ import models.message.TaskStatus;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
 import notification.PipeNotificationHandler;
+import play.Logger;
 import utils.DBHelper;
+import utils.DataInconsistencyException;
 import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import executor.TaskCallback;
@@ -105,7 +107,7 @@ public class Orchestrator implements TaskCallback {
     }
 
     @Override
-    public void handleTaskStarted(TaskExecutionContext context) {
+    public synchronized void handleTaskStarted(TaskExecutionContext context) {
         TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
         if (isNewPhaseStatus(context, taskStatus)) {
             PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
@@ -121,7 +123,7 @@ public class Orchestrator implements TaskCallback {
     }
 
     @Override
-    public void handleTaskResult(TaskResult result) {
+    public synchronized void handleTaskResult(TaskResult result) {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
         dbHelper.updateTaskToFinished(taskStatus);
         notifictionHandler.notifyTaskStatusListeners(taskStatus);
@@ -140,8 +142,21 @@ public class Orchestrator implements TaskCallback {
                         phaseStatus.isSuccess());
             }
         }
+        if (result.success()) {
+            // Start next task only if the pipe is still running.
+            try {
+                Pipe currentPipe = dbHelper.getPipe(result.context().getPipeVersion());
+                if (currentPipe.state == State.RUNNING) {
+                    startNextTask(result);
+                }
+            } catch (DataNotFoundException ex) {
+                Logger.error("Got a result for task " + taskStatus.getTaskName()
+                        + ". But no Pipe found for " + taskStatus.getPipeName() + " with version "
+                        + taskStatus.getVersion());
+                throw new DataInconsistencyException(ex.getMessage());
+            }
+        }
 
-        startNextTask(result);
     }
 
     /**
