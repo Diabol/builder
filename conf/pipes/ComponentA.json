@@ -6,24 +6,21 @@
             "tasks":[
                 {
                     "taskName":"Compile",
-                    "isAutomatic":true,
                     "command":"sleep 2",
                     "triggersTasks":["Unit-test", "Sonar"]
                 },
                 {
                     "taskName":"Unit-test",
-                    "isAutomatic":true,
                     "command":"sleep 1",
                     "triggersTasks":["Package"]
                 },
                 {
                     "taskName":"Sonar",
-                    "isAutomatic":true,
+                    "isBlocking": false,
                     "command":"conf/pipes/cmd/sonar.sh"
                 },
                 {
                     "taskName":"Package",
-                    "isAutomatic":true,
                     "command":"sleep 1"
                 }
             ]
@@ -39,7 +36,6 @@
                 },
                 {
                     "taskName":"Integration-test",
-                    "isAutomatic":true,
                     "command":"echo CI:Integration-test..."
                 }
             ]

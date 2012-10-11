@@ -10,7 +10,10 @@ public class TaskConfig {
 
     private String taskName;
     private String cmd;
+    // Default is for a task to automatically execute.
     private boolean isAutomatic = true;
+    // Default is for a task to block execution of other tasks.
+    private boolean isBlocking = true;
     private List<String> triggersTasks = new ArrayList<String>();
 
     public TaskConfig(String taskName, String cmd, boolean isAutomatic) {
@@ -40,6 +43,14 @@ public class TaskConfig {
         this.isAutomatic = isAutomatic;
     }
 
+    public boolean isBlocking() {
+        return isBlocking;
+    }
+
+    public void setIsBlocking(boolean isBlocking) {
+        this.isBlocking = isBlocking;
+    }
+
     public String getCommand() {
         return cmd;
     }
@@ -60,6 +71,9 @@ public class TaskConfig {
         if (getTaskName() == null || getCommand() == null || getTaskName().isEmpty()
                 || getCommand().isEmpty()) {
             throw new PipeValidationException("Invalid: " + this);
+        } else if (!isBlocking && triggersTasks.size() > 0) {
+            throw new PipeValidationException(
+                    "A non-blocking task is not allowed to trigger other tasks. " + this);
         }
     }
 
@@ -73,6 +87,8 @@ public class TaskConfig {
         builder.append(cmd);
         builder.append(", isAutomatic=");
         builder.append(isAutomatic);
+        builder.append(", isBlocking=");
+        builder.append(isBlocking);
         builder.append(", triggersTasks=");
         builder.append(triggersTasks != null ? triggersTasks.subList(0,
                 Math.min(triggersTasks.size(), maxLen)) : null);

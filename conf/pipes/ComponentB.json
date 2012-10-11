@@ -6,24 +6,21 @@
             "tasks":[
                 {
                     "taskName":"Compile",
-                    "isAutomatic":true,
                     "command":"sleep 3",
                     "triggersTasks":["Unit-test", "Sonar"]
                 },
                 {
                     "taskName":"Unit-test",
-                    "isAutomatic":true,
                     "command":"sleep 3",
                     "triggersTasks":["Package"]
                 },
                 {
                     "taskName":"Sonar",
-                    "isAutomatic":true,
+                    "isBlocking": false,
                     "command":"conf/pipes/cmd/sonar.sh"
                 },
                 {
                     "taskName":"Package",
-                    "isAutomatic":true,
                     "command":"sleep 3"
                 }
             ]
@@ -33,13 +30,11 @@
             "tasks":[
                 {
                     "taskName":"Deploy",
-                    "isAutomatic":true,
                     "command":"conf/pipes/cmd/deploy-ci.sh",
                     "triggersTasks":["Integration-test"]
                 },
                 {
                     "taskName":"Integration-test",
-                    "isAutomatic":true,
                     "command":"echo CI:Integration-test..."
                 }
             ]
@@ -55,7 +50,6 @@
                 },
                 {
                     "taskName":"Manual-test",
-                    "isAutomatic":true,
                     "command":"sleep 3"
                 }
             ]
