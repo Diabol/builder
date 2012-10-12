@@ -55,7 +55,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
     private int numberOfSuccessfullPhaseStatusRecieved;
     private int numberOfNewPipereceived;
     private int numberOfFailedPhaseStatusRecieved;
-    private final PipeConfig mockedConf = mockConfig();
+    private PipeConfig mockedConf;
     private Orchestrator target;
 
     @Mock
@@ -80,22 +80,26 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         numberOfFailedPhaseStatusRecieved = 0;
         target = new Orchestrator();
         target.setPipeConfigReader(confReader);
-    }
+        mockedConf = mockConfig();
 
-    @Test
-    public void testRunAutomaticPipe() throws Exception {
-        Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
         handler.addTaskStatusChangedListener(this);
         handler.addPhaseStatusChangedListener(this);
         handler.addPipeStatusChangedListener(this);
+    }
 
+    @Test
+    public void testRunPipeWithManualTask() throws Exception {
+        Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
+        // Making first task of second phase manual.
+        mockedConf.getPhases().get(1).getInitialTask().setIsAutomatic(false);
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
                 PipeVersion pipeVersion = target.start("ThePipe");
                 assertThat(pipeVersion).isNotNull();
-                while (numberOfSuccessfullPhaseStatusRecieved < 3) {
+                // Wait for the tasks of the first phase to finish.
+                while (numberOfSuccessfullTaskStatusRecieved < 4) {
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
@@ -106,25 +110,72 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
 
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
-                    assertThat(persistedPipe.state).isEqualTo(State.SUCCESS);
-                    assertFirstPhase(persistedPipe);
-                    assertSecondPhase(persistedPipe);
-                    assertThirdPhase(persistedPipe);
+                    assertThat(persistedPipe.state).isEqualTo(State.RUNNING);
+                    assertFirstPhaseSuccessFull(persistedPipe);
+                    assertThat(numberOfRunningTaskStatusRecieved).isEqualTo(4);
+                    assertThat(numberOfSuccessfullTaskStatusRecieved).isEqualTo(4);
+                    assertThat(numberOfRunningPhaseStatusReceived).isEqualTo(1);
+                    assertThat(numberOfSuccessfullPhaseStatusRecieved).isEqualTo(1);
+                    assertThat(numberOfNewPipereceived).isEqualTo(1);
+
+                    // Start the manual task and verify that the whole pipe is
+                    // executed successfully.
+                    target.startTask(mockedConf.getPhases().get(1).getInitialTask().getTaskName(),
+                            mockedConf.getPhases().get(1).getName(), mockedConf.getName(),
+                            pipeVersion.getVersion());
+                    waitAndAssertSuccessfullPipe(pipeVersion);
                 } catch (DataNotFoundException ex) {
                     Logger.error(ex.getMessage());
                     assertThat(true).isFalse();
                 }
-
-                assertThat(numberOfRunningTaskStatusRecieved).isEqualTo(8);
-                assertThat(numberOfSuccessfullTaskStatusRecieved).isEqualTo(7);
-                // The boguscmd will fail the task but not the phase.
-                assertThat(numberOfFailedTaskStatusRecieved).isEqualTo(1);
-                assertThat(numberOfRunningPhaseStatusReceived).isEqualTo(3);
-                assertThat(numberOfSuccessfullPhaseStatusRecieved).isEqualTo(3);
-                assertThat(numberOfFailedPhaseStatusRecieved).isEqualTo(0);
-                assertThat(numberOfNewPipereceived).isEqualTo(1);
             }
         });
+    }
+
+    @Test
+    public void testRunAutomaticPipe() throws Exception {
+        Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                PipeVersion pipeVersion = target.start("ThePipe");
+                assertThat(pipeVersion).isNotNull();
+                waitAndAssertSuccessfullPipe(pipeVersion);
+            }
+
+        });
+    }
+
+    private void waitAndAssertSuccessfullPipe(PipeVersion pipeVersion) {
+        while (numberOfSuccessfullPhaseStatusRecieved < 3) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                assertThat(true).isFalse();
+            }
+        }
+
+        try {
+            Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
+            assertThat(persistedPipe.state).isEqualTo(State.SUCCESS);
+            assertFirstPhaseSuccessFull(persistedPipe);
+            assertSecondPhaseSuccessFull(persistedPipe);
+            assertThirdPhaseSuccessFull(persistedPipe);
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage());
+            assertThat(true).isFalse();
+        }
+
+        assertThat(numberOfRunningTaskStatusRecieved).isEqualTo(8);
+        assertThat(numberOfSuccessfullTaskStatusRecieved).isEqualTo(7);
+        // The boguscmd will fail the task but not the phase.
+        assertThat(numberOfFailedTaskStatusRecieved).isEqualTo(1);
+        assertThat(numberOfRunningPhaseStatusReceived).isEqualTo(3);
+        assertThat(numberOfSuccessfullPhaseStatusRecieved).isEqualTo(3);
+        assertThat(numberOfFailedPhaseStatusRecieved).isEqualTo(0);
+        assertThat(numberOfNewPipereceived).isEqualTo(1);
+
     }
 
     @Override
@@ -154,7 +205,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         }
     }
 
-    private void assertThirdPhase(Pipe persistedPipe) {
+    private void assertThirdPhaseSuccessFull(Pipe persistedPipe) {
         Phase third = persistedPipe.phases.get(2);
         assertThat(third.state).isEqualTo(State.SUCCESS);
         List<Task> tasks = third.tasks;
@@ -163,7 +214,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         }
     }
 
-    private void assertSecondPhase(Pipe persistedPipe) {
+    private void assertSecondPhaseSuccessFull(Pipe persistedPipe) {
         Phase second = persistedPipe.phases.get(1);
         assertThat(second.state).isEqualTo(State.SUCCESS);
         Task firstTask = second.tasks.get(0);
@@ -172,7 +223,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         assertThat(secondtask.state).isEqualTo(State.FAILURE);
     }
 
-    private void assertFirstPhase(Pipe persistedPipe) {
+    private void assertFirstPhaseSuccessFull(Pipe persistedPipe) {
         Phase first = persistedPipe.phases.get(0);
         assertThat(first.state).isEqualTo(State.SUCCESS);
         List<Task> tasks = first.tasks;
