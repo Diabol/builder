@@ -106,6 +106,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
 
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
+                    assertThat(persistedPipe.state).isEqualTo(State.SUCCESS);
                     assertFirstPhase(persistedPipe);
                     assertSecondPhase(persistedPipe);
                     assertThirdPhase(persistedPipe);
