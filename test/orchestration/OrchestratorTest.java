@@ -3,6 +3,7 @@ package orchestration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.PipeVersion;
+import models.StatusInterface.State;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -133,7 +135,7 @@ public class OrchestratorTest {
     }
 
     @Test
-    public void testHandleTaskResultSuccessSetsSuccessOnPhaseAndTaskWhenAllTasksInPhaseSuccessful()
+    public void testHandleTaskResultSuccessSetsSuccessOnPhaseAndTaskWhenAllBlockingTasksInPhaseSuccessful()
             throws Exception {
         TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
         context.finishedNow();
@@ -203,6 +205,115 @@ public class OrchestratorTest {
         // phase.
         assertTrue(taskExecCapt.getValue().getTask().getTaskName()
                 .equals(pipeConf.getPhases().get(1).getInitialTask().getTaskName()));
+    }
+
+    @Test
+    public void testHandleTaskresultSuccessDoesNotStartNextPhaseIfTasksAreStillRunning()
+            throws Exception {
+        TaskExecutionContext context = createContextForLastTaskInFirstPhase();
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+
+        Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(1).state = State.RUNNING;
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+
+        orchestrator.handleTaskResult(success);
+        verify(dbHelper).updateTaskToFinished((TaskStatus) Mockito.notNull());
+        verify(notificationHandler).notifyTaskStatusListeners((TaskStatus) Mockito.notNull());
+        verify(dbHelper, Mockito.atLeastOnce()).getPhaseForContext(context);
+        verify(dbHelper).getPipe(version);
+        verifyNoMoreInteractions(dbHelper);
+        verifyNoMoreInteractions(notificationHandler);
+        verifyNoMoreInteractions(taskExecutor);
+
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessStartsFirstTaskOfNextPhaseWhenANonBlockingTaskIsFailed()
+            throws Exception {
+        TaskExecutionContext context = createContextForLastTaskInFirstPhase();
+        context.getPhase().getTasks().get(1).setIsBlocking(false);
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+
+        Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(1).state = State.FAILURE;
+
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+
+        orchestrator.handleTaskResult(success);
+
+        ArgumentCaptor<TaskExecutionContext> taskExecCapt = ArgumentCaptor
+                .forClass(TaskExecutionContext.class);
+        verify(taskExecutor).execute(taskExecCapt.capture(), (Orchestrator) Mockito.notNull());
+        // Assert that the next task to execute is the first of the second
+        // phase.
+        assertTrue(taskExecCapt.getValue().getTask().getTaskName()
+                .equals(pipeConf.getPhases().get(1).getInitialTask().getTaskName()));
+    }
+
+    @Test
+    public void testHandleNonBlockingSuccessDoesNotStartFirstTaskOfNextPhase() throws Exception {
+        TaskExecutionContext context = createContextForLastTaskInFirstPhase();
+        context.getTask().setIsBlocking(false);
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+
+        orchestrator.handleTaskResult(success);
+        verify(dbHelper).updateTaskToFinished((TaskStatus) Mockito.notNull());
+        verify(notificationHandler).notifyTaskStatusListeners((TaskStatus) Mockito.notNull());
+        verifyNoMoreInteractions(dbHelper);
+        verifyNoMoreInteractions(notificationHandler);
+        verifyNoMoreInteractions(taskExecutor);
+
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessStartsFirstTaskOfNextPhaseWhenANonBlockingTaskIsRunning()
+            throws Exception {
+        TaskExecutionContext context = createContextForLastTaskInFirstPhase();
+        context.getPhase().getTasks().get(1).setIsBlocking(false);
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+
+        Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(1).state = State.RUNNING;
+
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+
+        orchestrator.handleTaskResult(success);
+
+        ArgumentCaptor<TaskExecutionContext> taskExecCapt = ArgumentCaptor
+                .forClass(TaskExecutionContext.class);
+        verify(taskExecutor).execute(taskExecCapt.capture(), (Orchestrator) Mockito.notNull());
+        // Assert that the next task to execute is the first of the second
+        // phase.
+        assertTrue(taskExecCapt.getValue().getTask().getTaskName()
+                .equals(pipeConf.getPhases().get(1).getInitialTask().getTaskName()));
+
+    }
+
+    @Test
+    public void testHandleTaskResultFailedDoesNotFailPhaseAndPipeIfNonBlocking() {
+        TaskExecutionContext context = createContextForLastTaskInFirstPhase();
+        context.finishedNow();
+        context.getTask().setIsBlocking(false);
+        TaskResult failure = new TaskResult(false, context);
+        Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(0).state = State.SUCCESS;
+        firstPhase.tasks.get(1).state = State.RUNNING;
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        orchestrator.handleTaskResult(failure);
+
+        TaskStatus failedTaskStatus = TaskStatus.newFinishedTaskStatus(failure);
+        verifyTaskStatusForDBHelperAndNotificationHandler(failedTaskStatus);
+
+        verifyNoMoreInteractions(dbHelper);
+        verifyNoMoreInteractions(notificationHandler);
     }
 
     @Test

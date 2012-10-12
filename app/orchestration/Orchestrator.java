@@ -109,7 +109,7 @@ public class Orchestrator implements TaskCallback {
     @Override
     public synchronized void handleTaskStarted(TaskExecutionContext context) {
         TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
-        if (isNewPhaseStatus(context, taskStatus)) {
+        if (isFirstTaskJustStarted(context, taskStatus)) {
             PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
             dbHelper.updatePhaseToOngoing(phaseStatus);
             notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
@@ -127,33 +127,35 @@ public class Orchestrator implements TaskCallback {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
         dbHelper.updateTaskToFinished(taskStatus);
         notifictionHandler.notifyTaskStatusListeners(taskStatus);
-        // Check it the phase of the task should be updated with new state.
-        PhaseStatus phaseStatus = getNewFinishedPhaseStatus(result);
-
-        if (phaseStatus != null) {
-            // Update phase state
-            dbHelper.updatePhaseToFinished(phaseStatus);
-            notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
-            // Update pipe state if phase has changed to failed or it has
-            // changed to success AND it is the last phase in the pipe.
-            if (!phaseStatus.isSuccess()
-                    || (isContextForLastPhase(result.context()) && phaseStatus.isSuccess())) {
-                dbHelper.updatePipeToFinished(result.context().getPipeVersion(),
-                        phaseStatus.isSuccess());
-            }
-        }
-        if (result.success()) {
-            // Start next task only if the pipe is still running.
-            try {
-                Pipe currentPipe = dbHelper.getPipe(result.context().getPipeVersion());
-                if (currentPipe.state == State.RUNNING) {
-                    startNextTask(result);
+        // Check it the phase of the task should be updated with new state. Only
+        // applicable for blocking tasks.
+        if (result.context().getTask().isBlocking()) {
+            PhaseStatus phaseStatus = getNewFinishedPhaseStatus(result);
+            if (phaseStatus != null) {
+                // Update phase state
+                dbHelper.updatePhaseToFinished(phaseStatus);
+                notifictionHandler.notifyPhaseStatusListeners(phaseStatus);
+                // Update pipe state if phase has changed to failed or it has
+                // changed to success AND it is the last phase in the pipe.
+                if (!phaseStatus.isSuccess()
+                        || (isContextForLastPhase(result.context()) && phaseStatus.isSuccess())) {
+                    dbHelper.updatePipeToFinished(result.context().getPipeVersion(),
+                            phaseStatus.isSuccess());
                 }
-            } catch (DataNotFoundException ex) {
-                Logger.error("Got a result for task " + taskStatus.getTaskName()
-                        + ". But no Pipe found for " + taskStatus.getPipeName() + " with version "
-                        + taskStatus.getVersion());
-                throw new DataInconsistencyException(ex.getMessage());
+            }
+            if (result.success()) {
+                // Start next task only if the pipe is still running.
+                try {
+                    Pipe currentPipe = dbHelper.getPipe(result.context().getPipeVersion());
+                    if (currentPipe.state == State.RUNNING) {
+                        startNextTask(result);
+                    }
+                } catch (DataNotFoundException ex) {
+                    Logger.error("Got a result for task " + taskStatus.getTaskName()
+                            + ". But no Pipe found for " + taskStatus.getPipeName()
+                            + " with version " + taskStatus.getVersion());
+                    throw new DataInconsistencyException(ex.getMessage());
+                }
             }
         }
 
@@ -190,7 +192,7 @@ public class Orchestrator implements TaskCallback {
         }
         // 3. Trigger first task in next phase if all tasks in this phase
         // finished and auto.
-        if (allTasksInPhaseFinishedSuccessfully(taskContext)) {
+        if (allBlockingTasksInPhaseFinishedSuccessfully(taskContext)) {
             TaskExecutionContext newTaskContext = taskContext.getFirstTaskInNextPhase();
             if (newTaskContext != null) {
                 if (newTaskContext.getTask().isAutomatic()) {
@@ -200,22 +202,23 @@ public class Orchestrator implements TaskCallback {
         }
     }
 
-    private boolean allTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
-        for (Task task : dbHelper.getPhaseForContext(taskContext).tasks) {
-            if (task.state != State.SUCCESS) {
+    private boolean allBlockingTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
+
+        List<Task> tasksInPhaseForContext = dbHelper.getPhaseForContext(taskContext).tasks;
+        for (int i = 0; i < tasksInPhaseForContext.size(); i++) {
+            if (tasksInPhaseForContext.get(i).state != State.SUCCESS
+                    && taskContext.getPhase().getTasks().get(i).isBlocking()) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean isNewPhaseStatus(TaskExecutionContext context, TaskStatus taskStatus) {
+    private boolean isFirstTaskJustStarted(TaskExecutionContext context, TaskStatus taskStatus) {
         TaskConfig currentTask = context.getTask();
         boolean firstTaskJustStarted = currentTask.equals(context.getPhase().getInitialTask())
                 && taskStatus.isRunning();
-        boolean taskSuccceeded = taskStatus.isSuccess();
-        return firstTaskJustStarted || !taskSuccceeded
-                || allTasksInPhaseFinishedSuccessfully(context);
+        return firstTaskJustStarted;
     }
 
     private boolean isContextForFirstTaskOfPipe(TaskExecutionContext context) {
@@ -229,7 +232,7 @@ public class Orchestrator implements TaskCallback {
      */
     private PhaseStatus getNewFinishedPhaseStatus(TaskResult latestTaskResult) {
         if (!latestTaskResult.success()
-                || allTasksInPhaseFinishedSuccessfully(latestTaskResult.context())) {
+                || allBlockingTasksInPhaseFinishedSuccessfully(latestTaskResult.context())) {
             return PhaseStatus.newFinishedPhaseStatus(latestTaskResult.context(),
                     latestTaskResult.success());
         } else {

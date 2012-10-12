@@ -216,7 +216,7 @@ public class DBHelper {
 
     }
 
-    public void updatePipeToFinished(PipeVersion pipeVersion, boolean success) {
+    public synchronized void updatePipeToFinished(PipeVersion pipeVersion, boolean success) {
         try {
             Pipe pipe = getPipe(pipeVersion);
             pipe.finishNow(success);
