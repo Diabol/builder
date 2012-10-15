@@ -53,10 +53,9 @@ public class Pipes extends Controller {
         for (PhaseConfig phaseConf : pipeConf.getPhases()) {
             Phase phase = Phase.createNewFromConfig(phaseConf);
             result.phases.add(phase);
-            /**
-             * Tasks are not added to the initial data. Fetched when clicking on
-             * a phase.
-             */
+            for (TaskConfig taskConfig : phaseConf.getTasks()) {
+                phase.tasks.add(Task.createNewFromConfig(taskConfig));
+            }
         }
         return result;
     }

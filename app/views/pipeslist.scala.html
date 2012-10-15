@@ -17,7 +17,7 @@
 
 @createPipeMarkup(pipeCount: Int, pipe: Pipe) = {
     @for(phaseCount <- 0 until pipe.phases.length){
-        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" onclick="fetchAndDisplayLatestTasksForPhase('@{pipe.name}', '@{pipe.phases.get(phaseCount).name}');" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhaseText(pipe, pipe.phases.get(phaseCount))}</h2>
+        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhase(pipe, pipe.phases.get(phaseCount))}</h2>
         @if(phaseCount > 0) {
              @addEdge(pipe.name+pipe.phases.get(phaseCount-1).name, pipe.name+pipe.phases.get(phaseCount).name)
         }
@@ -31,25 +31,8 @@
         @for(i <- 0 until pipes.length){
         	shownPipeVersions['@{pipes.get(i).name}'] = "@{pipes.get(i).version}";
         }
-      	//Variables used for keeping track of which phase and pipe is selected.
-        var selectedPhase;
-      	var selectedPipe;
         window.onload = function() {
             initPageObjects();
-        }
-        
-        function fetchAndDisplayLatestTasksForPhase(pipeName, phaseName) {
-        	var displayTasks = function(tasks) {
-	        	var html = "<div id='taskHeader'>Tasks for phase: " + phaseName + ", pipe: "+pipeName+" and version: "+shownPipeVersions[pipeName]+".</div>";
-	        	for (counter = 0; counter < tasks.length; counter++) {
-	                html = html +"<div id='" + tasks[counter].name + "' class='task "+tasks[counter].state+"' style='left: "
-	                        + (30 + 150 * counter) + "px; top: 50px;'><div style='padding-top: 40%;'>"
-	                        + tasks[counter].name + "</div></div>";
-	            }
-	        	$('#tasks').html(html);
-        	}
-            highlightPhase(pipeName, phaseName);
-        	$.get("/pipe/"+pipeName+"/latest/"+phaseName+"/tasks", displayTasks);
         }
         
         function resetPhasesWithVersion(className, version){
@@ -69,7 +52,7 @@
         
         function updateTask(updateTaskData) {
         	function colorizeTask(colour) {
-        		$('#'+updateTaskData.taskName).animate({ backgroundColor: colour }, 'fast');
+        		$('#'+updateTaskData.pipeName+updateTaskData.phaseName+updateTaskData.taskName).animate({ backgroundColor: colour }, 'fast');
         	}
         	switch(updateTaskData.status) {
         	case "RUNNING":
@@ -124,16 +107,13 @@
                     	updatePhase(data);
                 	}
                 } else if(data.taskUpdate) {
-                	if(selectedPipe && selectedPipe == data.pipeName && selectedPhase && selectedPhase == data.phaseName && (shownPipeVersions[data.pipeName] == data.version)){
+                	if(shownPipeVersions[data.pipeName] == data.version){
                 		//The updated task is visible
                 		updateTask(data);
                 	}
                 } else if(data.newPipeVersion) {
                 	shownPipeVersions[data.pipeName] = data.version;
                 	resetPhasesWithVersion(data.pipeName, data.version);
-                	if(selectedPipe && selectedPipe == data.pipeName) {
-                		fetchAndDisplayLatestTasksForPhase(data.pipeName, selectedPhase)
-                	}
                 }
 
             }
@@ -145,11 +125,6 @@
     <table class="main_table" style="height: 100%;">
         <tr>
             <td style="vertical-align: top; padding: 0px;">
-                <div class="canvas" style="width: 100%; height: 200px;">
-                    <div id="tasks">
-                        <div id='taskHeader'>Tasks</div>
-                    </div>
-                </div>
                 <div id="mainCanvas" class="canvas" style="width: 100%; height: 500px;">
                     <div id="pipeList">Component pipes
                     @for(i <- 0 until pipes.length){

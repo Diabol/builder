@@ -90,9 +90,9 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
 
     @Test
     public void testRunPipeWithManualTask() throws Exception {
-        Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
         // Making first task of second phase manual.
         mockedConf.getPhases().get(1).getInitialTask().setIsAutomatic(false);
+        Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {

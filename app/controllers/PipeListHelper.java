@@ -2,6 +2,7 @@ package controllers;
 
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
+import models.statusdata.Task;
 import play.api.templates.Html;
 
 /**
@@ -20,12 +21,19 @@ public class PipeListHelper {
         return new Html(buf.toString());
     }
 
-    public static Html generateMarkupForPhaseText(Pipe pipe, Phase phase) {
+    public static Html generateMarkupForPhase(Pipe pipe, Phase phase) {
         StringBuffer buf = new StringBuffer();
         // Create the nodes
         buf.append("<div id='name'>" + phase.name + "</div><div id='version'>Version: "
                 + pipe.version + "</div><div id='state'>State: " + phase.state + "</div>");
-
+        buf.append("<div id='tasks' style='top:5px;'>");
+        for (int taskCount = 0; taskCount < phase.tasks.size(); taskCount++) {
+            Task task = phase.tasks.get(taskCount);
+            buf.append("<div id='" + pipe.name + phase.name + task.name + "' class='task "
+                    + task.state + " " + pipe.name + "' style='left: " + (10 + taskCount * 30)
+                    + "px;'></div>");
+        }
+        buf.append("</div>");
         return new Html(buf.toString());
     }
 }
