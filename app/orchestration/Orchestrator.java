@@ -11,6 +11,7 @@ import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 import notification.PipeNotificationHandler;
 import play.Logger;
 import utils.DBHelper;
@@ -65,13 +66,13 @@ public class Orchestrator implements TaskCallback {
     }
 
     /** Start first task of first phase of pipe */
-    public PipeVersion start(String pipeName) {
+    public PipeVersion start(String pipeName, VersionControlInfo vcInfo) {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getFirstPhaseConfig();
         TaskConfig task = phase.getInitialTask();
 
         PipeVersion version = getNextPipeVersion(pipe);
-        dbHelper.persistNewPipe(version, pipe);
+        dbHelper.persistNewPipe(version, vcInfo, pipe);
         notifictionHandler.notifyNewVersionOfPipe(version);
         startTask(task, phase, pipe, version);
 

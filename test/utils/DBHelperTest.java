@@ -20,6 +20,7 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,11 +38,13 @@ public class DBHelperTest {
 
     PipeConfig configuredPipe;
     PipeVersion version;
+    VersionControlInfo vcInfo;
 
     @Before
     public void setup() {
         configuredPipe = PipeConfReader.getInstance().getConfiguredPipes().get(0);
         version = PipeVersion.fromString("Version", configuredPipe);
+        vcInfo = new VersionControlInfo("#version", "Commit msg");
     }
 
     @After
@@ -57,7 +60,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 try {
                     Pipe persisted = DBHelper.getInstance().getPipe(version);
                     assertEquals(configuredPipe.getName(), persisted.name);
@@ -135,11 +138,11 @@ public class DBHelperTest {
             public void run() {
                 try {
 
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version1", configuredPipe), configuredPipe);
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version2", configuredPipe), configuredPipe);
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version3", configuredPipe), configuredPipe);
                     Pipe latest = DBHelper.getInstance().getLatestPipe(configuredPipe);
                     assertEquals("Version3", latest.version);
@@ -173,7 +176,7 @@ public class DBHelperTest {
                 try {
                     PipeConfig secondConfiguredPipe = PipeConfReader.getInstance()
                             .getConfiguredPipes().get(1);
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version1", secondConfiguredPipe),
                             secondConfiguredPipe);
                     DBHelper.getInstance().getLatestPipe(configuredPipe);
@@ -192,9 +195,9 @@ public class DBHelperTest {
             public void run() {
                 try {
 
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version1", configuredPipe), configuredPipe);
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version2", configuredPipe), configuredPipe);
                     PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
                     TaskConfig firstTask = firstPhase.getInitialTask();
@@ -221,7 +224,7 @@ public class DBHelperTest {
                 try {
                     PipeConfig secondConfiguredPipe = PipeConfReader.getInstance()
                             .getConfiguredPipes().get(1);
-                    DBHelper.getInstance().persistNewPipe(
+                    persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version1", secondConfiguredPipe),
                             secondConfiguredPipe);
                     DBHelper.getInstance().getLatestTasks(configuredPipe.getName(),
@@ -239,7 +242,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                 DBHelper.getInstance().updateTaskToOngoing(taskStatus);
@@ -278,7 +281,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 TaskResult successResult = new TaskResult(true, context);
 
@@ -302,7 +305,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 TaskResult failedResult = new TaskResult(false, context);
                 DBHelper.getInstance().updateTaskToFinished(
@@ -344,7 +347,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
                 DBHelper.getInstance().updatePhaseToOngoing(phaseStatus);
@@ -383,7 +386,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 DBHelper.getInstance().updatePhaseToFinished(
                         PhaseStatus.newFinishedPhaseStatus(context, true));
@@ -404,7 +407,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 TaskExecutionContext context = createContextForFirstTask();
                 DBHelper.getInstance().updatePhaseToFinished(
                         PhaseStatus.newFinishedPhaseStatus(context, false));
@@ -443,7 +446,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 DBHelper.getInstance().updatePipeToOnging(version);
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
@@ -478,7 +481,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 DBHelper.getInstance().updatePipeToFinished(version, true);
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
@@ -497,7 +500,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 DBHelper.getInstance().updatePipeToFinished(version, false);
                 try {
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
@@ -532,7 +535,7 @@ public class DBHelperTest {
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                DBHelper.getInstance().persistNewPipe(version, configuredPipe);
+                persistPipeWithVersionControlInfo(version, configuredPipe);
                 List<Task> persistedTasks;
                 try {
                     persistedTasks = DBHelper.getInstance().getTasks(configuredPipe.getName(),
@@ -595,6 +598,33 @@ public class DBHelperTest {
                 }
             }
         });
+    }
+
+    @Test
+    public void testThatVCInfoIsPersisted() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                persistPipeWithVersionControlInfo(version, configuredPipe);
+                try {
+                    Pipe persisted = DBHelper.getInstance().getPipe(version);
+                    // For some reason pipe.versionControlInfo is null when
+                    // using fakeApplication() but not when running a real
+                    // application.
+                    // Looking up the vci based on pipe id instead.
+                    VersionControlInfo persistedVC = VersionControlInfo.find.where()
+                            .eq("pipe_id", persisted.pipeId).findList().get(0);
+                    assertEquals(vcInfo.versionControlId, persistedVC.versionControlId);
+                    assertEquals(vcInfo.versionControlText, persistedVC.versionControlText);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+            }
+        });
+    }
+
+    private void persistPipeWithVersionControlInfo(PipeVersion pVersion, PipeConfig pipeConfig) {
+        DBHelper.getInstance().persistNewPipe(pVersion, vcInfo, pipeConfig);
     }
 
     private TaskExecutionContext createContextForFirstTask() {

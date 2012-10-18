@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import models.config.PipeConfig;
 import play.data.validation.Constraints;
@@ -20,13 +21,16 @@ public class Pipe extends CDEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public long pipeId;
+    public Long pipeId;
 
     @Constraints.Required
     public String name;
 
     @Constraints.Required
     public String version;
+
+    @OneToOne(mappedBy = "pipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    public VersionControlInfo versionControlInfo;
 
     @OneToMany(mappedBy = "pipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     public List<Phase> phases;
@@ -48,8 +52,8 @@ public class Pipe extends CDEntity {
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        buf.append("\nPipe Name: " + name + ", version: " + version + ", status: "
-                + super.toString());
+        buf.append("\nPipe Name: " + name + ", version: " + version + ", versionControlInfo: "
+                + versionControlInfo + ", status: " + super.toString());
         buf.append("\n");
         buf.append("Phases: \n");
         for (Phase ph : phases) {

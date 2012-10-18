@@ -1,6 +1,7 @@
 package orchestration;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.running;
 
@@ -17,6 +18,7 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 import notification.PhaseStatusChangedListener;
 import notification.PipeNotificationHandler;
 import notification.PipeStatusChangedListener;
@@ -39,8 +41,9 @@ import utils.PipeConfReader;
 /**
  * 'Component' test of {@link Orchestrator}.
  * 
- * This will execute the full system: read the pipe config, start a pipe and
- * check that notifications are sent and that the correct result is persisted.
+ * This will execute the full system except for the config which is mocked to
+ * ease testing. It starts a pipe and check that notifications are sent and that
+ * the correct result is persisted.
  * 
  * @author marcus
  */
@@ -57,6 +60,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
     private int numberOfFailedPhaseStatusRecieved;
     private PipeConfig mockedConf;
     private Orchestrator target;
+    private VersionControlInfo vcInfo;
 
     @Mock
     private PipeConfReader confReader;
@@ -81,6 +85,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         target = new Orchestrator();
         target.setPipeConfigReader(confReader);
         mockedConf = mockConfig();
+        vcInfo = new VersionControlInfo("#1", "Commit text");
 
         PipeNotificationHandler handler = PipeNotificationHandler.getInstance();
         handler.addTaskStatusChangedListener(this);
@@ -96,7 +101,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                PipeVersion pipeVersion = target.start("ThePipe");
+                PipeVersion pipeVersion = target.start("ThePipe", vcInfo);
                 assertThat(pipeVersion).isNotNull();
                 // Wait for the tasks of the first phase to finish.
                 while (numberOfSuccessfullTaskStatusRecieved < 4) {
@@ -138,7 +143,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                PipeVersion pipeVersion = target.start("ThePipe");
+                PipeVersion pipeVersion = target.start("ThePipe", vcInfo);
                 assertThat(pipeVersion).isNotNull();
                 waitAndAssertSuccessfullPipe(pipeVersion);
             }
@@ -158,6 +163,14 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
 
         try {
             Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
+            // For some reason pipe.versionControlInfo is null when
+            // using fakeApplication() but not when running a real
+            // application.
+            // Looking up the vci based on pipe id instead.
+            VersionControlInfo persistedVC = VersionControlInfo.find.where()
+                    .eq("pipe_id", persistedPipe.pipeId).findList().get(0);
+            assertEquals(vcInfo.versionControlId, persistedVC.versionControlId);
+            assertEquals(vcInfo.versionControlText, persistedVC.versionControlText);
             assertThat(persistedPipe.state).isEqualTo(State.SUCCESS);
             assertFirstPhaseSuccessFull(persistedPipe);
             assertSecondPhaseSuccessFull(persistedPipe);

@@ -11,6 +11,7 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 import play.db.ebean.Model.Finder;
 import executor.TaskExecutionContext;
 
@@ -60,9 +61,12 @@ public class DBHelper {
         this.taskFind = taskFinder;
     }
 
-    public synchronized void persistNewPipe(PipeVersion version, PipeConfig pipe) {
+    public synchronized void persistNewPipe(PipeVersion version, VersionControlInfo vcInfo,
+            PipeConfig pipe) {
         // Create the pipe
         Pipe pipeData = Pipe.createNewFromConfig(version.getVersion(), pipe);
+        vcInfo.pipe = pipeData;
+        pipeData.versionControlInfo = vcInfo;
         pipeData.save();
         // Create the phases belonging to the pipe
         for (PhaseConfig phaseConf : pipe.getPhases()) {

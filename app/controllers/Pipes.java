@@ -10,6 +10,7 @@ import models.config.TaskConfig;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 import notification.PipeNotificationHandler;
 import notification.impl.PipeListStatusChangeListener;
 import orchestration.Orchestrator;
@@ -50,6 +51,7 @@ public class Pipes extends Controller {
 
     private static Pipe createNotStartedPipe(PipeConfig pipeConf) {
         Pipe result = Pipe.createNewFromConfig("NA", pipeConf);
+        result.versionControlInfo = VersionControlInfo.createVCInfoNotAvailable();
         for (PhaseConfig phaseConf : pipeConf.getPhases()) {
             Phase phase = Phase.createNewFromConfig(phaseConf);
             result.phases.add(phase);
@@ -62,7 +64,8 @@ public class Pipes extends Controller {
 
     public static Result start(String pipeName) {
         try {
-            PipeVersion pipeVersion = new Orchestrator().start(pipeName);
+            PipeVersion pipeVersion = new Orchestrator().start(pipeName,
+                    VersionControlInfo.createVCInfoNotAvailable());
             String pipeUrl = createNewPipeUrl(pipeVersion);
             return generatePipeStartedResult(pipeVersion, pipeUrl);
         } catch (Exception e) {
@@ -71,6 +74,10 @@ public class Pipes extends Controller {
             return internalServerError(errMsg);
         }
     }
+
+    /**
+     * TODO:Add method for starting pipe with version control information.
+     */
 
     public static Result startTask(String taskName, String phaseName, String pipeName,
             String pipeVersion) {

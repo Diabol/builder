@@ -20,6 +20,7 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 import notification.PipeNotificationHandler;
 
 import org.junit.After;
@@ -56,6 +57,7 @@ public class OrchestratorTest {
     Pipe failedPipe;
     Pipe successfullPipe;
     String stringVersion = "1";
+    private final VersionControlInfo firstCommit = new VersionControlInfo("#1", "FirstCommit");
 
     @Before
     public void prepare() {
@@ -87,8 +89,8 @@ public class OrchestratorTest {
     public void testStartPipeForTheFirstTimePersistsNewVersionOfPipeAndNotifiesAboutNewVersion()
             throws Exception {
         when(dbHelper.getLatestPipe(pipeConf)).thenThrow(new DataNotFoundException(""));
-        orchestrator.start("ThePipe");
-        verify(dbHelper).persistNewPipe(version, pipeConf);
+        orchestrator.start("ThePipe", firstCommit);
+        verify(dbHelper).persistNewPipe(version, firstCommit, pipeConf);
         verify(notificationHandler).notifyNewVersionOfPipe(version);
     }
 
@@ -96,9 +98,10 @@ public class OrchestratorTest {
     public void testStartPipeIncrementsVersionWhenEarlierExists() throws Exception {
         Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
         when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
-        orchestrator.start("ThePipe");
+        VersionControlInfo secondCommit = new VersionControlInfo("#2", "SecondCommit");
+        orchestrator.start("ThePipe", secondCommit);
         PipeVersion newVersion = PipeVersion.fromString("2", pipeConf);
-        verify(dbHelper).persistNewPipe(newVersion, pipeConf);
+        verify(dbHelper).persistNewPipe(newVersion, secondCommit, pipeConf);
         verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
     }
 

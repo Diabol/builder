@@ -20,7 +20,7 @@ public class Task extends CDEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public long taskId;
+    public Long taskId;
 
     @Constraints.Required
     public String name;

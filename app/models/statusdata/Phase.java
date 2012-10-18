@@ -22,7 +22,7 @@ public class Phase extends CDEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public long phaseId;
+    public Long phaseId;
 
     @Constraints.Required
     public String name;

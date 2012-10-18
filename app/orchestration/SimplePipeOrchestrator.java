@@ -9,6 +9,7 @@ import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
 import models.statusdata.Pipe;
+import models.statusdata.VersionControlInfo;
 import notification.PipeNotificationHandler;
 import play.Logger;
 import utils.DBHelper;
@@ -29,7 +30,8 @@ public class SimplePipeOrchestrator implements Runnable {
 
     @Override
     public void run() {
-        DBHelper.getInstance().persistNewPipe(PipeVersion.fromString(version, pipe), pipe);
+        DBHelper.getInstance().persistNewPipe(PipeVersion.fromString(version, pipe),
+                VersionControlInfo.createVCInfoNotAvailable(), pipe);
         for (PhaseConfig phase : pipe.getPhases()) {
             TaskExecutionContext context = new TaskExecutionContext(null, pipe, phase,
                     PipeVersion.fromString(version, pipe));
