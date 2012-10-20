@@ -2,7 +2,7 @@
 <project name="builder-static_analysis" default="static-analysis" basedir="..">
 
   <property name="sbt.location" location="/usr/local/bin/sbt" />
-  <property name="findbugs.home" value="${basedir}/lib" />
+  <property name="findbugs.home" location="${basedir}/lib/" />
 
   <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpath="${basedir}/lib/findbugs-ant.jar" />
 
