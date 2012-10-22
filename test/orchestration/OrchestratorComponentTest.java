@@ -6,8 +6,10 @@ import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.running;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import junit.framework.Assert;
 import models.PipeVersion;
 import models.StatusInterface.State;
 import models.config.PhaseConfig;
@@ -24,6 +26,8 @@ import notification.PipeNotificationHandler;
 import notification.PipeStatusChangedListener;
 import notification.TaskStatusChangedListener;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,10 +37,14 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import play.Logger;
+import play.mvc.Http.Context;
+import play.mvc.Http.Request;
+import play.mvc.Http.RequestBody;
 import test.MockitoTestBase;
 import utils.DBHelper;
 import utils.DataNotFoundException;
 import utils.PipeConfReader;
+import controllers.GitHub;
 
 /**
  * 'Component' test of {@link Orchestrator}.
@@ -151,6 +159,55 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         });
     }
 
+    @Test
+    public void testRunAutomaticTriggeredByGithubAndIdAndTextIsPersisted() {
+        Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Mock the request object where the json payload from
+                    // Github is read.
+                    String commitMsg = "Commit msg";
+                    String commitId = "#asd120923rf";
+                    JsonNode githubJson = createJsonWithCommit(commitId, commitMsg);
+                    Request requestMock = Mockito.mock(Request.class);
+                    RequestBody body = Mockito.mock(RequestBody.class);
+                    Mockito.when(body.asJson()).thenReturn(githubJson);
+                    Mockito.when(requestMock.body()).thenReturn(body);
+                    Context.current.set(new Context(requestMock, new HashMap<String, String>(),
+                            new HashMap<String, String>()));
+                    GitHub.start("ThePipe");
+                    while (numberOfSuccessfullPhaseStatusRecieved < 3) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            assertThat(true).isFalse();
+                        }
+                    }
+                    Pipe latest = DBHelper.getInstance().getLatestPipe(mockedConf);
+                    VersionControlInfo persistedVC = VersionControlInfo.find.where()
+                            .eq("pipe_id", latest.pipeId).findList().get(0);
+                    assertThat(persistedVC.versionControlId).isEqualTo(commitId);
+                    assertThat(persistedVC.versionControlText).isEqualTo(commitMsg);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Assert.assertTrue(false);
+                }
+
+            }
+
+        });
+    }
+
+    private JsonNode createJsonWithCommit(String id, String message) throws Exception {
+        String jsonString = "{\"commits\":[{\"message\":\"" + message + "\",\"id\":\"" + id
+                + "\"}]}";
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readTree(jsonString);
+    }
+
     private void waitAndAssertSuccessfullPipe(PipeVersion pipeVersion) {
         while (numberOfSuccessfullPhaseStatusRecieved < 3) {
             try {
@@ -172,6 +229,8 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
             assertEquals(vcInfo.versionControlId, persistedVC.versionControlId);
             assertEquals(vcInfo.versionControlText, persistedVC.versionControlText);
             assertThat(persistedPipe.state).isEqualTo(State.SUCCESS);
+            assertThat(persistedPipe.versionControlInfo.versionControlId).isEqualTo(
+                    vcInfo.versionControlId);
             assertFirstPhaseSuccessFull(persistedPipe);
             assertSecondPhaseSuccessFull(persistedPipe);
             assertThirdPhaseSuccessFull(persistedPipe);
