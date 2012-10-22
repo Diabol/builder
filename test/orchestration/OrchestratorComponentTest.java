@@ -122,7 +122,8 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                 }
 
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion.getPipeName(),
+                            pipeVersion.getVersion());
                     assertThat(persistedPipe.state).isEqualTo(State.RUNNING);
                     assertFirstPhaseSuccessFull(persistedPipe);
                     assertThat(numberOfRunningTaskStatusRecieved).isEqualTo(4);
@@ -219,7 +220,8 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         }
 
         try {
-            Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion);
+            Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion.getPipeName(),
+                    pipeVersion.getVersion());
             // For some reason pipe.versionControlInfo is null when
             // using fakeApplication() but not when running a real
             // application.
@@ -259,7 +261,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
     }
 
     @Override
-    public void receiveNewVersion(PipeVersion version, VersionControlInfo vcInfo) {
+    public void receiveNewVersion(PipeVersion version) {
         numberOfNewPipereceived++;
     }
 

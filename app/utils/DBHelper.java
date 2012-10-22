@@ -11,7 +11,6 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
-import models.statusdata.VersionControlInfo;
 import play.db.ebean.Model.Finder;
 import executor.TaskExecutionContext;
 
@@ -61,12 +60,11 @@ public class DBHelper {
         this.taskFind = taskFinder;
     }
 
-    public synchronized void persistNewPipe(PipeVersion version, VersionControlInfo vcInfo,
-            PipeConfig pipe) {
+    public synchronized void persistNewPipe(PipeVersion version, PipeConfig pipe) {
         // Create the pipe
         Pipe pipeData = Pipe.createNewFromConfig(version.getVersion(), pipe);
-        vcInfo.pipe = pipeData;
-        pipeData.versionControlInfo = vcInfo;
+        version.getVersionControlInfo().pipe = pipeData;
+        pipeData.versionControlInfo = version.getVersionControlInfo();
         pipeData.save();
         // Create the phases belonging to the pipe
         for (PhaseConfig phaseConf : pipe.getPhases()) {
@@ -178,16 +176,15 @@ public class DBHelper {
         }
     }
 
-    public Pipe getPipe(PipeVersion version) throws DataNotFoundException {
-        List<Pipe> foundPipes = pipeFind.where().eq("name", version.getPipeName())
-                .eq("version", version.getVersion()).findList();
+    public Pipe getPipe(String name, String version) throws DataNotFoundException {
+        List<Pipe> foundPipes = pipeFind.where().eq("name", name).eq("version", version).findList();
         if (foundPipes.size() == 0) {
-            throw new DataNotFoundException("No data found for pipe '" + version.getPipeName()
-                    + "' with version " + version.getVersion());
+            throw new DataNotFoundException("No data found for pipe '" + name + "' with version "
+                    + version);
         } else if (foundPipes.size() > 1) {
             throw new DataInconsistencyException("Found " + foundPipes.size()
-                    + " instances of pipe with name " + version.getPipeName() + " and version "
-                    + version.getVersion() + ". Should only be 1 match.");
+                    + " instances of pipe with name " + name + " and version " + version
+                    + ". Should only be 1 match.");
         } else {
             return foundPipes.get(0);
         }
@@ -209,7 +206,7 @@ public class DBHelper {
 
     public synchronized void updatePipeToOnging(PipeVersion pipeVersion) {
         try {
-            Pipe pipe = getPipe(pipeVersion);
+            Pipe pipe = getPipe(pipeVersion.getPipeName(), pipeVersion.getVersion());
             pipe.startNow();
             pipe.save();
         } catch (DataNotFoundException ex) {
@@ -222,7 +219,7 @@ public class DBHelper {
 
     public synchronized void updatePipeToFinished(PipeVersion pipeVersion, boolean success) {
         try {
-            Pipe pipe = getPipe(pipeVersion);
+            Pipe pipe = getPipe(pipeVersion.getPipeName(), pipeVersion.getVersion());
             pipe.finishNow(success);
             pipe.save();
         } catch (DataNotFoundException ex) {

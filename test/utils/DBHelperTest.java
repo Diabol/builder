@@ -43,8 +43,8 @@ public class DBHelperTest {
     @Before
     public void setup() {
         configuredPipe = PipeConfReader.getInstance().getConfiguredPipes().get(0);
-        version = PipeVersion.fromString("Version", configuredPipe);
         vcInfo = new VersionControlInfo("#version", "Commit msg");
+        version = PipeVersion.fromString("Version", vcInfo, configuredPipe);
     }
 
     @After
@@ -62,7 +62,8 @@ public class DBHelperTest {
             public void run() {
                 persistPipeWithVersionControlInfo(version, configuredPipe);
                 try {
-                    Pipe persisted = DBHelper.getInstance().getPipe(version);
+                    Pipe persisted = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(configuredPipe.getName(), persisted.name);
                     assertEquals(State.NOT_STARTED, persisted.state);
                     /**
@@ -93,7 +94,7 @@ public class DBHelperTest {
             @Override
             public void run() {
                 try {
-                    DBHelper.getInstance().getPipe(version);
+                    DBHelper.getInstance().getPipe(version.getPipeName(), version.getVersion());
                 } catch (DataNotFoundException e) {
                     assertTrue(e != null);
                 }
@@ -119,7 +120,7 @@ public class DBHelperTest {
                     when(mockedFinder.where()).thenReturn(mockedExprList);
 
                     DBHelper.getInstance().setPipeFinder(mockedFinder);
-                    DBHelper.getInstance().getPipe(version);
+                    DBHelper.getInstance().getPipe(version.getPipeName(), version.getVersion());
                     assertTrue(false);
                 } catch (DataInconsistencyException e) {
                     // Expected exception
@@ -139,11 +140,12 @@ public class DBHelperTest {
                 try {
 
                     persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version1", configuredPipe), configuredPipe);
-                    persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version2", configuredPipe), configuredPipe);
-                    persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version3", configuredPipe), configuredPipe);
+                            PipeVersion.fromString("Version1", vcInfo, configuredPipe),
+                            configuredPipe);
+                    persistPipeWithVersionControlInfo(PipeVersion.fromString("Version2",
+                            new VersionControlInfo("2", "2"), configuredPipe), configuredPipe);
+                    persistPipeWithVersionControlInfo(PipeVersion.fromString("Version3",
+                            new VersionControlInfo("3", "3"), configuredPipe), configuredPipe);
                     Pipe latest = DBHelper.getInstance().getLatestPipe(configuredPipe);
                     assertEquals("Version3", latest.version);
                 } catch (DataNotFoundException e) {
@@ -177,7 +179,7 @@ public class DBHelperTest {
                     PipeConfig secondConfiguredPipe = PipeConfReader.getInstance()
                             .getConfiguredPipes().get(1);
                     persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version1", secondConfiguredPipe),
+                            PipeVersion.fromString("Version1", vcInfo, secondConfiguredPipe),
                             secondConfiguredPipe);
                     DBHelper.getInstance().getLatestPipe(configuredPipe);
                     assertTrue(false);
@@ -196,14 +198,16 @@ public class DBHelperTest {
                 try {
 
                     persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version1", configuredPipe), configuredPipe);
-                    persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version2", configuredPipe), configuredPipe);
+                            PipeVersion.fromString("Version1", vcInfo, configuredPipe),
+                            configuredPipe);
+                    persistPipeWithVersionControlInfo(PipeVersion.fromString("Version2",
+                            new VersionControlInfo("2", "2"), configuredPipe), configuredPipe);
                     PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
                     TaskConfig firstTask = firstPhase.getInitialTask();
                     TaskExecutionContext context = new TaskExecutionContext(firstTask,
                             configuredPipe, configuredPipe.getPhases().get(0), PipeVersion
-                                    .fromString("Version2", configuredPipe));
+                                    .fromString("Version2", new VersionControlInfo("2", "2"),
+                                            configuredPipe));
                     TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                     DBHelper.getInstance().updateTaskToOngoing(taskStatus);
                     List<Task> latestTasks = DBHelper.getInstance().getLatestTasks(
@@ -225,7 +229,7 @@ public class DBHelperTest {
                     PipeConfig secondConfiguredPipe = PipeConfReader.getInstance()
                             .getConfiguredPipes().get(1);
                     persistPipeWithVersionControlInfo(
-                            PipeVersion.fromString("Version1", secondConfiguredPipe),
+                            PipeVersion.fromString("Version1", vcInfo, secondConfiguredPipe),
                             secondConfiguredPipe);
                     DBHelper.getInstance().getLatestTasks(configuredPipe.getName(),
                             configuredPipe.getFirstPhaseConfig().getName());
@@ -247,7 +251,8 @@ public class DBHelperTest {
                 TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                 DBHelper.getInstance().updateTaskToOngoing(taskStatus);
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.RUNNING, persistedPipe.phases.get(0).tasks.get(0).state);
                     assertTrue(persistedPipe.phases.get(0).tasks.get(0).started != null);
                 } catch (DataNotFoundException e) {
@@ -289,7 +294,8 @@ public class DBHelperTest {
                         TaskStatus.newFinishedTaskStatus(successResult));
 
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.SUCCESS, persistedPipe.phases.get(0).tasks.get(0).state);
                     assertTrue(persistedPipe.phases.get(0).tasks.get(0).finished != null);
                 } catch (DataNotFoundException e) {
@@ -312,7 +318,8 @@ public class DBHelperTest {
                         TaskStatus.newFinishedTaskStatus(failedResult));
 
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.FAILURE, persistedPipe.phases.get(0).tasks.get(0).state);
                     assertTrue(persistedPipe.phases.get(0).tasks.get(0).finished != null);
                 } catch (DataNotFoundException e) {
@@ -352,7 +359,8 @@ public class DBHelperTest {
                 PhaseStatus phaseStatus = PhaseStatus.newRunningPhaseStatus(context);
                 DBHelper.getInstance().updatePhaseToOngoing(phaseStatus);
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.RUNNING, persistedPipe.phases.get(0).state);
                     assertTrue(persistedPipe.phases.get(0).started != null);
                 } catch (DataNotFoundException e) {
@@ -391,7 +399,8 @@ public class DBHelperTest {
                 DBHelper.getInstance().updatePhaseToFinished(
                         PhaseStatus.newFinishedPhaseStatus(context, true));
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.SUCCESS, persistedPipe.phases.get(0).state);
                     assertTrue(persistedPipe.phases.get(0).finished != null);
                 } catch (DataNotFoundException e) {
@@ -412,7 +421,8 @@ public class DBHelperTest {
                 DBHelper.getInstance().updatePhaseToFinished(
                         PhaseStatus.newFinishedPhaseStatus(context, false));
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.FAILURE, persistedPipe.phases.get(0).state);
                     assertTrue(persistedPipe.phases.get(0).finished != null);
                 } catch (DataNotFoundException e) {
@@ -449,7 +459,8 @@ public class DBHelperTest {
                 persistPipeWithVersionControlInfo(version, configuredPipe);
                 DBHelper.getInstance().updatePipeToOnging(version);
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.RUNNING, persistedPipe.state);
                     assertTrue(persistedPipe.started != null);
                 } catch (DataNotFoundException e) {
@@ -484,7 +495,8 @@ public class DBHelperTest {
                 persistPipeWithVersionControlInfo(version, configuredPipe);
                 DBHelper.getInstance().updatePipeToFinished(version, true);
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.SUCCESS, persistedPipe.state);
                     assertTrue(persistedPipe.finished != null);
                 } catch (DataNotFoundException e) {
@@ -503,7 +515,8 @@ public class DBHelperTest {
                 persistPipeWithVersionControlInfo(version, configuredPipe);
                 DBHelper.getInstance().updatePipeToFinished(version, false);
                 try {
-                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version);
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     assertEquals(State.FAILURE, persistedPipe.state);
                     assertTrue(persistedPipe.finished != null);
                 } catch (DataNotFoundException e) {
@@ -607,7 +620,8 @@ public class DBHelperTest {
             public void run() {
                 persistPipeWithVersionControlInfo(version, configuredPipe);
                 try {
-                    Pipe persisted = DBHelper.getInstance().getPipe(version);
+                    Pipe persisted = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
                     // For some reason pipe.versionControlInfo is null when
                     // using fakeApplication() but not when running a real
                     // application.
@@ -624,7 +638,7 @@ public class DBHelperTest {
     }
 
     private void persistPipeWithVersionControlInfo(PipeVersion pVersion, PipeConfig pipeConfig) {
-        DBHelper.getInstance().persistNewPipe(pVersion, vcInfo, pipeConfig);
+        DBHelper.getInstance().persistNewPipe(pVersion, pipeConfig);
     }
 
     private TaskExecutionContext createContextForFirstTask() {

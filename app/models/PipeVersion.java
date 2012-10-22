@@ -3,6 +3,7 @@ package models;
 import java.util.Comparator;
 
 import models.config.PipeConfig;
+import models.statusdata.VersionControlInfo;
 
 /**
  * Encapsulates the pipe version with the version as a string with an injectable
@@ -14,28 +15,34 @@ public class PipeVersion implements Comparable<PipeVersion> {
 
     private final String version;
     private final PipeConfig pipe;
+    private final VersionControlInfo versionControlInfo;
     private Comparator<PipeVersion> comparator;
 
-    public static PipeVersion fromString(String pipeVersion, PipeConfig pipe) {
-        return new PipeVersion(pipeVersion, pipe);
+    public static PipeVersion fromString(String pipeVersion, VersionControlInfo vcInfo,
+            PipeConfig pipe) {
+        return new PipeVersion(pipeVersion, vcInfo, pipe);
     }
 
-    PipeVersion(String version, PipeConfig pipe) throws PipeVersionValidationException {
+    PipeVersion(String version, VersionControlInfo vcInfo, PipeConfig pipe)
+            throws PipeVersionValidationException {
         this.version = version;
         this.pipe = pipe;
+        this.versionControlInfo = vcInfo;
         validate();
     }
 
-    PipeVersion(String version, PipeConfig pipe, Comparator<PipeVersion> comparator)
-            throws PipeVersionValidationException {
-        this(version, pipe);
+    PipeVersion(String version, VersionControlInfo vcInfo, PipeConfig pipe,
+            Comparator<PipeVersion> comparator) throws PipeVersionValidationException {
+        this(version, vcInfo, pipe);
         this.comparator = comparator;
     }
 
     private void validate() throws PipeVersionValidationException {
         // TODO More validation
-        if (version == null || version.isEmpty() || pipe == null || pipe.getName().isEmpty()) {
-            throw new PipeVersionValidationException("Could not create pipe version from: '" + version + "'.");
+        if (version == null || version.isEmpty() || pipe == null || pipe.getName().isEmpty()
+                || versionControlInfo == null) {
+            throw new PipeVersionValidationException("Could not create pipe version from: '"
+                    + version + "'.");
         }
     }
 
@@ -45,6 +52,10 @@ public class PipeVersion implements Comparable<PipeVersion> {
 
     public String getPipeName() {
         return pipe.getName();
+    }
+
+    public VersionControlInfo getVersionControlInfo() {
+        return versionControlInfo;
     }
 
     @Override
@@ -60,6 +71,7 @@ public class PipeVersion implements Comparable<PipeVersion> {
         StringBuilder builder = new StringBuilder();
         builder.append("PipeStringVersion [version=");
         builder.append(getVersion());
+        builder.append(", versionControlInfo=" + versionControlInfo.toString());
         builder.append(", pipeName=");
         builder.append(getPipeName());
         builder.append("]");

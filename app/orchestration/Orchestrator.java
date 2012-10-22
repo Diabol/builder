@@ -71,30 +71,33 @@ public class Orchestrator implements TaskCallback {
         PhaseConfig phase = pipe.getFirstPhaseConfig();
         TaskConfig task = phase.getInitialTask();
 
-        PipeVersion version = getNextPipeVersion(pipe);
-        dbHelper.persistNewPipe(version, vcInfo, pipe);
-        notifictionHandler.notifyNewVersionOfPipe(version, vcInfo);
+        PipeVersion version = getNextPipeVersion(pipe, vcInfo);
+        dbHelper.persistNewPipe(version, pipe);
+        notifictionHandler.notifyNewVersionOfPipe(version);
         startTask(task, phase, pipe, version);
 
         return version;
     }
 
     /** Try to start given task in given phase and pipe version. */
-    public void startTask(String taskName, String phaseName, String pipeName, String pipeVersion) {
+    public void startTask(String taskName, String phaseName, String pipeName, String pipeVersion)
+            throws DataNotFoundException {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getPhaseByName(phaseName);
         TaskConfig task = phase.getTaskByName(taskName);
-        PipeVersion version = PipeVersion.fromString(pipeVersion, pipe);
+        Pipe persisted = dbHelper.getPipe(pipeName, pipeVersion);
+        PipeVersion version = PipeVersion.fromString(pipeVersion, persisted.versionControlInfo,
+                pipe);
         startTask(task, phase, pipe, version);
     }
 
-    private PipeVersion getNextPipeVersion(PipeConfig pipe) {
+    private PipeVersion getNextPipeVersion(PipeConfig pipe, VersionControlInfo vcInfo) {
         try {
             Pipe latestPipe = dbHelper.getLatestPipe(pipe);
             long latest = Long.valueOf(latestPipe.version);
-            return PipeVersion.fromString("" + ++latest, pipe);
+            return PipeVersion.fromString("" + ++latest, vcInfo, pipe);
         } catch (DataNotFoundException ex) {
-            return PipeVersion.fromString("1", pipe);
+            return PipeVersion.fromString("1", vcInfo, pipe);
         }
     }
 
@@ -147,7 +150,8 @@ public class Orchestrator implements TaskCallback {
             if (result.success()) {
                 // Start next task only if the pipe is still running.
                 try {
-                    Pipe currentPipe = dbHelper.getPipe(result.context().getPipeVersion());
+                    Pipe currentPipe = dbHelper.getPipe(result.context().getPipe().getName(),
+                            result.context().getPipeVersion().getVersion());
                     if (currentPipe.state == State.RUNNING) {
                         startNextTask(result);
                     }

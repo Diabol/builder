@@ -67,7 +67,7 @@ public class OrchestratorTest {
         orchestrator.setTaskexecutor(taskExecutor);
         orchestrator.setPipeConfigReader(confReader);
         pipeConf = mockConfig();
-        version = PipeVersion.fromString(stringVersion, pipeConf);
+        version = PipeVersion.fromString(stringVersion, firstCommit, pipeConf);
         runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
         runningPipe.startNow();
         failedPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
@@ -90,8 +90,8 @@ public class OrchestratorTest {
             throws Exception {
         when(dbHelper.getLatestPipe(pipeConf)).thenThrow(new DataNotFoundException(""));
         orchestrator.start("ThePipe", firstCommit);
-        verify(dbHelper).persistNewPipe(version, firstCommit, pipeConf);
-        verify(notificationHandler).notifyNewVersionOfPipe(version, firstCommit);
+        verify(dbHelper).persistNewPipe(version, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(version);
     }
 
     @Test
@@ -100,9 +100,9 @@ public class OrchestratorTest {
         when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
         VersionControlInfo secondCommit = new VersionControlInfo("#2", "SecondCommit");
         orchestrator.start("ThePipe", secondCommit);
-        PipeVersion newVersion = PipeVersion.fromString("2", pipeConf);
-        verify(dbHelper).persistNewPipe(newVersion, secondCommit, pipeConf);
-        verify(notificationHandler).notifyNewVersionOfPipe(newVersion, secondCommit);
+        PipeVersion newVersion = PipeVersion.fromString("2", secondCommit, pipeConf);
+        verify(dbHelper).persistNewPipe(newVersion, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class OrchestratorTest {
         Phase phaseWithAllTasksSuccess = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
 
         when(dbHelper.getPhaseForContext(context)).thenReturn(phaseWithAllTasksSuccess);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
         orchestrator.handleTaskResult(success);
 
         TaskStatus successTaskStatus = TaskStatus.newFinishedTaskStatus(success);
@@ -169,13 +169,14 @@ public class OrchestratorTest {
         Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
         Phase lastPhase = createSuccessfullPhase(lastPhaseConf);
         when(dbHelper.getPhaseForContext(context)).thenReturn(lastPhase);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
         Pipe pipeWithAllPhasesSuccess = Pipe.createNewFromConfig(stringVersion, pipeConf);
         pipeWithAllPhasesSuccess.phases.add(firstPhase);
         pipeWithAllPhasesSuccess.phases.add(lastPhase);
 
-        when(dbHelper.getPipe(version)).thenReturn(pipeWithAllPhasesSuccess);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(
+                pipeWithAllPhasesSuccess);
 
         orchestrator.handleTaskResult(success);
 
@@ -197,7 +198,7 @@ public class OrchestratorTest {
 
         Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -220,13 +221,13 @@ public class OrchestratorTest {
         Phase firstPhase = createSuccessfullPhase(pipeConf.getFirstPhaseConfig());
         firstPhase.tasks.get(1).state = State.RUNNING;
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
         verify(dbHelper).updateTaskToFinished((TaskStatus) Mockito.notNull());
         verify(notificationHandler).notifyTaskStatusListeners((TaskStatus) Mockito.notNull());
         verify(dbHelper, Mockito.atLeastOnce()).getPhaseForContext(context);
-        verify(dbHelper).getPipe(version);
+        verify(dbHelper).getPipe(version.getPipeName(), version.getVersion());
         verifyNoMoreInteractions(dbHelper);
         verifyNoMoreInteractions(notificationHandler);
         verifyNoMoreInteractions(taskExecutor);
@@ -245,7 +246,7 @@ public class OrchestratorTest {
         firstPhase.tasks.get(1).state = State.FAILURE;
 
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -286,7 +287,7 @@ public class OrchestratorTest {
         firstPhase.tasks.get(1).state = State.RUNNING;
 
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -327,7 +328,7 @@ public class OrchestratorTest {
         Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
         firstPhase.tasks.get(0).finishNow(true);
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenReturn(runningPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -346,7 +347,7 @@ public class OrchestratorTest {
         Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
         firstPhase.tasks.get(0).finishNow(true);
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenReturn(failedPipe);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(failedPipe);
 
         orchestrator.handleTaskResult(success);
 
@@ -362,7 +363,8 @@ public class OrchestratorTest {
         Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
         firstPhase.tasks.get(0).finishNow(true);
         when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
-        when(dbHelper.getPipe(version)).thenThrow(new DataNotFoundException("Message"));
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenThrow(
+                new DataNotFoundException("Message"));
         try {
             orchestrator.handleTaskResult(success);
             assertTrue(false);
