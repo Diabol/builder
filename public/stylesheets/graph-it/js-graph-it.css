@@ -30,8 +30,16 @@ div.block, h1.block, h2.block, p.block
     -webkit-border-radius: 15px;
     -moz-border-radius: 15px;
     border-radius: 15px;
-    height: 75px;
+    height: 100px;
     width: 200px;
+}
+
+#version {
+	padding-top: 3px;
+}
+
+#tasks {
+	padding-top: 5px;
 }
 
 .SUCCESS

@@ -228,9 +228,6 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                     .eq("pipe_id", persistedPipe.pipeId).findList().get(0);
             assertEquals(vcInfo.versionControlId, persistedVC.versionControlId);
             assertEquals(vcInfo.versionControlText, persistedVC.versionControlText);
-            assertThat(persistedPipe.state).isEqualTo(State.SUCCESS);
-            assertThat(persistedPipe.versionControlInfo.versionControlId).isEqualTo(
-                    vcInfo.versionControlId);
             assertFirstPhaseSuccessFull(persistedPipe);
             assertSecondPhaseSuccessFull(persistedPipe);
             assertThirdPhaseSuccessFull(persistedPipe);
@@ -262,7 +259,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
     }
 
     @Override
-    public void receiveNewVersion(PipeVersion version) {
+    public void receiveNewVersion(PipeVersion version, VersionControlInfo vcInfo) {
         numberOfNewPipereceived++;
     }
 

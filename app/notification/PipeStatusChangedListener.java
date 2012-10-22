@@ -1,6 +1,7 @@
 package notification;
 
 import models.PipeVersion;
+import models.statusdata.VersionControlInfo;
 
 public interface PipeStatusChangedListener {
     /**
@@ -8,6 +9,6 @@ public interface PipeStatusChangedListener {
      * 
      * @param version
      */
-    public void receiveNewVersion(PipeVersion version);
+    public void receiveNewVersion(PipeVersion version, VersionControlInfo vcInfo);
 
 }

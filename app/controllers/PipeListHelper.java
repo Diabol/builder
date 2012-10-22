@@ -24,8 +24,11 @@ public class PipeListHelper {
     public static Html generateMarkupForPhase(Pipe pipe, Phase phase) {
         StringBuffer buf = new StringBuffer();
         // Create the nodes
-        buf.append("<div id='name'>" + phase.name + "</div><div id='version'>Version: "
-                + pipe.version + "</div><div id='state'>State: " + phase.state + "</div>");
+        buf.append("<div id='name'>Phase: " + phase.name + "</div><div id='version'>Version: "
+                + pipe.version + "</div><div id='commitId'>Commit Id: "
+                + pipe.versionControlInfo.versionControlId
+                + "</div><div id='commitMsg'>Commit Msg: "
+                + pipe.versionControlInfo.versionControlText + "</div>");
         buf.append("<div id='tasks' style='top:5px;'>");
         for (int taskCount = 0; taskCount < phase.tasks.size(); taskCount++) {
             Task task = phase.tasks.get(taskCount);

@@ -6,6 +6,7 @@ import java.util.Set;
 import models.PipeVersion;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.VersionControlInfo;
 
 /**
  * Singleton that keeps track of listeners and notifies them of relevant events.
@@ -114,10 +115,10 @@ public class PipeNotificationHandler {
         }
     }
 
-    public void notifyNewVersionOfPipe(PipeVersion version) {
+    public void notifyNewVersionOfPipe(PipeVersion version, VersionControlInfo vcInfo) {
         synchronized (pipeListeners) {
             for (PipeStatusChangedListener pipeListener : pipeListeners) {
-                pipeListener.receiveNewVersion(version);
+                pipeListener.receiveNewVersion(version, vcInfo);
             }
         }
     }

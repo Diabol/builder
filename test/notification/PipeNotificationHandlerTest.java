@@ -5,6 +5,7 @@ import models.PipeVersion;
 import models.message.PhaseStatus;
 import models.message.PipeStatus;
 import models.message.TaskStatus;
+import models.statusdata.VersionControlInfo;
 
 import org.junit.After;
 import org.junit.Test;
@@ -40,6 +41,8 @@ public class PipeNotificationHandlerTest extends MockitoTestBase {
     private PipeStatusChangedListener pipeListener2;
     @Mock
     private PipeVersion pipeVersion;
+    @Mock
+    private VersionControlInfo vcInfo;
 
     @After
     public void after() {
@@ -76,9 +79,9 @@ public class PipeNotificationHandlerTest extends MockitoTestBase {
         handler.addPipeStatusChangedListener(pipeListener1);
         handler.addPipeStatusChangedListener(pipeListener2);
 
-        handler.notifyNewVersionOfPipe(pipeVersion);
-        Mockito.verify(pipeListener1).receiveNewVersion(pipeVersion);
-        Mockito.verify(pipeListener2).receiveNewVersion(pipeVersion);
+        handler.notifyNewVersionOfPipe(pipeVersion, vcInfo);
+        Mockito.verify(pipeListener1).receiveNewVersion(pipeVersion, vcInfo);
+        Mockito.verify(pipeListener2).receiveNewVersion(pipeVersion, vcInfo);
     }
 
     @Test

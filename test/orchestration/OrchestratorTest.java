@@ -91,7 +91,7 @@ public class OrchestratorTest {
         when(dbHelper.getLatestPipe(pipeConf)).thenThrow(new DataNotFoundException(""));
         orchestrator.start("ThePipe", firstCommit);
         verify(dbHelper).persistNewPipe(version, firstCommit, pipeConf);
-        verify(notificationHandler).notifyNewVersionOfPipe(version);
+        verify(notificationHandler).notifyNewVersionOfPipe(version, firstCommit);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class OrchestratorTest {
         orchestrator.start("ThePipe", secondCommit);
         PipeVersion newVersion = PipeVersion.fromString("2", pipeConf);
         verify(dbHelper).persistNewPipe(newVersion, secondCommit, pipeConf);
-        verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
+        verify(notificationHandler).notifyNewVersionOfPipe(newVersion, secondCommit);
     }
 
     @Test

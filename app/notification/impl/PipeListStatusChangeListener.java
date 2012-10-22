@@ -3,6 +3,7 @@ package notification.impl;
 import models.PipeVersion;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.VersionControlInfo;
 import notification.PhaseStatusChangedListener;
 import notification.PipeStatusChangedListener;
 import notification.TaskStatusChangedListener;
@@ -50,11 +51,13 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
     }
 
     @Override
-    public void receiveNewVersion(PipeVersion version) {
+    public void receiveNewVersion(PipeVersion version, VersionControlInfo vcInfo) {
         ObjectNode json = Json.newObject();
         json.put("newPipeVersion", true);
         json.put("pipeName", version.getPipeName());
         json.put("version", version.getVersion());
+        json.put("commitId", vcInfo.versionControlId);
+        json.put("commitMsg", vcInfo.versionControlText);
         out.write(json);
 
     }
