@@ -1,4 +1,5 @@
 package models.message;
+
 import java.util.Date;
 
 import models.StatusInterface;
@@ -6,7 +7,7 @@ import models.StatusInterface;
 import org.joda.time.ReadableDateTime;
 
 public abstract class AbstractMessage implements StatusInterface {
-    
+
     private final State state;
     private final ReadableDateTime started;
     private final ReadableDateTime finished;
@@ -22,27 +23,35 @@ public abstract class AbstractMessage implements StatusInterface {
     }
 
     @Override
-	public Date getStarted() {
-        return started.toDateTime().toDate();
+    public Date getStarted() {
+        if (started != null) {
+            return started.toDateTime().toDate();
+        } else {
+            return null;
+        }
     }
 
     @Override
-	public Date getFinished() {
-        return finished.toDateTime().toDate();
+    public Date getFinished() {
+        if (finished != null) {
+            return finished.toDateTime().toDate();
+        } else {
+            return null;
+        }
     }
 
     @Override
-	public boolean isSuccess() {
+    public boolean isSuccess() {
         return state == State.SUCCESS;
     }
 
     @Override
-	public boolean isRunning() {
+    public boolean isRunning() {
         return state == State.RUNNING;
     }
 
-	@Override
-	public State getState() {
-		return state;
-	}
+    @Override
+    public State getState() {
+        return state;
+    }
 }

@@ -17,7 +17,7 @@
 
 @createPipeMarkup(pipeCount: Int, pipe: Pipe) = {
     @for(phaseCount <- 0 until pipe.phases.length){
-        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: @{100+200*pipeCount}px;">@{PipeListHelper.generateMarkupForPhase(pipe, pipe.phases.get(phaseCount))}</h2>
+        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: 120px;">@{PipeListHelper.generateMarkupForPhase(pipe, pipe.phases.get(phaseCount))}</h2>
         @if(phaseCount > 0) {
              @addEdge(pipe.name+pipe.phases.get(phaseCount-1).name, pipe.name+pipe.phases.get(phaseCount).name)
         }
@@ -35,11 +35,16 @@
             initPageObjects();
         }
         
-        function resetPhasesWithVersion(className, version, commitId, commitMsg){
+        function resetPhases(className){
         	$('.'+className).animate({ backgroundColor: 'black' }, 'fast');
-    		$('.'+className).find('#version').html("Version: " + version);
+        	$('.'+className).find('#started').html("Started: Not yet started");
+    		$('.'+className).find('#finished').html("Finished: Not yet finished");
+        }
+        
+        function resetPipeVersionInfo(className, version, commitId, commitMsg) {
+        	$('.'+className).find('#pipeVersion').html("Version: " + version);
     		$('.'+className).find('#commitId').html("Commit Id: " + commitId);
-    		$('.'+className).find('#commitMsg').html("Commit Msg: " + commitMsg);
+    		$('.'+className).find('#commitText').html("Commit Text: " + commitMsg);
         }
         function highlightPhase(pipeName, phaseName) {
             if(selectedPhase &&  selectedPipe){
@@ -71,8 +76,8 @@
         	var domNodeId = updatePhaseData.pipeName+updatePhaseData.phaseName;
         	function colorizePhase(colour) {
         		$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');
-        		$('#'+domNodeId).find('#state').html("State: " +updatePhaseData.status);
-        		$('#'+domNodeId).find('#version').html("Version: " +updatePhaseData.version);
+        		$('#'+domNodeId).find('#started').html("Started: " +updatePhaseData.started);
+        		$('#'+domNodeId).find('#finished').html("Finished: " +updatePhaseData.finished);
         	}
         	switch(updatePhaseData.status) {
         	case "RUNNING":
@@ -97,6 +102,7 @@
 
             var receiveEvent = function(event) {
                 var data = JSON.parse(event.data);
+                console.log(data);
                 // Handle errors
                 if(data.error) {
                     chatSocket.close();
@@ -113,7 +119,8 @@
                 	}
                 } else if(data.newPipeVersion) {
                 	shownPipeVersions[data.pipeName] = data.version;
-                	resetPhasesWithVersion(data.pipeName, data.version, data.commitId, data.commitMsg);
+                	resetPhases(data.pipeName);
+                	resetPipeVersionInfo(data.pipeName, data.version, data.commitId, data.commitMsg);
                 }
 
             }
@@ -125,14 +132,22 @@
     <table class="main_table" style="height: 100%;">
         <tr>
             <td style="vertical-align: top; padding: 0px;">
-                <div id="mainCanvas" class="canvas" style="width: 100%; height: 500px;">
-                    <div id="pipeList">Component pipes
+                    <div id="pipeList">
                     @for(i <- 0 until pipes.length){
-                        <div class="pipe">
-                            @createPipeMarkup(i, pipes(i))
-                        </div>
+                    	<br>
+                    	<div id="@{pipes(i).name}canvas" class="canvas" style="width: 100%; height: 250px; padding-top: 10px;">
+	                        <div class="pipe">
+	                        	<div id="pipeText" class="@{pipes(i).name}" style="padding-top: 10px; padding-left: 10px;">
+	                        		<div id="pipeName" style="font-size: 32px;">@{pipes(i).name}</div>
+		                        	<div id="pipeVersion" style="padding-top: 5px; font-size: 14px;">Version: @{pipes(i).version}</div>
+		                        	<div id="commitText" style="font-size: 14px;">Commit Text: @{pipes(i).versionControlInfo.versionControlText}</div>
+		                        	<div id="commitId" style="font-size: 14px;">Commit Id: @{pipes(i).versionControlInfo.versionControlId}</div>
+	                        	</div>
+	                            @createPipeMarkup(i, pipes(i))
+	                        </div>
+                    	</div>
                     }
-                    </div>
+                    
                 </div>
              </td>
         </tr>

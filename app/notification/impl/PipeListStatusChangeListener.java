@@ -15,6 +15,9 @@ import play.mvc.WebSocket;
 
 /**
  * Created by Daniel Grönberg
+ * 
+ * This listener is specific for the pipe list view. Consider implementing your
+ * own listener if you need other data pushed to your page.
  */
 public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         TaskStatusChangedListener, PipeStatusChangedListener {
@@ -34,6 +37,12 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("phaseName", status.getPhaseName());
         json.put("status", status.getStatus().toString());
         json.put("version", status.getVersion());
+        String started = status.getStarted() != null ? status.getStarted().toString()
+                : "Not yet started";
+        json.put("started", started);
+        String finished = status.getFinished() != null ? status.getFinished().toString()
+                : "Not yet finished";
+        json.put("finished", finished);
         out.write(json);
     }
 
