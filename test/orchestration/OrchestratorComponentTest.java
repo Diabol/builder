@@ -8,6 +8,7 @@ import static play.test.Helpers.running;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 import models.PipeVersion;
@@ -26,8 +27,6 @@ import notification.PipeNotificationHandler;
 import notification.PipeStatusChangedListener;
 import notification.TaskStatusChangedListener;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -171,10 +170,10 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                     // Github is read.
                     String commitMsg = "Commit msg";
                     String commitId = "#asd120923rf";
-                    JsonNode githubJson = createJsonWithCommit(commitId, commitMsg);
+                    Map<String, String[]> encodedJson = createJsonWithCommit(commitId, commitMsg);
                     Request requestMock = Mockito.mock(Request.class);
                     RequestBody body = Mockito.mock(RequestBody.class);
-                    Mockito.when(body.asJson()).thenReturn(githubJson);
+                    Mockito.when(body.asFormUrlEncoded()).thenReturn(encodedJson);
                     Mockito.when(requestMock.body()).thenReturn(body);
                     Context.current.set(new Context(requestMock, new HashMap<String, String>(),
                             new HashMap<String, String>()));
@@ -202,11 +201,14 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         });
     }
 
-    private JsonNode createJsonWithCommit(String id, String message) throws Exception {
+    private Map<String, String[]> createJsonWithCommit(String id, String message) throws Exception {
+        Map<String, String[]> result = new HashMap<String, String[]>();
         String jsonString = "{\"commits\":[{\"message\":\"" + message + "\",\"id\":\"" + id
                 + "\"}]}";
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readTree(jsonString);
+        String[] array = { jsonString };
+        result.put("payload", array);
+        return result;
+
     }
 
     private void waitAndAssertSuccessfullPipe(PipeVersion pipeVersion) {
