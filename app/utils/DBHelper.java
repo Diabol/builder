@@ -186,6 +186,9 @@ public class DBHelper {
                     + " instances of pipe with name " + name + " and version " + version
                     + ". Should only be 1 match.");
         } else {
+            // TODO: Figure out why this is needed for the versionControlInfo to
+            // be set on the pipe.
+            String id = foundPipes.get(0).versionControlInfo.versionControlId;
             return foundPipes.get(0);
         }
     }
@@ -195,6 +198,9 @@ public class DBHelper {
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No persisted pipes found for '" + pipe.getName() + "'");
         } else {
+            // TODO: Figure out why this is needed for the versionControlInfo to
+            // be set on the pipe.
+            String id = foundPipes.get(foundPipes.size() - 1).versionControlInfo.versionControlId;
             return foundPipes.get(foundPipes.size() - 1);
         }
     }
