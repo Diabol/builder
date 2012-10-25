@@ -23,7 +23,6 @@ import models.statusdata.Task;
 import models.statusdata.VersionControlInfo;
 import notification.PipeNotificationHandler;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,11 +60,7 @@ public class OrchestratorTest {
 
     @Before
     public void prepare() {
-        orchestrator = new Orchestrator();
-        orchestrator.setDBHelper(dbHelper);
-        orchestrator.setPipeNotificationHandler(notificationHandler);
-        orchestrator.setTaskexecutor(taskExecutor);
-        orchestrator.setPipeConfigReader(confReader);
+        orchestrator = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor);
         pipeConf = mockConfig();
         version = PipeVersion.fromString(stringVersion, firstCommit, pipeConf);
         runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
@@ -75,14 +70,6 @@ public class OrchestratorTest {
         successfullPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
         successfullPipe.finishNow(true);
         when(confReader.get("ThePipe")).thenReturn(pipeConf);
-    }
-
-    @After
-    public void cleanUp() {
-        orchestrator.setDBHelper(DBHelper.getInstance());
-        orchestrator.setPipeConfigReader(PipeConfReader.getInstance());
-        orchestrator.setPipeNotificationHandler(PipeNotificationHandler.getInstance());
-        orchestrator.setTaskexecutor(TaskExecutor.getInstance());
     }
 
     @Test

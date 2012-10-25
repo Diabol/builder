@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import models.statusdata.VersionControlInfo;
-import orchestration.Orchestrator;
 
 import org.codehaus.jackson.JsonNode;
 
@@ -26,14 +25,12 @@ public class GitHub extends Controller {
                 commits = Json.parse(jsonAsString).path("commits").findParents("message");
             }
         }
-        if (commits != null) {
+        if (commits != null && commits.size() > 0) {
             for (JsonNode commit : commits) {
-                new Orchestrator().start(pipeName, createVCInfoFromJson(commit));
+                return Pipes.start(pipeName, createVCInfoFromJson(commit));
             }
-            return ok();
-        } else {
-            return badRequest("Could not parse body of request.");
         }
+        return badRequest("Could not parse commits from body of request: " + body.asText());
     }
 
     private static VersionControlInfo createVCInfoFromJson(JsonNode commit) {

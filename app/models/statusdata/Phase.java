@@ -15,6 +15,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import models.config.PhaseConfig;
+
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
+
 import play.data.validation.Constraints;
 
 @Entity
@@ -44,6 +50,20 @@ public class Phase extends CDEntity {
         Phase phase = new Phase(phaseConf.getName(), State.NOT_STARTED, null, null,
                 new ArrayList<Task>());
         return phase;
+    }
+
+    @Override
+    public ObjectNode toObjectNode() {
+        ObjectNode result = super.toObjectNode();
+        result.put("name", name);
+        JsonFactory factory = new JsonFactory();
+        ObjectMapper om = new ObjectMapper(factory);
+        ArrayNode taskArray = om.createArrayNode();
+        for (Task task : tasks) {
+            taskArray.add(task.toObjectNode());
+        }
+        result.put("tasks", taskArray);
+        return result;
     }
 
     public static Finder<Long, Phase> find = new Finder<Long, Phase>(Long.class, Phase.class);

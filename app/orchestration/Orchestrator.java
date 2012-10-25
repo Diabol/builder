@@ -38,31 +38,18 @@ import executor.TaskResult;
  */
 public class Orchestrator implements TaskCallback {
 
-    private static PipeConfReader configReader = PipeConfReader.getInstance();
-    private static DBHelper dbHelper = DBHelper.getInstance();
-    private static PipeNotificationHandler notifictionHandler = PipeNotificationHandler
-            .getInstance();
-    private static TaskExecutor taskExecutor = TaskExecutor.getInstance();
+    private final PipeConfReader configReader;
+    private final DBHelper dbHelper;
+    private final PipeNotificationHandler notifictionHandler;
+    private final TaskExecutor taskExecutor;
 
-    /**
-     * The below setters is needed for mocking in test.
-     * 
-     * @param dbHelper
-     */
-    public void setDBHelper(DBHelper dbHelper) {
-        Orchestrator.dbHelper = dbHelper;
-    }
-
-    public void setPipeNotificationHandler(PipeNotificationHandler notifictionHandler) {
-        Orchestrator.notifictionHandler = notifictionHandler;
-    }
-
-    public void setTaskexecutor(TaskExecutor taskExecutor) {
-        Orchestrator.taskExecutor = taskExecutor;
-    }
-
-    public void setPipeConfigReader(PipeConfReader configReader) {
-        Orchestrator.configReader = configReader;
+    public Orchestrator(PipeConfReader configReader, DBHelper dbHelper,
+            PipeNotificationHandler notifictionHandler, TaskExecutor taskExecutor) {
+        super();
+        this.configReader = configReader;
+        this.dbHelper = dbHelper;
+        this.notifictionHandler = notifictionHandler;
+        this.taskExecutor = taskExecutor;
     }
 
     /** Start first task of first phase of pipe */

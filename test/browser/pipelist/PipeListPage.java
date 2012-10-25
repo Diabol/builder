@@ -19,8 +19,6 @@ import org.fluentlenium.core.domain.FluentList;
  */
 public class PipeListPage extends FluentPage {
 
-
-
     @Override
     public String getUrl() {
         return LOCALHOST_BASE_TEST_URL + getUri();
@@ -33,7 +31,7 @@ public class PipeListPage extends FluentPage {
     }
 
     public FluentList<?> getPipeDivList() {
-        return find("div", withId("pipeList")).find(".pipe");
+        return find("div", withId("pipeList")).find(".canvas");
     }
 
     public String getUri() {

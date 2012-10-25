@@ -20,6 +20,27 @@ GET     /pipe/:pipe/latest/:phase/tasks controllers.Pipes.getTasksForLatestVersi
 # Get tasks for a specific pipe, version and phase
 GET		/pipe/:pipe/:version/:phase/tasks controllers.Pipes.getTasks(pipe: String, version:String, phase: String)
 
+# Get phases of a specific pipe of the latest version
+GET    /pipe/:pipe/latest/phases		  controllers.Pipes.getPhasesForLatestVersion(pipe: String)
+
+# Get phases for a specific pipe and version
+GET		/pipe/:pipe/:version/phases		  controllers.Pipes.getPhases(pipe:String, version:String)
+
+# Get the latest version of all pipes
+GET	   /pipe/latest						  controllers.Pipes.getLatestPipes()
+
+# Get the latest version of a pipe
+GET 	/pipe/:pipe/latest					controllers.Pipes.getLatestPipe(pipe: String)
+
+# Get the pipe of a specific version
+GET 	/pipe/:pipe/:version				controllers.Pipes.getPipe(pipe: String, version: String)
+
+# Get all versions of a specific pipe
+GET	   /pipe/:pipe							controllers.Pipes.getPipeVersions(pipe: String)
+
+# Get the latest number of versions of a specific pipe
+GET		/pipe/:pipe/latest/:number			controllers.Pipes.getNumberOfLatestPipe(pipe: String, number: Int)
+
 # Start a pipe, ie create a new Pipe instance
 POST    /pipe/:pipe                 controllers.Pipes.start(pipe: String)
 
