@@ -227,15 +227,26 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException ex) {
             phases = createNotStartedPhases(pipeName);
         }
+        return ok(createJsonForPhase(phases));
+    }
+
+    public static Result getPhases(String pipeName, String pipeVersion) {
+        List<Phase> phases;
+        try {
+            Pipe pipe = dbHelper.getPipe(pipeName, pipeVersion);
+            phases = pipe.phases;
+        } catch (DataNotFoundException ex) {
+            return notFound(ex.getMessage());
+        }
+        return ok(createJsonForPhase(phases));
+    }
+
+    private static JsonNode createJsonForPhase(List<Phase> phases) {
         List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
         for (Phase phase : phases) {
             jsonList.add(phase.toObjectNode());
         }
-        return ok(Json.toJson(jsonList.toArray()));
-    }
-
-    public static Result getPhases(String pipeName, String pipeVersion) {
-        return TODO;
+        return Json.toJson(jsonList.toArray());
     }
 
     public static Result getLatestPipes() {

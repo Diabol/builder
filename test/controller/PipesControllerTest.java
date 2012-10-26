@@ -1,6 +1,7 @@
 package controller;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.NOT_FOUND;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.GET;
 import static play.test.Helpers.callAction;
@@ -129,6 +130,48 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                     }
                 }
                 Result result = Pipes.getPhasesForLatestVersion("ThePipe");
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                for (PhaseConfig conf : mockedConf.getPhases()) {
+                    assertThat(contentAsString(result)).contains(conf.getName());
+                    for (TaskConfig task : conf.getTasks()) {
+                        assertThat(contentAsString(result)).contains(task.getTaskName());
+                    }
+                }
+                assertThat(contentAsString(result).contains("SUCCESS"));
+            }
+        });
+    }
+
+    @Test
+    public void testPhasesForVersionReturnsNotFoundWhenNotStarted() {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getPhases("ThePipe", "version");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
+            }
+        });
+    }
+
+    @Test
+    public void testGetPhasesOfAExistingVersion() {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                callAction(controllers.routes.ref.Pipes.start("ThePipe"));
+                while (phaseCompletedCount < 3) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        assertThat(true).isFalse();
+                    }
+                }
+                Result result = Pipes.getPhases("ThePipe", "1");
                 assertThat(status(result)).isEqualTo(OK);
                 assertThat(contentType(result)).isEqualTo("application/json");
                 assertThat(charset(result)).isEqualTo("utf-8");
