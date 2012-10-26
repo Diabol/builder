@@ -43,14 +43,14 @@ public class TaskTest {
         ObjectNode on = task.toObjectNode();
         assertThat(on.get("state").asText()).isEqualTo("RUNNING");
         assertThat(on.get("started")).isNotNull();
-        assertThat(on.get("finished").asText()).isEqualTo("NA");
+        assertThat(on.get("finished")).isNull();
     }
 
     @Test
     public void testToObjectNodeStarted() {
         ObjectNode on = task.toObjectNode();
         assertThat(on.get("state").asText()).isEqualTo("NOT_STARTED");
-        assertThat(on.get("started").asText()).isEqualTo("NA");
-        assertThat(on.get("finished").asText()).isEqualTo("NA");
+        assertThat(on.get("started")).isNull();
+        assertThat(on.get("finished")).isNull();
     }
 }

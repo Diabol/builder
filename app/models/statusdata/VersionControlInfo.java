@@ -7,8 +7,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+import org.codehaus.jackson.node.ObjectNode;
+
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
+import play.libs.Json;
 
 /**
  * 
@@ -53,5 +56,12 @@ public class VersionControlInfo extends Model {
         builder.append(", versionControlText=");
         builder.append(versionControlText + "]");
         return builder.toString();
+    }
+
+    public ObjectNode toObjectNode() {
+        ObjectNode result = Json.newObject();
+        result.put("versionControlId", versionControlId);
+        result.put("versionControlText", versionControlText);
+        return result;
     }
 }

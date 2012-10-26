@@ -186,6 +186,63 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
         });
     }
 
+    @Test
+    public void testGetLatestVersionOfPipesReturnsNotStartedtWhenNotStarted() {
+        Mockito.when(configReader.getConfiguredPipes()).thenReturn(
+                Collections.singletonList(mockedConf));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getLatestPipes();
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result)).contains(mockedConf.getName());
+                for (PhaseConfig conf : mockedConf.getPhases()) {
+                    assertThat(contentAsString(result)).contains(conf.getName());
+                    for (TaskConfig task : conf.getTasks()) {
+                        assertThat(contentAsString(result)).contains(task.getTaskName());
+                    }
+                }
+                assertThat(contentAsString(result).contains("NOT_STARTED"));
+            }
+        });
+    }
+
+    @Test
+    public void testGetLatestVersionOfPipesReturnsLatestStarted() {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        Mockito.when(configReader.getConfiguredPipes()).thenReturn(
+                Collections.singletonList(mockedConf));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                callAction(controllers.routes.ref.Pipes.start("ThePipe"));
+                while (phaseCompletedCount < 3) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        assertThat(true).isFalse();
+                    }
+                }
+                Result result = Pipes.getLatestPipes();
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result)).contains(mockedConf.getName());
+                for (PhaseConfig conf : mockedConf.getPhases()) {
+                    assertThat(contentAsString(result)).contains(conf.getName());
+                    for (TaskConfig task : conf.getTasks()) {
+                        assertThat(contentAsString(result)).contains(task.getTaskName());
+                    }
+                }
+                assertThat(contentAsString(result).contains("version: 1"));
+                assertThat(contentAsString(result).contains("NOT_STARTED"));
+            }
+        });
+    }
+
     @Override
     public void recieveStatusChanged(PhaseStatus status) {
         if (status.isSuccess()) {

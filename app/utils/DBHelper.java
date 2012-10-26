@@ -62,9 +62,9 @@ public class DBHelper {
 
     public synchronized void persistNewPipe(PipeVersion version, PipeConfig pipe) {
         // Create the pipe
-        Pipe pipeData = Pipe.createNewFromConfig(version.getVersion(), pipe);
+        Pipe pipeData = Pipe.createNewFromConfig(version.getVersion(), pipe,
+                version.getVersionControlInfo());
         version.getVersionControlInfo().pipe = pipeData;
-        pipeData.versionControlInfo = version.getVersionControlInfo();
         pipeData.save();
         // Create the phases belonging to the pipe
         for (PhaseConfig phaseConf : pipe.getPhases()) {

@@ -60,23 +60,33 @@ public class Pipes extends Controller {
     }
 
     public static Result list() {
-        List<Pipe> latestPipes = new ArrayList<Pipe>();
-        for (PipeConfig pipeConf : configReader.getConfiguredPipes()) {
-            try {
-                Pipe latest = dbHelper.getLatestPipe(pipeConf);
-                latestPipes.add(latest);
-            } catch (DataNotFoundException ex) {
-                Pipe notYetStarted = createNotStartedPipe(pipeConf);
-                latestPipes.add(notYetStarted);
-            }
-
-        }
+        List<Pipe> latestPipes = createLatestPipes();
         return ok(pipeslist.render(latestPipes));
     }
 
+    /**
+     * Get the latest version of each configured pipe. Create a not started pipe
+     * if not started.
+     * 
+     * @return
+     */
+    private static List<Pipe> createLatestPipes() {
+        List<Pipe> result = new ArrayList<Pipe>();
+        for (PipeConfig pipeConf : configReader.getConfiguredPipes()) {
+            try {
+                Pipe latest = dbHelper.getLatestPipe(pipeConf);
+                result.add(latest);
+            } catch (DataNotFoundException ex) {
+                Pipe notYetStarted = createNotStartedPipe(pipeConf);
+                result.add(notYetStarted);
+            }
+        }
+        return result;
+    }
+
     private static Pipe createNotStartedPipe(PipeConfig pipeConf) {
-        Pipe result = Pipe.createNewFromConfig("NA", pipeConf);
-        result.versionControlInfo = VersionControlInfo.createVCInfoNotAvailable();
+        Pipe result = Pipe.createNewFromConfig("NA", pipeConf,
+                VersionControlInfo.createVCInfoNotAvailable());
         for (PhaseConfig phaseConf : pipeConf.getPhases()) {
             Phase phase = Phase.createNewFromConfig(phaseConf);
             result.phases.add(phase);
@@ -227,7 +237,7 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException ex) {
             phases = createNotStartedPhases(pipeName);
         }
-        return ok(createJsonForPhase(phases));
+        return ok(createJsonForPhases(phases));
     }
 
     public static Result getPhases(String pipeName, String pipeVersion) {
@@ -238,10 +248,10 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException ex) {
             return notFound(ex.getMessage());
         }
-        return ok(createJsonForPhase(phases));
+        return ok(createJsonForPhases(phases));
     }
 
-    private static JsonNode createJsonForPhase(List<Phase> phases) {
+    private static JsonNode createJsonForPhases(List<Phase> phases) {
         List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
         for (Phase phase : phases) {
             jsonList.add(phase.toObjectNode());
@@ -250,7 +260,13 @@ public class Pipes extends Controller {
     }
 
     public static Result getLatestPipes() {
-        return TODO;
+        List<Pipe> latestPipes = createLatestPipes();
+        List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
+        for (Pipe pipe : latestPipes) {
+            jsonList.add(pipe.toObjectNode());
+        }
+        return ok(Json.toJson(jsonList.toArray()));
+
     }
 
     public static Result getLatestPipe(String pipeName) {

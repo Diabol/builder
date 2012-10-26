@@ -63,11 +63,13 @@ public class OrchestratorTest {
         orchestrator = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor);
         pipeConf = mockConfig();
         version = PipeVersion.fromString(stringVersion, firstCommit, pipeConf);
-        runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);
         runningPipe.startNow();
-        failedPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        failedPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf,
+                new VersionControlInfo("#2", "SecondCommit"));
         failedPipe.finishNow(false);
-        successfullPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        successfullPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf,
+                new VersionControlInfo("#3", "ThirdCommit"));
         successfullPipe.finishNow(true);
         when(confReader.get("ThePipe")).thenReturn(pipeConf);
     }
@@ -83,7 +85,7 @@ public class OrchestratorTest {
 
     @Test
     public void testStartPipeIncrementsVersionWhenEarlierExists() throws Exception {
-        Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf);
+        Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);
         when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
         VersionControlInfo secondCommit = new VersionControlInfo("#2", "SecondCommit");
         orchestrator.start("ThePipe", secondCommit);
@@ -158,7 +160,8 @@ public class OrchestratorTest {
         when(dbHelper.getPhaseForContext(context)).thenReturn(lastPhase);
         when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
 
-        Pipe pipeWithAllPhasesSuccess = Pipe.createNewFromConfig(stringVersion, pipeConf);
+        Pipe pipeWithAllPhasesSuccess = Pipe.createNewFromConfig(stringVersion, pipeConf,
+                firstCommit);
         pipeWithAllPhasesSuccess.phases.add(firstPhase);
         pipeWithAllPhasesSuccess.phases.add(lastPhase);
 

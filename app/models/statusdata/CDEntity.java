@@ -44,7 +44,7 @@ public abstract class CDEntity extends Model implements StatusInterface {
 
     @Override
     public String toString() {
-        DateFormatter formatter = new DateFormatter();
+        DateFormatter formatter = new DateFormatter("yyyy/MM/dd HH:mm:ss");
         StringBuffer buf = new StringBuffer();
         buf.append("state: " + state);
         if (started != null) {
@@ -92,11 +92,14 @@ public abstract class CDEntity extends Model implements StatusInterface {
     }
 
     public ObjectNode toObjectNode() {
-        DateFormatter formatter = new DateFormatter();
         ObjectNode result = Json.newObject();
         result.put("state", state.toString());
-        result.put("started", started != null ? formatter.print(started, Locale.ENGLISH) : "NA");
-        result.put("finished", finished != null ? formatter.print(finished, Locale.ENGLISH) : "NA");
+        if (started != null) {
+            result.put("started", started.getTime());
+        }
+        if (finished != null) {
+            result.put("finished", finished.getTime());
+        }
         return result;
     }
 }
