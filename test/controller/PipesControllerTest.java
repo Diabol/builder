@@ -34,6 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import play.mvc.Result;
 import test.MockitoTestBase;
+import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import browser.pipelist.PipeListPage;
 import controllers.Pipes;
@@ -81,7 +82,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
     }
 
     @Test
-    public void testPipelistRoute() {
+    public void testPipelistRoute() throws Exception {
         Mockito.when(configReader.get("ThePipe")).thenReturn(MockConfigHelper.mockConfig());
         running(fakeApplication(), new Runnable() {
             @Override
@@ -94,7 +95,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
     }
 
     @Test
-    public void testGetLatestPhasesReturnsANotStartedPipeWhenNotstarted() {
+    public void testGetLatestPhasesReturnsANotStartedPipeWhenNotstarted() throws Exception {
         Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
         running(fakeApplication(), new Runnable() {
             @Override
@@ -115,7 +116,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
     }
 
     @Test
-    public void testGetLatestPhasesOfASuccessFullPipe() {
+    public void testGetLatestPhasesOfASuccessFullPipe() throws Exception {
         Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
         running(fakeApplication(), new Runnable() {
             @Override
@@ -145,7 +146,19 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
     }
 
     @Test
-    public void testPhasesForVersionReturnsNotFoundWhenNotStarted() {
+    public void testGetLatestPhasesReturnsNotFoundWhenNotConfigured() throws Exception {
+        Mockito.when(configReader.get("NotConfigured")).thenThrow(new DataNotFoundException(""));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getPhasesForLatestVersion("NotConfigured");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
+            }
+        });
+    }
+
+    @Test
+    public void testPhasesForVersionReturnsNotFoundWhenNotStarted() throws Exception {
         Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
         running(fakeApplication(), new Runnable() {
             @Override
@@ -157,7 +170,19 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
     }
 
     @Test
-    public void testGetPhasesOfAExistingVersion() {
+    public void testPhasesForVersionReturnsNotFoundWhenNotConfigured() throws Exception {
+        Mockito.when(configReader.get("NotConfigured")).thenThrow(new DataNotFoundException(""));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getPhases("NotConfigured", "version");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
+            }
+        });
+    }
+
+    @Test
+    public void testGetPhasesOfAExistingVersion() throws Exception {
         Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
         running(fakeApplication(), new Runnable() {
             @Override
@@ -210,7 +235,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
     }
 
     @Test
-    public void testGetLatestVersionOfPipesReturnsLatestStarted() {
+    public void testGetLatestVersionOfPipesReturnsLatestStarted() throws Exception {
         Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
         Mockito.when(configReader.getConfiguredPipes()).thenReturn(
                 Collections.singletonList(mockedConf));
@@ -239,6 +264,72 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                 }
                 assertThat(contentAsString(result).contains("version: 1"));
                 assertThat(contentAsString(result).contains("NOT_STARTED"));
+            }
+        });
+    }
+
+    @Test
+    public void testGetLatestVersionOfPipeReturnsNotStartedWhenNotStarted() throws Exception {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getLatestPipe("ThePipe");
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result)).contains(mockedConf.getName());
+                for (PhaseConfig conf : mockedConf.getPhases()) {
+                    assertThat(contentAsString(result)).contains(conf.getName());
+                    for (TaskConfig task : conf.getTasks()) {
+                        assertThat(contentAsString(result)).contains(task.getTaskName());
+                    }
+                }
+                assertThat(contentAsString(result).contains("NOT_STARTED"));
+            }
+        });
+    }
+
+    @Test
+    public void testGetLatestVersionOfPipeReturnsLatestStarted() throws Exception {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                callAction(controllers.routes.ref.Pipes.start("ThePipe"));
+                while (phaseCompletedCount < 3) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        assertThat(true).isFalse();
+                    }
+                }
+                Result result = Pipes.getLatestPipe("ThePipe");
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result)).contains(mockedConf.getName());
+                for (PhaseConfig conf : mockedConf.getPhases()) {
+                    assertThat(contentAsString(result)).contains(conf.getName());
+                    for (TaskConfig task : conf.getTasks()) {
+                        assertThat(contentAsString(result)).contains(task.getTaskName());
+                    }
+                }
+                assertThat(contentAsString(result).contains("version: 1"));
+                assertThat(contentAsString(result).contains("NOT_STARTED"));
+            }
+        });
+    }
+
+    @Test
+    public void testGetLatestVersionOfPipeReturnsNotFoundWhenNotConfigured() throws Exception {
+        Mockito.when(configReader.get("NotConfigured")).thenThrow(new DataNotFoundException(""));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getLatestPipe("NotConfigured");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
             }
         });
     }

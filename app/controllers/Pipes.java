@@ -111,11 +111,9 @@ public class Pipes extends Controller {
                     taskExecutor).start(pipeName, vcInfo);
             String pipeUrl = createNewPipeUrl(pipeVersion);
             return generatePipeStartedResult(pipeVersion, pipeUrl);
-        } catch (Exception e) {
-            String errMsg = "Could not start pipe: " + pipeName;
-            e.printStackTrace();
-            Logger.error(errMsg, e);
-            return internalServerError(errMsg);
+        } catch (DataNotFoundException ex) {
+            Logger.error("Could not start " + pipeName + ". " + ex.getMessage(), ex);
+            return notFound(ex.getMessage());
         }
     }
 
@@ -130,7 +128,7 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException e) {
             String errMsg = "Could not start " + msg;
             Logger.error(errMsg, e);
-            return internalServerError(errMsg);
+            return notFound(errMsg);
         }
     }
 
@@ -139,11 +137,26 @@ public class Pipes extends Controller {
     }
 
     public static Result getTasksForLatestVersion(String pipeName, String phaseName) {
+        PipeConfig config;
+        PhaseConfig phaseConfig;
+        try {
+            config = configReader.get(pipeName);
+            phaseConfig = config.getPhaseByName(phaseName);
+            if (phaseConfig == null) {
+                String errorMsg = "Phase with name '" + phaseName + "' is not configured for '"
+                        + pipeName + "'.";
+                Logger.error(errorMsg);
+                return notFound(errorMsg);
+            }
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
+            return notFound(ex.getMessage());
+        }
         List<Task> tasks;
         try {
             tasks = dbHelper.getLatestTasks(pipeName, phaseName);
         } catch (DataNotFoundException ex) {
-            tasks = createNotStartedTasks(pipeName, phaseName);
+            tasks = createNotStartedTasks(phaseConfig);
         }
         List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
         for (Task task : tasks) {
@@ -162,13 +175,13 @@ public class Pipes extends Controller {
             }
             return ok(Json.toJson(jsonList.toArray()));
         } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
             return notFound(ex.getMessage());
         }
     }
 
-    private static List<Phase> createNotStartedPhases(String pipeName) {
+    private static List<Phase> createNotStartedPhases(PipeConfig pipeConf) {
         List<Phase> result = new ArrayList<Phase>();
-        PipeConfig pipeConf = configReader.get(pipeName);
         for (PhaseConfig phaseConf : pipeConf.getPhases()) {
             Phase phase = Phase.createNewFromConfig(phaseConf);
             for (TaskConfig task : phaseConf.getTasks()) {
@@ -179,16 +192,10 @@ public class Pipes extends Controller {
         return result;
     }
 
-    private static List<Task> createNotStartedTasks(String pipeName, String phaseName) {
+    private static List<Task> createNotStartedTasks(PhaseConfig phaseConf) {
         List<Task> result = new ArrayList<Task>();
-        PipeConfig pipeConf = configReader.get(pipeName);
-        for (PhaseConfig phaseConf : pipeConf.getPhases()) {
-            if (phaseConf.getName().equals(phaseName)) {
-                for (TaskConfig task : phaseConf.getTasks()) {
-                    result.add(Task.createNewFromConfig(task));
-                }
-                break;
-            }
+        for (TaskConfig task : phaseConf.getTasks()) {
+            result.add(Task.createNewFromConfig(task));
         }
         return result;
     }
@@ -216,7 +223,6 @@ public class Pipes extends Controller {
                             notificationHandler.removePipeStatusChangedListener(listener);
                         }
                     });
-
                     // Notify the client tha
                     ObjectNode json = Json.newObject();
                     json.put("socket", "ready");
@@ -224,18 +230,24 @@ public class Pipes extends Controller {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-
             }
         };
     }
 
     public static Result getPhasesForLatestVersion(String pipeName) {
+        PipeConfig config;
+        try {
+            config = configReader.get(pipeName);
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
+            return notFound(ex.getMessage());
+        }
         List<Phase> phases;
         try {
-            Pipe latest = dbHelper.getLatestPipe(configReader.get(pipeName));
+            Pipe latest = dbHelper.getLatestPipe(config);
             phases = latest.phases;
         } catch (DataNotFoundException ex) {
-            phases = createNotStartedPhases(pipeName);
+            phases = createNotStartedPhases(config);
         }
         return ok(createJsonForPhases(phases));
     }
@@ -270,7 +282,20 @@ public class Pipes extends Controller {
     }
 
     public static Result getLatestPipe(String pipeName) {
-        return TODO;
+        PipeConfig config;
+        try {
+            config = configReader.get(pipeName);
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
+            return notFound(ex.getMessage());
+        }
+        Pipe result;
+        try {
+            result = dbHelper.getLatestPipe(config);
+        } catch (DataNotFoundException ex) {
+            result = createNotStartedPipe(config);
+        }
+        return ok(result.toObjectNode());
     }
 
     public static Result getPipe(String pipeName, String pipeVersion) {

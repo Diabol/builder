@@ -59,7 +59,7 @@ public class OrchestratorTest {
     private final VersionControlInfo firstCommit = new VersionControlInfo("#1", "FirstCommit");
 
     @Before
-    public void prepare() {
+    public void prepare() throws Exception {
         orchestrator = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor);
         pipeConf = mockConfig();
         version = PipeVersion.fromString(stringVersion, firstCommit, pipeConf);

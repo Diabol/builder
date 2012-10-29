@@ -53,7 +53,8 @@ public class Orchestrator implements TaskCallback {
     }
 
     /** Start first task of first phase of pipe */
-    public PipeVersion start(String pipeName, VersionControlInfo vcInfo) {
+    public PipeVersion start(String pipeName, VersionControlInfo vcInfo)
+            throws DataNotFoundException {
         PipeConfig pipe = getPipe(pipeName);
         PhaseConfig phase = pipe.getFirstPhaseConfig();
         TaskConfig task = phase.getInitialTask();
@@ -233,7 +234,7 @@ public class Orchestrator implements TaskCallback {
 
     }
 
-    private PipeConfig getPipe(String pipeName) {
+    private PipeConfig getPipe(String pipeName) throws DataNotFoundException {
         return configReader.get(pipeName);
     }
 }

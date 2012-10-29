@@ -29,7 +29,7 @@ public class PipeConfReader {
 
     private static PipeConfReader instance;
     private final static String URL_TO_JSON = "conf/pipes/";
-    private final List<PipeConfig> jsonAsObjects =  new ArrayList<PipeConfig>();
+    private final List<PipeConfig> jsonAsObjects = new ArrayList<PipeConfig>();
     private final Map<String, PipeConfig> pipeMap = new HashMap<String, PipeConfig>();
 
     static {
@@ -50,12 +50,13 @@ public class PipeConfReader {
         return instance;
     }
 
-    private PipeConfReader() throws PipeValidationException, JsonParseException, JsonMappingException, IOException {
+    private PipeConfReader() throws PipeValidationException, JsonParseException,
+            JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = mapper.getJsonFactory();
 
         File pipeDir = new File(URL_TO_JSON);
-        for(int i = 0; i < pipeDir.list().length; i++){
+        for (int i = 0; i < pipeDir.list().length; i++) {
             File file = new File(URL_TO_JSON + pipeDir.list()[i]);
             if (file.isFile()) {
                 JsonParser jp = factory.createJsonParser(file);
@@ -74,7 +75,9 @@ public class PipeConfReader {
         confToValidate.validate();
         for (PipeConfig conf : jsonAsObjects) {
             if (conf.getName().equals(confToValidate.getName())) {
-                throw new PipeValidationException("Failed to read PipeConfig: Cannot have two pipes with same name: " + conf.getName());
+                throw new PipeValidationException(
+                        "Failed to read PipeConfig: Cannot have two pipes with same name: "
+                                + conf.getName());
             }
         }
     }
@@ -87,9 +90,14 @@ public class PipeConfReader {
         return pipeMap;
     }
 
-    public PipeConfig get(String pipeName) {
+    public PipeConfig get(String pipeName) throws DataNotFoundException {
         // PipeConfig was validated at init so need not be done here
-        return getConfiguredPipesMappedByName().get(pipeName);
+        PipeConfig result = getConfiguredPipesMappedByName().get(pipeName);
+        if (result != null) {
+            return result;
+        } else {
+            throw new DataNotFoundException("Pipe with name '" + pipeName + "' is not configured.");
+        }
     }
 
 }

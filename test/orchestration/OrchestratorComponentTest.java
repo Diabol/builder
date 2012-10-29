@@ -113,19 +113,20 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                PipeVersion pipeVersion = target.start("ThePipe", vcInfo);
-                assertThat(pipeVersion).isNotNull();
-                // Wait for the tasks of the first phase to finish.
-                while (numberOfSuccessfullTaskStatusRecieved < 4) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        assertThat(true).isFalse();
-                    }
-                }
-
                 try {
+                    PipeVersion pipeVersion = target.start("ThePipe", vcInfo);
+
+                    assertThat(pipeVersion).isNotNull();
+                    // Wait for the tasks of the first phase to finish.
+                    while (numberOfSuccessfullTaskStatusRecieved < 4) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            assertThat(true).isFalse();
+                        }
+                    }
+
                     Pipe persistedPipe = DBHelper.getInstance().getPipe(pipeVersion.getPipeName(),
                             pipeVersion.getVersion());
                     assertThat(persistedPipe.state).isEqualTo(State.RUNNING);
@@ -143,7 +144,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                             pipeVersion.getVersion());
                     waitAndAssertSuccessfullPipe(pipeVersion);
                 } catch (DataNotFoundException ex) {
-                    Logger.error(ex.getMessage());
+                    ex.printStackTrace();
                     assertThat(true).isFalse();
                 }
             }
@@ -156,16 +157,22 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         running(fakeApplication(), new Runnable() {
             @Override
             public void run() {
-                PipeVersion pipeVersion = target.start("ThePipe", vcInfo);
-                assertThat(pipeVersion).isNotNull();
-                waitAndAssertSuccessfullPipe(pipeVersion);
+                try {
+                    PipeVersion pipeVersion = target.start("ThePipe", vcInfo);
+                    assertThat(pipeVersion).isNotNull();
+                    waitAndAssertSuccessfullPipe(pipeVersion);
+                } catch (DataNotFoundException ex) {
+                    ex.printStackTrace();
+                    assertThat(true).isFalse();
+                }
             }
 
         });
     }
 
     @Test
-    public void testRunAutomaticTriggeredByGithubAndIdAndTextIsParsedAndPersisted() {
+    public void testRunAutomaticTriggeredByGithubAndIdAndTextIsParsedAndPersisted()
+            throws Exception {
         Pipes.setPipeConfigReader(confReader);
         Mockito.when(confReader.get("ThePipe")).thenReturn(mockedConf);
         running(fakeApplication(), new Runnable() {
