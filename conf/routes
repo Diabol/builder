@@ -32,11 +32,11 @@ GET	   /pipes/latest						  controllers.Pipes.getLatestPipes()
 # Get the latest version of a pipe
 GET 	/pipe/:pipe/latest					controllers.Pipes.getLatestPipe(pipe: String)
 
+# Get a map from all versions of a pipe to version control info, respectively.
+GET	   /pipe/:pipe/versionMap							controllers.Pipes.getPipeVersions(pipe: String)
+
 # Get the pipe of a specific version
 GET 	/pipe/:pipe/:version				controllers.Pipes.getPipe(pipe: String, version: String)
-
-# Get all versions of a specific pipe
-GET	   /pipe/:pipe							controllers.Pipes.getPipeVersions(pipe: String)
 
 # Get the latest number of versions of a specific pipe
 GET		/pipe/:pipe/latest/:number			controllers.Pipes.getNumberOfLatestPipe(pipe: String, number: Int)

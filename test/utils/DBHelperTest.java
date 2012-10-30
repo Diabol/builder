@@ -637,6 +637,45 @@ public class DBHelperTest {
         });
     }
 
+    @Test
+    public void testGetAllReturnsAllRunPipes() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                persistPipeWithVersionControlInfo(version, configuredPipe);
+                persistPipeWithVersionControlInfo(
+                        PipeVersion.fromString("Version2",
+                                VersionControlInfo.createVCInfoNotAvailable(), configuredPipe),
+                        configuredPipe);
+                try {
+                    List<Pipe> persisted = DBHelper.getInstance().getAll(version.getPipeName());
+                    assertEquals(persisted.size(), 2);
+                    assertEquals(persisted.get(0).name, configuredPipe.getName());
+                    assertEquals(persisted.get(1).name, configuredPipe.getName());
+                    assertEquals(persisted.get(0).version, "Version");
+                    assertEquals(persisted.get(1).version, "Version2");
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+            }
+        });
+    }
+
+    @Test
+    public void testGetAllThrowsDataNotFoundExceptionWhenNotRun() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DBHelper.getInstance().getAll(version.getPipeName());
+                    assertTrue(false);
+                } catch (DataNotFoundException e) {
+                    assertTrue(e != null);
+                }
+            }
+        });
+    }
+
     private void persistPipeWithVersionControlInfo(PipeVersion pVersion, PipeConfig pipeConfig) {
         DBHelper.getInstance().persistNewPipe(pVersion, pipeConfig);
     }

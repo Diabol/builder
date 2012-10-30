@@ -7,6 +7,7 @@ import models.statusdata.VersionControlInfo;
 
 import org.codehaus.jackson.JsonNode;
 
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.RequestBody;
@@ -14,7 +15,6 @@ import play.mvc.Result;
 
 public class GitHub extends Controller {
     public static Result start(String pipeName) {
-
         RequestBody body = request().body();
         Map<String, String[]> map = body.asFormUrlEncoded();
         List<JsonNode> commits = null;
@@ -30,7 +30,9 @@ public class GitHub extends Controller {
                 return Pipes.start(pipeName, createVCInfoFromJson(commit));
             }
         }
-        return badRequest("Could not parse commits from body of request: " + body.asText());
+        String errorText = "Could not parse commits from body of request: " + body.asText();
+        Logger.error(errorText);
+        return badRequest(errorText);
     }
 
     private static VersionControlInfo createVCInfoFromJson(JsonNode commit) {

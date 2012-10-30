@@ -16,6 +16,8 @@ import static play.test.Helpers.status;
 import helpers.MockConfigHelper;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
@@ -32,11 +34,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import play.Logger;
+import play.mvc.Http.Context;
+import play.mvc.Http.Request;
+import play.mvc.Http.RequestBody;
 import play.mvc.Result;
 import test.MockitoTestBase;
 import utils.DataNotFoundException;
 import utils.PipeConfReader;
 import browser.pipelist.PipeListPage;
+import controllers.GitHub;
 import controllers.Pipes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -390,8 +397,78 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
         });
     }
 
+    @Test
+    public void testGetPipeVersions() throws Exception {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                startPipeWithGithubVCInfo("vc1", "commit1");
+                startPipeWithGithubVCInfo("vc2", "commit2");
+                while (phaseCompletedCount < 6) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        assertThat(true).isFalse();
+                    }
+                }
+                Result result = Pipes.getPipeVersions("ThePipe");
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result).contains(
+                        "\"1\":{\"versionControlId\":\"vc1\",\"versionControlText\":\"commit1\"}"));
+                assertThat(contentAsString(result).contains(
+                        "\"2\":{\"versionControlId\":\"vc2\",\"versionControlText\":\"commit2\"}"));
+            }
+
+            private void startPipeWithGithubVCInfo(String commitId, String commitText) {
+                // Mock the request object where the json payload from
+                // Github is read.
+                Map<String, String[]> json = new HashMap<String, String[]>();
+                String jsonString = "{\"commits\":[{\"message\":\"" + commitText + "\",\"id\":\""
+                        + commitId + "\"}]}";
+                String[] array = { jsonString };
+                json.put("payload", array);
+                Request requestMock = Mockito.mock(Request.class);
+                RequestBody body = Mockito.mock(RequestBody.class);
+                Mockito.when(body.asFormUrlEncoded()).thenReturn(json);
+                Mockito.when(requestMock.body()).thenReturn(body);
+                Context.current.set(new Context(requestMock, new HashMap<String, String>(),
+                        new HashMap<String, String>()));
+                GitHub.start("ThePipe");
+            }
+        });
+    }
+
+    @Test
+    public void testGetPipeVersionsReturnsNotFoundWhenNotConfigured() throws Exception {
+        Mockito.when(configReader.get("NotConfigured")).thenThrow(new DataNotFoundException(""));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getPipeVersions("NotConfigured");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
+            }
+        });
+    }
+
+    @Test
+    public void testGetPipeVersionsReturnsNotRun() throws Exception {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.getPipeVersions("ThePipe");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
+            }
+        });
+    }
+
     @Override
     public void recieveStatusChanged(PhaseStatus status) {
+        Logger.error("status " + status.getState() + " received for " + status.getPhaseName());
         if (status.isSuccess()) {
             phaseCompletedCount++;
         }

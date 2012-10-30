@@ -235,4 +235,13 @@ public class DBHelper {
         }
 
     }
+
+    public List<Pipe> getAll(String pipeName) throws DataNotFoundException {
+        List<Pipe> result = pipeFind.where().eq("name", pipeName).findList();
+        if (result.size() > 0) {
+            return result;
+        } else {
+            throw new DataNotFoundException("No persisted pipes found for " + pipeName);
+        }
+    }
 }

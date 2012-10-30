@@ -97,10 +97,24 @@ public class Pipes extends Controller {
         return result;
     }
 
+    /**
+     * Starts a pipe of a given name.
+     * 
+     * @param pipeName
+     * @return
+     */
     public static Result start(String pipeName) {
         return startPipe(pipeName, VersionControlInfo.createVCInfoNotAvailable());
     }
 
+    /**
+     * Starts a pipe of a given name and adds the given version control info to
+     * it.
+     * 
+     * @param pipeName
+     * @param vcInfo
+     * @return
+     */
     public static Result start(String pipeName, VersionControlInfo vcInfo) {
         return startPipe(pipeName, vcInfo);
     }
@@ -117,6 +131,15 @@ public class Pipes extends Controller {
         }
     }
 
+    /**
+     * Starts a specific task of a running pipe.
+     * 
+     * @param taskName
+     * @param phaseName
+     * @param pipeName
+     * @param pipeVersion
+     * @return
+     */
     public static Result startTask(String taskName, String phaseName, String pipeName,
             String pipeVersion) {
         String msg = "task: '" + taskName + "' in phase: '" + phaseName + "' in pipe: '" + pipeName
@@ -136,6 +159,13 @@ public class Pipes extends Controller {
         return ok(startbuttons.render(configReader.getConfiguredPipes()));
     }
 
+    /**
+     * Returns the tasks of the latest run of the given phase.
+     * 
+     * @param pipeName
+     * @param phaseName
+     * @return [Task]
+     */
     public static Result getTasksForLatestVersion(String pipeName, String phaseName) {
         PipeConfig config;
         PhaseConfig phaseConfig;
@@ -166,6 +196,14 @@ public class Pipes extends Controller {
 
     }
 
+    /**
+     * Returns the tasks of a given phase and version.
+     * 
+     * @param pipeName
+     * @param version
+     * @param phaseName
+     * @return [Task]
+     */
     public static Result getTasks(String pipeName, String version, String phaseName) {
         try {
             List<Task> tasks = dbHelper.getTasks(pipeName, version, phaseName);
@@ -200,6 +238,11 @@ public class Pipes extends Controller {
         return result;
     }
 
+    /**
+     * Sets up a web socket.
+     * 
+     * @return
+     */
     public static WebSocket<JsonNode> setupSocket() {
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
@@ -231,6 +274,12 @@ public class Pipes extends Controller {
         };
     }
 
+    /**
+     * Returns the phases of the latest version of a given pipe.
+     * 
+     * @param pipeName
+     * @return [Phase]
+     */
     public static Result getPhasesForLatestVersion(String pipeName) {
         PipeConfig config;
         try {
@@ -249,6 +298,13 @@ public class Pipes extends Controller {
         return ok(createJsonForPhases(phases));
     }
 
+    /**
+     * returns the phases of a given pipe and version.
+     * 
+     * @param pipeName
+     * @param pipeVersion
+     * @return [Phase]
+     */
     public static Result getPhases(String pipeName, String pipeVersion) {
         List<Phase> phases;
         try {
@@ -278,6 +334,12 @@ public class Pipes extends Controller {
 
     }
 
+    /**
+     * Returns the latest version of all configured pipes.
+     * 
+     * @param pipeName
+     * @return {Pipe}
+     */
     public static Result getLatestPipe(String pipeName) {
         PipeConfig config;
         try {
@@ -295,6 +357,13 @@ public class Pipes extends Controller {
         return ok(result.toObjectNode());
     }
 
+    /**
+     * Returns the pipe of the given version.
+     * 
+     * @param pipeName
+     * @param pipeVersion
+     * @return {Pipe}
+     */
     public static Result getPipe(String pipeName, String pipeVersion) {
         Pipe result;
         try {
@@ -306,8 +375,24 @@ public class Pipes extends Controller {
         return ok(result.toObjectNode());
     }
 
+    /**
+     * Returns a map of version to VersionControlInfo of a specific pipe.
+     * 
+     * @param pipeName
+     * @return {version:VersionControlInfo}
+     */
     public static Result getPipeVersions(String pipeName) {
-        return TODO;
+        ObjectNode json = Json.newObject();
+        try {
+            List<Pipe> pipes = dbHelper.getAll(pipeName);
+            for (Pipe pipe : pipes) {
+                json.put(pipe.version, pipe.versionControlInfo.toObjectNode());
+            }
+            return ok(json);
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
+            return notFound(ex.getMessage());
+        }
     }
 
     public static Result getNumberOfLatestPipe(String pipe, int number) {
