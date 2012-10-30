@@ -213,17 +213,14 @@ public class Pipes extends Controller {
                     notificationHandler.addPipeStatusChangedListener(listener);
                     // Make sure the listeners are removed when socket is
                     // closed.
-                    // When the socket is closed.
                     in.onClose(new F.Callback0() {
                         @Override
                         public void invoke() {
-                            // Send a Quit message to the room.
                             notificationHandler.removePhaseStatusChangedListener(listener);
                             notificationHandler.removeTaskStatusChangedListener(listener);
                             notificationHandler.removePipeStatusChangedListener(listener);
                         }
                     });
-                    // Notify the client tha
                     ObjectNode json = Json.newObject();
                     json.put("socket", "ready");
                     out.write(json);
@@ -299,7 +296,14 @@ public class Pipes extends Controller {
     }
 
     public static Result getPipe(String pipeName, String pipeVersion) {
-        return TODO;
+        Pipe result;
+        try {
+            result = dbHelper.getPipe(pipeName, pipeVersion);
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
+            return notFound(ex.getMessage());
+        }
+        return ok(result.toObjectNode());
     }
 
     public static Result getPipeVersions(String pipeName) {
