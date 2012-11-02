@@ -26,6 +26,7 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 import utils.DBHelper;
 import utils.DataNotFoundException;
+import utils.LogHandler;
 import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
@@ -38,6 +39,7 @@ public class Pipes extends Controller {
     private static PipeNotificationHandler notificationHandler = PipeNotificationHandler
             .getInstance();
     private static TaskExecutor taskExecutor = TaskExecutor.getInstance();
+    private static LogHandler logHandler = LogHandler.getInstance();
 
     /**
      * The below setters is needed for mocking in test.
@@ -57,6 +59,10 @@ public class Pipes extends Controller {
 
     public static void setPipeConfigReader(PipeConfReader configReader) {
         Pipes.configReader = configReader;
+    }
+
+    public static void setLogHandler(LogHandler logHandler) {
+        Pipes.logHandler = logHandler;
     }
 
     public static Result list() {
@@ -122,7 +128,7 @@ public class Pipes extends Controller {
     private static Result startPipe(String pipeName, VersionControlInfo vcInfo) {
         try {
             PipeVersion pipeVersion = new Orchestrator(configReader, dbHelper, notificationHandler,
-                    taskExecutor).start(pipeName, vcInfo);
+                    taskExecutor, logHandler).start(pipeName, vcInfo);
             String pipeUrl = createNewPipeUrl(pipeVersion);
             return generatePipeStartedResult(pipeVersion, pipeUrl);
         } catch (DataNotFoundException ex) {
@@ -145,11 +151,26 @@ public class Pipes extends Controller {
         String msg = "task: '" + taskName + "' in phase: '" + phaseName + "' in pipe: '" + pipeName
                 + "'";
         try {
-            new Orchestrator(configReader, dbHelper, notificationHandler, taskExecutor).startTask(
-                    taskName, phaseName, pipeName, pipeVersion);
+            new Orchestrator(configReader, dbHelper, notificationHandler, taskExecutor, logHandler)
+                    .startTask(taskName, phaseName, pipeName, pipeVersion);
             return ok("Started " + msg + "' of version: '" + pipeVersion);
         } catch (DataNotFoundException e) {
             String errMsg = "Could not start " + msg;
+            Logger.error(errMsg, e);
+            return notFound(errMsg);
+        }
+    }
+
+    public static Result getTaskLog(String taskName, String phaseName, String pipeName,
+            String pipeVersion) {
+        String msg = "task: '" + taskName + "' in phase: '" + phaseName + "' in pipe: '" + pipeName
+                + "' of version '" + pipeVersion + "'";
+        try {
+            String key = taskName + phaseName + pipeName + pipeVersion;
+            String log = logHandler.getLog(key);
+            return ok(log);
+        } catch (DataNotFoundException e) {
+            String errMsg = "Could not retrieve log for " + msg;
             Logger.error(errMsg, e);
             return notFound(errMsg);
         }
@@ -324,6 +345,12 @@ public class Pipes extends Controller {
         return Json.toJson(jsonList.toArray());
     }
 
+    /**
+     * Returns the latest version of all configured pipes.
+     * 
+     * @param pipeName
+     * @return {Pipe}
+     */
     public static Result getLatestPipes() {
         List<Pipe> latestPipes = createLatestPipes();
         List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
@@ -335,10 +362,10 @@ public class Pipes extends Controller {
     }
 
     /**
-     * Returns the latest version of all configured pipes.
+     * Get the latest version of a given pipe
      * 
      * @param pipeName
-     * @return {Pipe}
+     * @return
      */
     public static Result getLatestPipe(String pipeName) {
         PipeConfig config;
@@ -395,8 +422,31 @@ public class Pipes extends Controller {
         }
     }
 
-    public static Result getNumberOfLatestPipe(String pipe, int number) {
-        return TODO;
+    /**
+     * Get the latest versions of a pipe, limited by a given number.
+     * 
+     * @param pipe
+     * @param number
+     * @return
+     */
+    public static Result getNumberOfLatestPipe(String pipeName, int number) {
+        try {
+            List<Pipe> pipes = dbHelper.getAll(pipeName);
+            List<Pipe> resultList;
+            if (pipes.size() <= number) {
+                resultList = pipes;
+            } else {
+                resultList = pipes.subList(pipes.size() - number, pipes.size());
+            }
+            List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
+            for (Pipe pipe : resultList) {
+                jsonList.add(pipe.toObjectNode());
+            }
+            return ok(Json.toJson(jsonList.toArray()));
+        } catch (DataNotFoundException ex) {
+            Logger.error(ex.getMessage(), ex);
+            return notFound(ex.getMessage());
+        }
     }
 
     private static Status generatePipeStartedResult(PipeVersion version, String newPipeUrl) {

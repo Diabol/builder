@@ -14,6 +14,9 @@ GET     /startButtons               controllers.Pipes.startButtons()
 # Start a task in a pipe, eg if a task is manual
 POST    /pipe/:pipe/:version/:phase/:task   controllers.Pipes.startTask(task: String, phase: String, pipe: String, version: String)
 
+#Get the log file for a given task
+GET     /pipe/:pipe/:version/:phase/:task/log controllers.Pipes.getTaskLog(task: String, phase: String, pipe: String, version: String)
+
 # Get tasks for a specific pipe and phase of the latest version
 GET     /pipe/:pipe/latest/:phase/tasks controllers.Pipes.getTasksForLatestVersion(pipe: String, phase: String)
 

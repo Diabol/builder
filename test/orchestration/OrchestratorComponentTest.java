@@ -40,6 +40,7 @@ import play.mvc.Http.RequestBody;
 import test.MockitoTestBase;
 import utils.DBHelper;
 import utils.DataNotFoundException;
+import utils.LogHandler;
 import utils.PipeConfReader;
 import controllers.GitHub;
 import controllers.Pipes;
@@ -78,6 +79,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
             .getInstance();
     private final DBHelper dbHelper = DBHelper.getInstance();
     private final TaskExecutor taskExecutor = TaskExecutor.getInstance();
+    private final LogHandler logHandler = LogHandler.getInstance();
 
     @Before
     public void prepare() {
@@ -88,7 +90,8 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         numberOfSuccessfullPhaseStatusRecieved = 0;
         numberOfNewPipereceived = 0;
         numberOfFailedPhaseStatusRecieved = 0;
-        target = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor);
+        target = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor,
+                logHandler);
         mockedConf = MockConfigHelper.mockConfig();
         vcInfo = new VersionControlInfo("#1", "Commit text");
 
@@ -204,6 +207,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                             .eq("pipe_id", latest.pipeId).findList().get(0);
                     assertThat(persistedVC.versionControlId).isEqualTo(commitId);
                     assertThat(persistedVC.versionControlText).isEqualTo(commitMsg);
+                    assertLogFiles(latest);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     Assert.assertTrue(false);
@@ -212,6 +216,22 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
             }
 
         });
+    }
+
+    private void assertLogFiles(Pipe latest) {
+        for (Phase phase : latest.phases) {
+            for (Task task : phase.tasks) {
+                try {
+                    String log = logHandler.getLog(task.name + phase.name + latest.name
+                            + latest.version);
+                    assertThat(log).isNotNull();
+                } catch (DataNotFoundException ex) {
+                    ex.printStackTrace();
+                    assertThat(true).isFalse();
+                }
+            }
+        }
+
     }
 
     private Map<String, String[]> createJsonWithCommit(String id, String message) throws Exception {

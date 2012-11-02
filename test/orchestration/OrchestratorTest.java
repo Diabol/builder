@@ -34,6 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import utils.DBHelper;
 import utils.DataInconsistencyException;
 import utils.DataNotFoundException;
+import utils.LogHandler;
 import utils.PipeConfReader;
 import executor.TaskExecutionContext;
 import executor.TaskExecutor;
@@ -47,6 +48,8 @@ public class OrchestratorTest {
     PipeNotificationHandler notificationHandler;
     @Mock
     PipeConfReader confReader;
+    @Mock
+    LogHandler logHandler;
     Orchestrator orchestrator;
     @Mock
     TaskExecutor taskExecutor;
@@ -60,7 +63,8 @@ public class OrchestratorTest {
 
     @Before
     public void prepare() throws Exception {
-        orchestrator = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor);
+        orchestrator = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor,
+                logHandler);
         pipeConf = mockConfig();
         version = PipeVersion.fromString(stringVersion, firstCommit, pipeConf);
         runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);

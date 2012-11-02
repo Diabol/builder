@@ -17,6 +17,7 @@ import play.Logger;
 import utils.DBHelper;
 import utils.DataInconsistencyException;
 import utils.DataNotFoundException;
+import utils.LogHandler;
 import utils.PipeConfReader;
 import executor.TaskCallback;
 import executor.TaskExecutionContext;
@@ -42,14 +43,17 @@ public class Orchestrator implements TaskCallback {
     private final DBHelper dbHelper;
     private final PipeNotificationHandler notifictionHandler;
     private final TaskExecutor taskExecutor;
+    private final LogHandler logHandler;
 
     public Orchestrator(PipeConfReader configReader, DBHelper dbHelper,
-            PipeNotificationHandler notifictionHandler, TaskExecutor taskExecutor) {
+            PipeNotificationHandler notifictionHandler, TaskExecutor taskExecutor,
+            LogHandler logHandler) {
         super();
         this.configReader = configReader;
         this.dbHelper = dbHelper;
         this.notifictionHandler = notifictionHandler;
         this.taskExecutor = taskExecutor;
+        this.logHandler = logHandler;
     }
 
     /** Start first task of first phase of pipe */
@@ -118,6 +122,10 @@ public class Orchestrator implements TaskCallback {
     public synchronized void handleTaskResult(TaskResult result) {
         TaskStatus taskStatus = TaskStatus.newFinishedTaskStatus(result);
         dbHelper.updateTaskToFinished(taskStatus);
+        String logKey = result.context().getTask().getTaskName()
+                + result.context().getPhase().getName() + result.context().getPipe().getName()
+                + result.context().getPipeVersion().getVersion();
+        logHandler.storeLog(logKey, result.out());
         notifictionHandler.notifyTaskStatusListeners(taskStatus);
         // Check it the phase of the task should be updated with new state. Only
         // applicable for blocking tasks.
