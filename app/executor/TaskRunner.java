@@ -72,7 +72,6 @@ class TaskRunner implements Runnable {
         String[] commands = getConfig().getCommand().split(" ");
         for (String cmd : commands) {
             if (cmd.contains("{VERSION}")) {
-                Logger.error("cmd contains {VERSION}");
                 cmd = cmd.replace("{VERSION}", context.getPipeVersion().getVersion());
             }
             if (cmd.contains("{COMMIT_ID}")) {
