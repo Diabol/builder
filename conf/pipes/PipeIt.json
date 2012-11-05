@@ -1,0 +1,31 @@
+{
+    "name":"PipeIt",
+    "phases":[
+        {
+            "name":"Setup",
+            "tasks":[
+             	{
+             		"taskName":"CreateWorkspace",
+             		"command": "conf/pipes/cmd/PipeIt-setup.sh {VERSION} {COMMIT_ID}"
+             	}
+            ]
+        },
+        {
+            "name":"Test",
+            "tasks":[
+            	{
+                    "taskName":"Test",
+                    "command":"conf/pipes/cmd/PipeIt-test.sh {VERSION}"
+				}
+            ]
+        },{
+            "name":"Cleanup",
+            "tasks":[
+				{
+                    "taskName":"Cleanup",
+                    "command":"rm -rf PipeIt-{VERSION}"
+                }
+            ]
+        }
+    ]
+}

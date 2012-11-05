@@ -1,6 +1,8 @@
 package executor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import models.config.TaskConfig;
 import play.Logger;
@@ -28,12 +30,16 @@ class TaskRunner implements Runnable {
     private void execute() {
         Process process = null;
         try {
-            // TODO: Maybe it's better to set ProcessBuilder.redirectErrorStream(true) and have only one output.
-            process = new ProcessBuilder(getCommand()).start();
+            // TODO: Maybe it's better to set
+            // ProcessBuilder.redirectErrorStream(true) and have only one
+            // output.
+            List<String> commands = getCommand();
+            process = new ProcessBuilder(commands).start();
             try {
                 process.waitFor();
             } catch (InterruptedException e) {
-                Logger.warn("Thread for task: '" + getName() + "' interrupted while waiting for process to finish.", e);
+                Logger.warn("Thread for task: '" + getName()
+                        + "' interrupted while waiting for process to finish.", e);
             }
         } catch (IOException e) {
             Logger.error("Failed while running task: '" + getName() + "'.", e);
@@ -55,8 +61,27 @@ class TaskRunner implements Runnable {
         return getConfig().isAutomatic();
     }
 
-    public String[] getCommand() {
-        return getConfig().getCommand().split(" ");
+    /**
+     * Get the arguments for the command to execute. Splits on space and inserts
+     * task parameters
+     * 
+     * @return
+     */
+    public List<String> getCommand() {
+        List<String> result = new ArrayList<String>();
+        String[] commands = getConfig().getCommand().split(" ");
+        for (String cmd : commands) {
+            if (cmd.contains("{VERSION}")) {
+                Logger.error("cmd contains {VERSION}");
+                cmd = cmd.replace("{VERSION}", context.getPipeVersion().getVersion());
+            }
+            if (cmd.contains("{COMMIT_ID}")) {
+                cmd = cmd.replace("{COMMIT_ID}",
+                        context.getPipeVersion().getVersionControlInfo().versionControlId);
+            }
+            result.add(cmd);
+        }
+        return result;
     }
 
     private TaskConfig getConfig() {
