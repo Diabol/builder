@@ -1,4 +1,6 @@
-#Create a directory to clone in. $1 resolves to the version of the pipe.
+#Cleanup from possible earlier versions of PipeIt.
+rm -rf PipeIt-$1
+#Create the directory to clone in. $1 resolves to the version of the pipe.
 mkdir PipeIt-$1
 #Enter the directory and clone PipeIt repository from github.
 cd PipeIt-$1/ && git clone git@github.com:Diabol/builder.git

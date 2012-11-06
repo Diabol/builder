@@ -126,6 +126,12 @@ public class Orchestrator implements TaskCallback {
                 + result.context().getPhase().getName() + result.context().getPipe().getName()
                 + result.context().getPipeVersion().getVersion();
         logHandler.storeLog(logKey, result.out());
+        if (!result.success()) {
+            Logger.info("Task '" + result.context().getTask().getTaskName()
+                    + "' failed. PipeVersion: " + result.context().getPipeVersion().toString()
+                    + ". Error log: " + result.out());
+            Logger.info("----End of task log----");
+        }
         notifictionHandler.notifyTaskStatusListeners(taskStatus);
         // Check it the phase of the task should be updated with new state. Only
         // applicable for blocking tasks.

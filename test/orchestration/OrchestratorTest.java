@@ -17,6 +17,7 @@ import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Committer;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
@@ -59,7 +60,9 @@ public class OrchestratorTest {
     Pipe failedPipe;
     Pipe successfullPipe;
     String stringVersion = "1";
-    private final VersionControlInfo firstCommit = new VersionControlInfo("#1", "FirstCommit");
+    Committer committer = new Committer("John", "john@company.com");
+    private final VersionControlInfo firstCommit = new VersionControlInfo("#1", "FirstCommit",
+            committer);
 
     @Before
     public void prepare() throws Exception {
@@ -70,10 +73,10 @@ public class OrchestratorTest {
         runningPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);
         runningPipe.startNow();
         failedPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf,
-                new VersionControlInfo("#2", "SecondCommit"));
+                new VersionControlInfo("#2", "SecondCommit", committer));
         failedPipe.finishNow(false);
         successfullPipe = Pipe.createNewFromConfig(version.getVersion(), pipeConf,
-                new VersionControlInfo("#3", "ThirdCommit"));
+                new VersionControlInfo("#3", "ThirdCommit", committer));
         successfullPipe.finishNow(true);
         when(confReader.get("ThePipe")).thenReturn(pipeConf);
     }
@@ -91,7 +94,7 @@ public class OrchestratorTest {
     public void testStartPipeIncrementsVersionWhenEarlierExists() throws Exception {
         Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);
         when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
-        VersionControlInfo secondCommit = new VersionControlInfo("#2", "SecondCommit");
+        VersionControlInfo secondCommit = new VersionControlInfo("#2", "SecondCommit", committer);
         orchestrator.start("ThePipe", secondCommit);
         PipeVersion newVersion = PipeVersion.fromString("2", secondCommit, pipeConf);
         verify(dbHelper).persistNewPipe(newVersion, pipeConf);

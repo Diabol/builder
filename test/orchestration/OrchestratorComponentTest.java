@@ -16,6 +16,7 @@ import models.StatusInterface.State;
 import models.config.PipeConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Committer;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
@@ -93,7 +94,8 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
         target = new Orchestrator(confReader, dbHelper, notificationHandler, taskExecutor,
                 logHandler);
         mockedConf = MockConfigHelper.mockConfig();
-        vcInfo = new VersionControlInfo("#1", "Commit text");
+        vcInfo = new VersionControlInfo("#1", "Commit text", new Committer("John",
+                "john@company.com"));
 
         handler = PipeNotificationHandler.getInstance();
         handler.addTaskStatusChangedListener(this);
@@ -186,7 +188,10 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                     // Github is read.
                     String commitMsg = "Commit msg";
                     String commitId = "#asd120923rf";
-                    Map<String, String[]> encodedJson = createJsonWithCommit(commitId, commitMsg);
+                    String name = "John Doe";
+                    String email = "john@company.com";
+                    Map<String, String[]> encodedJson = createJsonWithCommit(commitId, commitMsg,
+                            name, email);
                     Request requestMock = Mockito.mock(Request.class);
                     RequestBody body = Mockito.mock(RequestBody.class);
                     Mockito.when(body.asFormUrlEncoded()).thenReturn(encodedJson);
@@ -207,6 +212,10 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                             .eq("pipe_id", latest.pipeId).findList().get(0);
                     assertThat(persistedVC.versionControlId).isEqualTo(commitId);
                     assertThat(persistedVC.versionControlText).isEqualTo(commitMsg);
+                    Committer persistedCm = Committer.find.where().eq("vc_id", persistedVC.vcId)
+                            .findList().get(0);
+                    assertEquals(name, persistedCm.name);
+                    assertEquals(email, persistedCm.email);
                     assertLogFiles(latest);
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -234,11 +243,20 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
 
     }
 
-    private Map<String, String[]> createJsonWithCommit(String id, String message) throws Exception {
+    private Map<String, String[]> createJsonWithCommit(String id, String message, String name,
+            String email) throws Exception {
         Map<String, String[]> result = new HashMap<String, String[]>();
-        String jsonString = "{\"commits\":[{\"message\":\"" + message + "\",\"id\":\"" + id
-                + "\"}]}";
-        String[] array = { jsonString };
+        StringBuilder json = new StringBuilder();
+        json.append("{\"commits\":[");
+        json.append("{\"message\":\"" + message + "\"");
+        json.append(",\"id\":\"" + id + "\"");
+        json.append(",\"author\":{");
+        json.append("\"name\":\"" + name + "\"");
+        json.append(",\"email\":\"" + email + "\"");
+        json.append("}");
+        json.append("}");
+        json.append("]}");
+        String[] array = { json.toString() };
         result.put("payload", array);
         return result;
 
@@ -265,6 +283,10 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                     .eq("pipe_id", persistedPipe.pipeId).findList().get(0);
             assertEquals(vcInfo.versionControlId, persistedVC.versionControlId);
             assertEquals(vcInfo.versionControlText, persistedVC.versionControlText);
+            Committer persistedCm = Committer.find.where().eq("vc_id", persistedVC.vcId).findList()
+                    .get(0);
+            assertEquals(vcInfo.committer.name, persistedCm.name);
+            assertEquals(vcInfo.committer.email, persistedCm.email);
             assertFirstPhaseSuccessFull(persistedPipe);
             assertSecondPhaseSuccessFull(persistedPipe);
             assertThirdPhaseSuccessFull(persistedPipe);

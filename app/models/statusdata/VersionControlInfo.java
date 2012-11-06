@@ -1,6 +1,8 @@
 package models.statusdata;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,6 +27,9 @@ public class VersionControlInfo extends Model {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long vcId;
 
+    @OneToOne(mappedBy = "vcInfo", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    public Committer committer;
+
     @Constraints.Required
     public String versionControlId;
 
@@ -38,14 +43,16 @@ public class VersionControlInfo extends Model {
     public static Finder<Long, VersionControlInfo> find = new Finder<Long, VersionControlInfo>(
             Long.class, VersionControlInfo.class);
 
-    public VersionControlInfo(String versionControlId, String versionControlText) {
+    public VersionControlInfo(String versionControlId, String versionControlText,
+            Committer committer) {
         super();
         this.versionControlId = versionControlId;
         this.versionControlText = versionControlText;
+        this.committer = committer;
     }
 
     public static VersionControlInfo createVCInfoNotAvailable() {
-        return new VersionControlInfo("NA", "NA");
+        return new VersionControlInfo("NA", "NA", Committer.createCommitterNotAvailable());
     }
 
     @Override
@@ -54,7 +61,9 @@ public class VersionControlInfo extends Model {
         builder.append("VersionControlInfo [versionControlId=");
         builder.append(versionControlId);
         builder.append(", versionControlText=");
-        builder.append(versionControlText + "]");
+        builder.append(versionControlText);
+        builder.append(", committer=");
+        builder.append(committer.toString() + "]");
         return builder.toString();
     }
 
@@ -62,6 +71,7 @@ public class VersionControlInfo extends Model {
         ObjectNode result = Json.newObject();
         result.put("versionControlId", versionControlId);
         result.put("versionControlText", versionControlText);
+        result.put("committer", committer.toObjectNode());
         return result;
     }
 }

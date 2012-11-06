@@ -17,6 +17,7 @@ import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Committer;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
@@ -43,7 +44,8 @@ public class DBHelperTest {
     @Before
     public void setup() {
         configuredPipe = PipeConfReader.getInstance().getConfiguredPipes().get(0);
-        vcInfo = new VersionControlInfo("#version", "Commit msg");
+        vcInfo = new VersionControlInfo("#version", "Commit msg", new Committer("john",
+                "john@company.com"));
         version = PipeVersion.fromString("Version", vcInfo, configuredPipe);
     }
 
@@ -142,10 +144,16 @@ public class DBHelperTest {
                     persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version1", vcInfo, configuredPipe),
                             configuredPipe);
-                    persistPipeWithVersionControlInfo(PipeVersion.fromString("Version2",
-                            new VersionControlInfo("2", "2"), configuredPipe), configuredPipe);
-                    persistPipeWithVersionControlInfo(PipeVersion.fromString("Version3",
-                            new VersionControlInfo("3", "3"), configuredPipe), configuredPipe);
+                    persistPipeWithVersionControlInfo(PipeVersion.fromString(
+                            "Version2",
+                            new VersionControlInfo("2", "2", Committer
+                                    .createCommitterNotAvailable()), configuredPipe),
+                            configuredPipe);
+                    persistPipeWithVersionControlInfo(PipeVersion.fromString(
+                            "Version3",
+                            new VersionControlInfo("3", "3", Committer
+                                    .createCommitterNotAvailable()), configuredPipe),
+                            configuredPipe);
                     Pipe latest = DBHelper.getInstance().getLatestPipe(configuredPipe);
                     assertEquals("Version3", latest.version);
                 } catch (DataNotFoundException e) {
@@ -196,17 +204,20 @@ public class DBHelperTest {
             @Override
             public void run() {
                 try {
-
                     persistPipeWithVersionControlInfo(
                             PipeVersion.fromString("Version1", vcInfo, configuredPipe),
                             configuredPipe);
-                    persistPipeWithVersionControlInfo(PipeVersion.fromString("Version2",
-                            new VersionControlInfo("2", "2"), configuredPipe), configuredPipe);
+                    persistPipeWithVersionControlInfo(PipeVersion.fromString(
+                            "Version2",
+                            new VersionControlInfo("2", "2", Committer
+                                    .createCommitterNotAvailable()), configuredPipe),
+                            configuredPipe);
                     PhaseConfig firstPhase = configuredPipe.getPhases().get(0);
                     TaskConfig firstTask = firstPhase.getInitialTask();
                     TaskExecutionContext context = new TaskExecutionContext(firstTask,
                             configuredPipe, configuredPipe.getPhases().get(0), PipeVersion
-                                    .fromString("Version2", new VersionControlInfo("2", "2"),
+                                    .fromString("Version2", new VersionControlInfo("2", "2",
+                                            Committer.createCommitterNotAvailable()),
                                             configuredPipe));
                     TaskStatus taskStatus = TaskStatus.newRunningTaskStatus(context);
                     DBHelper.getInstance().updateTaskToOngoing(taskStatus);
@@ -630,6 +641,11 @@ public class DBHelperTest {
                             .eq("pipe_id", persisted.pipeId).findList().get(0);
                     assertEquals(vcInfo.versionControlId, persistedVC.versionControlId);
                     assertEquals(vcInfo.versionControlText, persistedVC.versionControlText);
+                    // Same comment as above
+                    Committer persistedCm = Committer.find.where().eq("vc_id", persistedVC.vcId)
+                            .findList().get(0);
+                    assertEquals(vcInfo.committer.name, persistedCm.name);
+                    assertEquals(vcInfo.committer.email, persistedCm.email);
                 } catch (DataNotFoundException e) {
                     assertTrue(false);
                 }

@@ -3,6 +3,7 @@ package controllers;
 import java.util.List;
 import java.util.Map;
 
+import models.statusdata.Committer;
 import models.statusdata.VersionControlInfo;
 
 import org.codehaus.jackson.JsonNode;
@@ -36,8 +37,11 @@ public class GitHub extends Controller {
     }
 
     private static VersionControlInfo createVCInfoFromJson(JsonNode commit) {
+        String name = commit.path("author").path("name").getTextValue();
+        String email = commit.path("author").path("email").getTextValue();
         String hashtag = commit.path("id").getTextValue();
         String commitMessage = commit.path("message").getTextValue();
-        return new VersionControlInfo(hashtag, commitMessage);
+        Committer committer = new Committer(name, email);
+        return new VersionControlInfo(hashtag, commitMessage, committer);
     }
 }

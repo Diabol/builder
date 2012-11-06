@@ -4,6 +4,8 @@ import static browser.AbstractBrowserFluentTest.LOCALHOST_BASE_TEST_URL;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fluentlenium.core.filter.FilterConstructor.withId;
 
+import java.util.concurrent.TimeUnit;
+
 import org.fluentlenium.core.FluentPage;
 import org.fluentlenium.core.domain.FluentList;
 
@@ -26,6 +28,7 @@ public class PipeListPage extends FluentPage {
 
     @Override
     public void isAt() {
+        await().atMost(5, TimeUnit.SECONDS).until(".canvas").hasSize(3);
         assertThat(title()).isEqualTo("Pipe List");
         assertThat(find("div", withId("pipeList")).size()).isEqualTo(1);
     }
