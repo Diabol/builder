@@ -42,9 +42,9 @@
         }
         
         function resetPipeVersionInfo(className, version, commitId, commitMsg) {
-        	$('.'+className).find('#pipeVersion').html("Version: " + version);
-    		$('.'+className).find('#commitId').html("Commit Id: " + commitId);
-    		$('.'+className).find('#commitText').html("Commit Text: " + commitMsg);
+        	$('.'+className).find('#pipeVersion').html('Version: ' + version);
+    		$('.'+className).find('#commitId').html(commitId);
+    		$('.'+className).find('#commitText').html(commitMsg);
         }
         function highlightPhase(pipeName, phaseName) {
             if(selectedPhase &&  selectedPipe){
@@ -76,6 +76,7 @@
         	var domNodeId = updatePhaseData.pipeName+updatePhaseData.phaseName;
         	function colorizePhase(colour) {
         		/*$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');*/
+                alert($('#'+domNodeId).find('#started').html);
         		$('#'+domNodeId).find('#started').html("Started: " +updatePhaseData.started.format("MMM dd, HH:mm:ss"));
         		$('#'+domNodeId).find('#finished').html("Finished: " +updatePhaseData.finished.format("MMM dd, HH:mm:ss"));
         	}
@@ -129,15 +130,18 @@
 
         })
     </script>
+    <div id="pipeList">
     @for(i <- 0 until pipes.length){
-        <div id="@{pipes(i).name}canvas" class="canvas" style="width: 100%; height: 300px; padding-top: 10px;">
-            <div id="a" class="component">
-                <h2><span class="componentName">@{pipes(i).name}</span><span class="componentVersion">  Version: @{pipes(i).version}</span></h2>
-                <div id="revisionInfo"><label>Change info: </label><span>@{pipes(i).versionControlInfo.versionControlId} : @{pipes(i).versionControlInfo.versionControlText}</span></div>
-                @createPipeMarkup(i, pipes(i))
+        <div id="@{pipes(i).name}canvas" class="canvas component @{pipes(i).name}" style="width: 100%; height: 300px; padding-top: 10px;">
+            <h2><span class="componentName">@{pipes(i).name}</span>  <span id="pipeVersion" class="componentVersion">Version: @{pipes(i).version}</span></h2>
+            <div id="revisionInfo">
+                <label>Change info: </label>
+                <span id="commitId">@{pipes(i).versionControlInfo.versionControlId}</span> : <span id="commitText">@{pipes(i).versionControlInfo.versionControlText}</span>
             </div>
+            @createPipeMarkup(i, pipes(i))
         </div>
     }
+    </div>
 }
 
 @main("Pipe List", headers)(html)
