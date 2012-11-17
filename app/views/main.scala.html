@@ -16,19 +16,27 @@
         <div id="logo-right" class="right"><a href="http://www.diabol.se"><br/>cool tools from<img src="@routes.Assets.at("images/diabollogo.png")" alt="pipeIt"/></a></div>
         <div class="clear"></div>
                 </div>
-                <div id="navigation" class="rounded">
+<div id="divider" class="">
+</div>
+<div id="navigation">
+    <div id="settings" class="right">
+        <span id="breadcrumbs" class="left">Dashboard: @title</span>
+        <a href="#" onclick="toggleVisibility('settingsPanel');">
+            <img src="@routes.Assets.at("images/settings.png")" alt="settings"/>
+        </a>
+        <div id="settingsPanel" class="collapsed">
+            <div class="right"><a href="#" onclick="toggleVisibility('settingsPanel')">close</a></div>
+            <h2>Settings</h2>
+            <hr/>
+            <a href="#" onclick="toggleVisibility('header');">Toggle page header</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<!--
                 <div id="breadcrumbs" class="left"> :: @title</div>
-        <div id="settings" class="right">
-                <a href="#" onclick="toggleVisibility('settingsPanel');">
-                <img src="@routes.Assets.at("images/settings.png")" alt="settings"/>
-                </a>
-                <div id="settingsPanel" class="collapsed">
-                <h1>Settings</h1>
-        aldasöldk
-                </div>
-                </div>
-        <div class="clear"></div>
-                </div>
+-->
         <div id="dashboard">
             @content
         </div>
