@@ -1,0 +1,263 @@
+body {
+    padding: 20px;
+    color: #2F2727;
+}
+
+label {
+    font-weight: bold;
+}
+#header {
+    padding-bottom: 10px;
+}
+
+#header a {
+    text-decoration: none;
+    color: #686985;
+}
+
+#logo-left {
+    float: left;
+    position: relative;
+    height: 80px;
+    padding-left: 75px;
+    font-family: fantasy;
+    font-size: 1.2em;
+}
+
+#logo-left h1 {
+    color: #2c2f85;
+    text-shadow: 2px 2px 2px #888888;
+}
+
+#logo-right {
+    float: right;
+    position: relative;
+    height: 80px;
+    font-family: fantasy;
+    font-weight: bold;
+    font-size: 1.05em;
+    padding-right: 15px;
+}
+
+
+#logo-left img {
+    height: 75px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+#logo-right img {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+#settings img {
+    height: 20px;
+}
+
+#settingsPanel {
+    position:fixed;
+    top:50%;
+    left:50%;
+    background-color:black;
+    z-index:1002;
+    overflow:auto;
+    width:800px;
+    height:400px;
+    margin-left:-400px;
+    margin-top:-200px;
+    opacity: 0.75;
+    padding: 10px;
+}
+
+.expanded {
+    visibility: visible;
+    transition: width 3s, height 3s, transform 3s;
+    -moz-transition: width 3s, height 3s, -moz-transform 3s;
+    -webkit-transition: width 3s, height 3s, -webkit-transform 3s;
+    -o-transition: width 3s, height 3s,-o-transform 3s;
+}
+
+.collapsed {
+    visibility: hidden;
+    transition: width 2s, height 2s, transform 2s;
+    -moz-transition: width 2s, height 2s, -moz-transform 2s;
+    -webkit-transition: width 2s, height 2s, -webkit-transform 2s;
+    -o-transition: width 2s, height 2s,-o-transform 2s;
+}
+
+
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.clear {
+    clear: both;
+}
+
+#navigation {
+    /* fallback */
+    background-color: #1a82f7;
+    background-image: url(images/linear_bg_1.png);
+    background-repeat: repeat-y;
+
+    /* Safari 4-5, Chrome 1-9 */
+    background: -webkit-gradient(linear, left top, right top, from(#2F2727), to(#1a82f7));
+
+    /* Safari 5.1, Chrome 10+ */
+    background: -webkit-linear-gradient(left, #1a82f7, #2F2727);
+
+    /* Firefox 3.6+ */
+    background: -moz-linear-gradient(left, #1a82f7, #2F2727);
+
+    /* IE 10 */
+    background: -ms-linear-gradient(left, #1a82f7, #2F2727);
+
+    /* Opera 11.10+ */
+    background: -o-linear-gradient(left, #1a82f7, #2F2727);
+
+    color: #f0ffff;
+    padding: 5px;
+}
+
+
+.rounded {
+    -webkit-border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    border-radius: 10px 10px 10px 10px;
+}
+
+.componentName {
+    border-bottom: 3px solid #bcbabe;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    -webkit-border-radius: 10px;
+    -webkit-border-bottom-right-radius: 0;
+    -moz-border-radius: 10px;
+    -moz-border-radius-bottomright: 0;
+    border-radius: 10px;
+    border-bottom-right-radius: 0;
+    /* Safari 4-5, Chrome 1-9 */
+    background: -webkit-gradient(linear, left top, right top, from(#fff3fc), to(#1a82f7));
+    /* Safari 5.1, Chrome 10+ */
+    background: -webkit-linear-gradient(top, #f4ebf7, #bcbabe);
+    /* Firefox 3.6+ */
+    background: -moz-linear-gradient(top, #1a82f7, #2F2727);
+    /* IE 10 */
+    background: -ms-linear-gradient(top, #1a82f7, #2F2727);
+    /* Opera 11.10+ */
+    background: -o-linear-gradient(top, #1a82f7, #2F2727);
+    color: #2c2f85;
+}
+
+.componentVersion {
+    font-size: 0.7em;
+}
+
+#revisionInfo {
+    margin-left: 25px;
+}
+
+#dashboard {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#dashboard h2 {
+    border-bottom: 4px solid #bcbabe;
+    -webkit-border-bottom-left-radius: 10px;
+    -moz-border-radius-bottomleft: 10px;
+    border-bottom-left-radius: 10px;
+    color: #2c2f85;
+}
+
+#dashboard h3 {
+    padding-left: 5px;
+    color: #2c2f85;
+    display: inline;
+}
+
+.component {
+    margin-bottom: 0px;
+}
+
+.pipe {
+
+}
+
+.phase {
+    float: left;
+    width: 250px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px #888888;
+}
+
+.phaseHeader {
+    padding: 5px;
+    border-top: 2px solid grey;
+    border-left: 2px solid grey;
+    border-right: 2px solid grey;
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-topright: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.phaseBody {
+    padding: 5px;
+    border: 2px solid grey;
+    height: 100px;
+    -webkit-border-bottom-right-radius: 10px;
+    -webkit-border-bottom-left-radius: 10px;
+    -moz-border-radius-bottomright: 10px;
+    -moz-border-radius-bottomleft: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.taskList {
+    margin-top: 10px;
+}
+
+.task {
+    float: left;
+    margin-right: 10px;
+    border: 2px solid grey;
+    width: 20px;
+    height: 20px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.action {
+    float: left;
+    width: 80px;
+    height: 120px;
+    text-align: center;
+}
+
+.action img {
+    height: 80px;
+    margin-top: 40px;
+}
+
+.auto img {
+    width: 60px;
+}
+
+.manual img {
+    width: 100px;
+}

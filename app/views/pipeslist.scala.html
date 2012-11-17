@@ -11,13 +11,13 @@
 
 @addEdge(parentId: String, childId: String) = {
     <div class="connector @{parentId} @{childId} right_start">
-        <img class="connector-end" src="@routes.Assets.at("images/graph-it/arrow.gif")">
+        <img class="connector-end" src="@routes.Assets.at("images/graph-it/fastforward.png")">
     </div>
 }
 
 @createPipeMarkup(pipeCount: Int, pipe: Pipe) = {
     @for(phaseCount <- 0 until pipe.phases.length){
-        <h2 id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" class="block @{pipe.phases.get(phaseCount).state} @{pipe.name}" style="left: @{30+phaseCount*300}px; top: 120px;">@{PipeListHelper.generateMarkupForPhase(pipe, pipe.phases.get(phaseCount))}</h2>
+        <div id="@{pipe.name}@{pipe.phases.get(phaseCount).name}" class="phase block @{pipe.name}" style="left: @{20+phaseCount*320}px; top: 120px;">@{PipeListHelper.generateMarkupForPhase(pipe, pipe.phases.get(phaseCount))}</div>
         @if(phaseCount > 0) {
              @addEdge(pipe.name+pipe.phases.get(phaseCount-1).name, pipe.name+pipe.phases.get(phaseCount).name)
         }
@@ -36,7 +36,7 @@
         }
         
         function resetPhases(className){
-        	$('.'+className).animate({ backgroundColor: 'black' }, 'fast');
+        	$('.'+className).animate({ backgroundColor: 'white' }, 'fast');
         	$('.'+className).find('#started').html("Started: Not yet started");
     		$('.'+className).find('#finished').html("Finished: Not yet finished");
         }
@@ -57,17 +57,17 @@
         
         function updateTask(updateTaskData) {
         	function colorizeTask(colour) {
-        		$('#'+updateTaskData.pipeName+updateTaskData.phaseName+updateTaskData.taskName).animate({ backgroundColor: colour }, 'fast');
+        		$('#'+updateTaskData.pipeName+updateTaskData.phaseName+updateTaskData.taskName).animate({ backgroundColor: colour }, 'slow');
         	}
         	switch(updateTaskData.status) {
         	case "RUNNING":
-        		colorizeTask("blue");
+        		colorizeTask("#b5e0f7");
     			break;
         	case "SUCCESS":
-        		colorizeTask("green")
+        		colorizeTask("#64cc7b")
     			break;
         	case "FAILURE":
-        		colorizeTask("red");
+        		colorizeTask("#d25353");
     			break;
         	}
         }
@@ -75,19 +75,19 @@
         function updatePhase(updatePhaseData) {
         	var domNodeId = updatePhaseData.pipeName+updatePhaseData.phaseName;
         	function colorizePhase(colour) {
-        		$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');
-        		$('#'+domNodeId).find('#started').html("Started: " +updatePhaseData.started);
-        		$('#'+domNodeId).find('#finished').html("Finished: " +updatePhaseData.finished);
+        		/*$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');*/
+        		$('#'+domNodeId).find('#started').html("Started: " +updatePhaseData.started.format("MMM dd, HH:mm:ss"));
+        		$('#'+domNodeId).find('#finished').html("Finished: " +updatePhaseData.finished.format("MMM dd, HH:mm:ss"));
         	}
         	switch(updatePhaseData.status) {
         	case "RUNNING":
-        		colorizePhase('blue');
+                colorizeTask("#C0E3F7");
     			break;
         	case "SUCCESS":
-        		colorizePhase('green');
+                colorizeTask("#AAFFC4")
     			break;
         	case "FAILURE":
-        		colorizePhase('red');
+                colorizeTask("#FFD8DA");
     			break;
         	}
         }
@@ -129,29 +129,15 @@
 
         })
     </script>
-    <table class="main_table" style="height: 100%;">
-        <tr>
-            <td style="vertical-align: top; padding: 0px;">
-                    <div id="pipeList">
-                    @for(i <- 0 until pipes.length){
-                    	<br>
-                    	<div id="@{pipes(i).name}canvas" class="canvas" style="width: 100%; height: 250px; padding-top: 10px;">
-	                        <div class="pipe">
-	                        	<div id="pipeText" class="@{pipes(i).name}" style="padding-top: 10px; padding-left: 10px;">
-	                        		<div id="pipeName" style="font-size: 32px;">@{pipes(i).name}</div>
-		                        	<div id="pipeVersion" style="padding-top: 5px; font-size: 14px;">Version: @{pipes(i).version}</div>
-		                        	<div id="commitText" style="font-size: 14px;">Commit Text: @{pipes(i).versionControlInfo.versionControlText}</div>
-		                        	<div id="commitId" style="font-size: 14px;">Commit Id: @{pipes(i).versionControlInfo.versionControlId}</div>
-	                        	</div>
-	                            @createPipeMarkup(i, pipes(i))
-	                        </div>
-                    	</div>
-                    }
-                    
-                </div>
-             </td>
-        </tr>
-    </table>
+    @for(i <- 0 until pipes.length){
+        <div id="@{pipes(i).name}canvas" class="canvas" style="width: 100%; height: 300px; padding-top: 10px;">
+            <div id="a" class="component">
+                <h2><span class="componentName">@{pipes(i).name}</span><span class="componentVersion">  Version: @{pipes(i).version}</span></h2>
+                <div id="revisionInfo"><label>Change info: </label><span>@{pipes(i).versionControlInfo.versionControlId} : @{pipes(i).versionControlInfo.versionControlText}</span></div>
+                @createPipeMarkup(i, pipes(i))
+            </div>
+        </div>
+    }
 }
 
 @main("Pipe List", headers)(html)

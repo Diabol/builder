@@ -6,7 +6,7 @@
 
 .connector
 {
-	background-color: black;
+	background-color: transparent;
 }
 
 .dock_point
@@ -30,7 +30,7 @@ div.block, h1.block, h2.block, p.block
     -webkit-border-radius: 15px;
     -moz-border-radius: 15px;
     border-radius: 15px;
-    height: 100px;
+    height: 120px;
     width: 250px;
 }
 
@@ -39,36 +39,46 @@ div.block, h1.block, h2.block, p.block
 }
 
 #tasks {
-	padding-top: 5px;
+	padding-top: 15px;
 }
 
 .SUCCESS
 {
-	background-color: green;
+	background-color: #64cc7b;
 }
 
 .FAILURE
 {
-	background-color: red;
+	background-color: #d25353;
 }
 
 .RUNNING
 {
-	background-color: blue;
+	background-color: #98c7f7;
 }
 
-
-div.canvas
+.PENDING
 {
-    border: 1px solid #999999;
-    background-image: url('gradient.jpg');
-    background-repeat: no-repeat;
-    background-position: top right;
-    padding: 0px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    border-radius: 5px 5px 5px 5px;
+    background-color: #d3d3d3;
 }
+
+
+div.canvas {
+    margin-bottom: 20px;
+    overflow: visible;
+}
+
+/*div.canvas*/
+/*{*/
+    /*border: 1px solid #999999;*/
+    /*background-image: url('gradient.jpg');*/
+    /*background-repeat: no-repeat;*/
+    /*background-position: top right;*/
+    /*padding: 0px;*/
+    /*-webkit-border-radius: 5px 5px 5px 5px;*/
+    /*-moz-border-radius: 5px 5px 5px 5px;*/
+    /*border-radius: 5px 5px 5px 5px;*/
+/*}*/
 
 .phaseHighlighted
 {
@@ -84,45 +94,6 @@ div.canvas
 }
 
 
-html
-{
-    padding: 0px;
-    margin: 0px;
-}
-
-body
-{
-    font-size: 11px;
-    padding: 3px;
-    margin: 0px;
-    background-color: white;
-}
-
-h1
-{
-    color: #FF7521;
-    margin: 0px;
-    font-size: 20px;
-
-}
-
-h2
-{
-    font-size: 15px;
-    margin: 0px;
-}
-
-p, div
-{
-    font-size: 11px;
-    margin: 0px;
-}
-
-a
-{
-    text-decoration: none;
-    color: #FF9900;
-}
 
 .middle-label, .source-label, .destination-label
 {
@@ -132,8 +103,15 @@ a
 
 div.connector
 {
-    background-color: orange;
+    background-color: transparent;
     z-index: 1000;
+    padding-right: 20px;
+}
+
+.connector-end {
+    height: 80px;
+    width: 40px;
+    padding-right: 10px;
 }
 
 table.main_table

@@ -28,7 +28,7 @@ public abstract class CDEntity extends Model implements StatusInterface {
 
     @Constraints.Required
     @Enumerated(EnumType.STRING)
-    public State state;
+    public StatusInterface.State state;
 
     @Formats.DateTime(pattern = "yyyy/MM/dd HH:mm:ss")
     public Date started;

@@ -4,20 +4,33 @@
 <html>
     <head>
         <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/new.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/misc.js")" type="text/javascript"></script>
         @scripts
     </head>
     <body id="mainBody">
-         <div id="header">
-            <table>
-                <tr>
-                    <td class="left"><a href="http://www.diabol.se"><img id="logo-img" src="@routes.Assets.at("images/diabol-logo.jpg")"/></a></td>
-                    <td class="right"><a class="nostyle"><h3>Pipe It</h3></a></td>
-                </tr>
-            </table>
+                <div id="header">
+                <div id="logo-left" class="left"><a href="#"><img src="@routes.Assets.at("images/pipeit-logo.png")"  alt="pipeIt"/><h1>pipeit</h1></a></div>
+        <div id="logo-right" class="right"><a href="http://www.diabol.se"><br/>cool tools from<img src="@routes.Assets.at("images/diabollogo.png")" alt="pipeIt"/></a></div>
+        <div class="clear"></div>
+                </div>
+                <div id="navigation" class="rounded">
+                <div id="breadcrumbs" class="left"> :: @title</div>
+        <div id="settings" class="right">
+                <a href="#" onclick="toggleVisibility('settingsPanel');">
+                <img src="@routes.Assets.at("images/settings.png")" alt="settings"/>
+                </a>
+                <div id="settingsPanel" class="collapsed">
+                <h1>Settings</h1>
+        aldasöldk
+                </div>
+                </div>
+        <div class="clear"></div>
+                </div>
+        <div id="dashboard">
+            @content
         </div>
-        @content
     </body>
 </html>

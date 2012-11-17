@@ -3,7 +3,9 @@ package controllers;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import org.apache.commons.lang.time.DateFormatUtils;
 import play.api.templates.Html;
+import java.text.DateFormat;
 
 /**
  * Helper class for the pipe list view.
@@ -24,7 +26,12 @@ public class PipeListHelper {
     public static Html generateMarkupForPhase(Pipe pipe, Phase phase) {
         StringBuffer buf = new StringBuffer();
         // Create the nodes
-        buf.append("<div id='name' style='font-size: 24px;'>" + phase.name + "</div>");
+        buf.append("<h3>" + phase.name + "</h3>");
+        buf.append("<hr/>");
+        String started = (phase.started != null) ? DateFormatUtils.format(phase.started,"MMM d, HH:mm:ss") : "Not yet started";
+        String finished = (phase.finished != null) ? DateFormatUtils.format(phase.finished,"MMM d HH:mm:ss") : "Not yet finished";
+        buf.append("<div id='started'><label>Started:</label><span> " + started + "</span></div>");
+        buf.append("<div id='started'><label>Finished:</label><span> " + finished + "</span></div>");
         buf.append("<div id='tasks' >");
         for (int taskCount = 0; taskCount < phase.tasks.size(); taskCount++) {
             Task task = phase.tasks.get(taskCount);
@@ -33,10 +40,6 @@ public class PipeListHelper {
                     + "px;'></div>");
         }
         buf.append("</div>");
-        String started = (phase.started != null) ? phase.started.toString() : "Not yet started";
-        String finished = (phase.finished != null) ? phase.finished.toString() : "Not yet finished";
-        buf.append("<div id='started' style='padding-top:25px;'>Started: " + started
-                + "</div><div id='finished'>Finished: " + finished + "</div>");
         return new Html(buf.toString());
     }
 }
