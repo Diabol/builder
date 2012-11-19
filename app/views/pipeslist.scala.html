@@ -42,7 +42,7 @@
         }
         
         function resetPipeVersionInfo(className, version, commitId, commitMsg) {
-        	$('.'+className).find("#revisionInfo").find('#pipeVersion').html('Version: ' + version);
+        	$('.'+className).find('#pipeVersion').html('Version: ' + version);
     		$('.'+className).find("#revisionInfo").find('#commitId').html(commitId);
     		$('.'+className).find("#revisionInfo").find('#commitText').html(commitMsg);
         }
@@ -75,20 +75,19 @@
         function updatePhase(updatePhaseData) {
         	var domNodeId = updatePhaseData.pipeName+updatePhaseData.phaseName;
         	function colorizePhase(colour) {
-        		/*$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');*/
-                alert($('#'+domNodeId).find('#started').html);
-        		$('#'+domNodeId).find('#started').html("Started: " +updatePhaseData.started.format("MMM dd, HH:mm:ss"));
-        		$('#'+domNodeId).find('#finished').html("Finished: " +updatePhaseData.finished.format("MMM dd, HH:mm:ss"));
+        		//$('#'+domNodeId).animate({ backgroundColor: colour }, 'fast');
+        		$('#'+domNodeId).find('#started').html("Started: " +updatePhaseData.started);
+        		$('#'+domNodeId).find('#finished').html("Finished: " +updatePhaseData.finished);
         	}
         	switch(updatePhaseData.status) {
         	case "RUNNING":
-                colorizeTask("#C0E3F7");
+        		colorizePhase("#C0E3F7");
     			break;
         	case "SUCCESS":
-                colorizeTask("#AAFFC4")
+        		colorizePhase("#AAFFC4")
     			break;
         	case "FAILURE":
-                colorizeTask("#FFD8DA");
+        		colorizePhase("#FFD8DA");
     			break;
         	}
         }

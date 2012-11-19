@@ -12,6 +12,7 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import play.libs.Json;
 import play.mvc.WebSocket;
+import controllers.PipeListHelper;
 
 /**
  * Created by Daniel Grönberg
@@ -37,11 +38,12 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("phaseName", status.getPhaseName());
         json.put("status", status.getStatus().toString());
         json.put("version", status.getVersion());
-        String started = status.getStarted() != null ? status.getStarted().toString()
-                : "Not yet started";
+
+        String started = status.getStarted() != null ? PipeListHelper.formatDate(status
+                .getStarted()) : "Not yet started";
         json.put("started", started);
-        String finished = status.getFinished() != null ? status.getFinished().toString()
-                : "Not yet finished";
+        String finished = status.getFinished() != null ? PipeListHelper.formatDate(status
+                .getFinished()) : "Not yet finished";
         json.put("finished", finished);
         out.write(json);
     }

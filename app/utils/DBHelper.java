@@ -8,9 +8,11 @@ import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
+import models.statusdata.Committer;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+import models.statusdata.VersionControlInfo;
 import play.db.ebean.Model.Finder;
 import executor.TaskExecutionContext;
 
@@ -196,7 +198,10 @@ public class DBHelper {
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No persisted pipes found for '" + pipe.getName() + "'");
         } else {
-            return foundPipes.get(foundPipes.size() - 1);
+            Pipe latest = foundPipes.get(foundPipes.size() - 1);
+            VersionControlInfo vc = latest.versionControlInfo;
+            Committer committer = vc.committer;
+            return latest;
         }
     }
 

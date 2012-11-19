@@ -1,11 +1,16 @@
 package controllers;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
+
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.DateUtils;
+
 import play.api.templates.Html;
-import java.text.DateFormat;
 
 /**
  * Helper class for the pipe list view.
@@ -28,10 +33,12 @@ public class PipeListHelper {
         // Create the nodes
         buf.append("<h3>" + phase.name + "</h3>");
         buf.append("<hr/>");
-        String started = (phase.started != null) ? DateFormatUtils.format(phase.started,"MMM d, HH:mm:ss") : "Not yet started";
-        String finished = (phase.finished != null) ? DateFormatUtils.format(phase.finished,"MMM d HH:mm:ss") : "Not yet finished";
+        String started = (phase.started != null) ? formatDate(phase.started) : "Not yet started";
+        String finished = (phase.finished != null) ? formatDate(phase.finished)
+                : "Not yet finished";
         buf.append("<div id='started'><label>Started:</label><span> " + started + "</span></div>");
-        buf.append("<div id='started'><label>Finished:</label><span> " + finished + "</span></div>");
+        buf.append("<div id='finished'><label>Finished:</label><span> " + finished
+                + "</span></div>");
         buf.append("<div id='tasks' >");
         for (int taskCount = 0; taskCount < phase.tasks.size(); taskCount++) {
             Task task = phase.tasks.get(taskCount);
@@ -41,5 +48,23 @@ public class PipeListHelper {
         }
         buf.append("</div>");
         return new Html(buf.toString());
+    }
+
+    public static String formatDate(Date dateToFormat) {
+        String format = "";
+        Calendar now = Calendar.getInstance();
+        now.setTime(new Date());
+        Calendar calToFormat = Calendar.getInstance();
+        calToFormat.setTime(dateToFormat);
+        if (DateUtils.isSameDay(now, calToFormat)) {
+            format = "HH:mm";
+        } else if (now.get(Calendar.YEAR) != calToFormat.get(Calendar.YEAR)) {
+            format = "yyyy/MM/dd HH:mm";
+        } else if (now.get(Calendar.WEEK_OF_YEAR) == calToFormat.get(Calendar.WEEK_OF_YEAR)) {
+            format = "E HH:mm";
+        } else {
+            format = "MM/dd HH:mm";
+        }
+        return DateFormatUtils.format(dateToFormat, format);
     }
 }
