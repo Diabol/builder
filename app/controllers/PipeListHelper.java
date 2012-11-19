@@ -57,12 +57,16 @@ public class PipeListHelper {
         Calendar calToFormat = Calendar.getInstance();
         calToFormat.setTime(dateToFormat);
         if (DateUtils.isSameDay(now, calToFormat)) {
+            // Same day. Eg. 14:56
             format = "HH:mm";
         } else if (now.get(Calendar.YEAR) != calToFormat.get(Calendar.YEAR)) {
+            // Different year. Eg 2012/03/30 14:56
             format = "yyyy/MM/dd HH:mm";
         } else if (now.get(Calendar.WEEK_OF_YEAR) == calToFormat.get(Calendar.WEEK_OF_YEAR)) {
+            // Same year and same week. Eg Mon 14:56
             format = "E HH:mm";
         } else {
+            // Same year but different week. Eg 03/30 14:56
             format = "MM/dd HH:mm";
         }
         return DateFormatUtils.format(dateToFormat, format);
