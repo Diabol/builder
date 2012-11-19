@@ -42,9 +42,9 @@
         }
         
         function resetPipeVersionInfo(className, version, commitId, commitMsg) {
-        	$('.'+className).find('#pipeVersion').html('Version: ' + version);
-    		$('.'+className).find('#commitId').html(commitId);
-    		$('.'+className).find('#commitText').html(commitMsg);
+        	$('.'+className).find("#revisionInfo").find('#pipeVersion').html('Version: ' + version);
+    		$('.'+className).find("#revisionInfo").find('#commitId').html(commitId);
+    		$('.'+className).find("#revisionInfo").find('#commitText').html(commitMsg);
         }
         function highlightPhase(pipeName, phaseName) {
             if(selectedPhase &&  selectedPipe){
