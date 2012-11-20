@@ -272,6 +272,24 @@ label {
     border-radius: 10px;
 }
 
+.taskInfo {
+    display: none;
+    padding: 5px;
+    position: absolute;
+    bottom: -15px;
+    background-color: #ffffff;
+    color: black;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid grey;
+    box-shadow: 3px 3px 3px #888888;
+}
+
+.task:hover .taskInfo {
+    display: block;
+}
+
 .action {
     float: left;
     width: 80px;

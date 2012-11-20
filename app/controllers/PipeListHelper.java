@@ -44,7 +44,7 @@ public class PipeListHelper {
             Task task = phase.tasks.get(taskCount);
             buf.append("<div id='" + pipe.name + phase.name + task.name + "' class='task "
                     + task.state + " " + pipe.name + "' style='left: " + (5 + taskCount * 30)
-                    + "px;'></div>");
+                    + "px;' on><div class='taskInfo'><label>"+task.name+"</label></div></div>");
         }
         buf.append("</div>");
         return new Html(buf.toString());
