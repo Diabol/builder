@@ -295,6 +295,20 @@ public class Pipes extends Controller {
         };
     }
 
+    public static Result incrementMajor(String pipeName) {
+        try {
+            PipeVersion pipeVersion = new Orchestrator(configReader, dbHelper, notificationHandler,
+                    taskExecutor, logHandler).incrementMajor(pipeName);
+            String pipeUrl = createNewPipeUrl(pipeVersion);
+            return generatePipeStartedResult(pipeVersion, pipeUrl);
+        } catch (DataNotFoundException ex) {
+            Logger.error(
+                    "Could not increment major version for " + pipeName + ". " + ex.getMessage(),
+                    ex);
+            return notFound(ex.getMessage());
+        }
+    }
+
     /**
      * Returns the phases of the latest version of a given pipe.
      * 

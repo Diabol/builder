@@ -203,7 +203,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                         assertThat(true).isFalse();
                     }
                 }
-                Result result = Pipes.getPhases("ThePipe", "1");
+                Result result = Pipes.getPhases("ThePipe", "1.1");
                 assertThat(status(result)).isEqualTo(OK);
                 assertThat(contentType(result)).isEqualTo("application/json");
                 assertThat(charset(result)).isEqualTo("utf-8");
@@ -269,7 +269,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                         assertThat(contentAsString(result)).contains(task.getTaskName());
                     }
                 }
-                assertThat(contentAsString(result).contains("version: 1"));
+                assertThat(contentAsString(result).contains("version: 1.1"));
                 assertThat(contentAsString(result).contains("NOT_STARTED"));
             }
         });
@@ -323,7 +323,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                         assertThat(contentAsString(result)).contains(task.getTaskName());
                     }
                 }
-                assertThat(contentAsString(result).contains("version: 1"));
+                assertThat(contentAsString(result).contains("version: 1.1"));
                 assertThat(contentAsString(result).contains("NOT_STARTED"));
             }
         });
@@ -344,7 +344,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                         assertThat(true).isFalse();
                     }
                 }
-                Result result = Pipes.getPipe("ThePipe", "1");
+                Result result = Pipes.getPipe("ThePipe", "1.1");
                 assertThat(status(result)).isEqualTo(OK);
                 assertThat(contentType(result)).isEqualTo("application/json");
                 assertThat(charset(result)).isEqualTo("utf-8");
@@ -355,7 +355,7 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                         assertThat(contentAsString(result)).contains(task.getTaskName());
                     }
                 }
-                assertThat(contentAsString(result).contains("version: 1"));
+                assertThat(contentAsString(result).contains("version: 1.1"));
                 assertThat(contentAsString(result).contains("NOT_STARTED"));
             }
         });
@@ -472,6 +472,51 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
         if (status.isSuccess()) {
             phaseCompletedCount++;
         }
+    }
+
+    @Test
+    public void testIncrementMajor() throws Exception {
+        Mockito.when(configReader.get("ThePipe")).thenReturn(mockedConf);
+        Mockito.when(configReader.getConfiguredPipes()).thenReturn(
+                Collections.singletonList(mockedConf));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                callAction(controllers.routes.ref.Pipes.incrementMajor("ThePipe"));
+                while (phaseCompletedCount < 3) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        assertThat(true).isFalse();
+                    }
+                }
+                Result result = Pipes.getLatestPipes();
+                assertThat(status(result)).isEqualTo(OK);
+                assertThat(contentType(result)).isEqualTo("application/json");
+                assertThat(charset(result)).isEqualTo("utf-8");
+                assertThat(contentAsString(result)).contains(mockedConf.getName());
+                for (PhaseConfig conf : mockedConf.getPhases()) {
+                    assertThat(contentAsString(result)).contains(conf.getName());
+                    for (TaskConfig task : conf.getTasks()) {
+                        assertThat(contentAsString(result)).contains(task.getTaskName());
+                    }
+                }
+                assertThat(contentAsString(result).contains("version: 2.1"));
+            }
+        });
+    }
+
+    @Test
+    public void testIncrementMajorReturnsNotFoundWhenNotConfigured() throws Exception {
+        Mockito.when(configReader.get("ThePipe")).thenThrow(new DataNotFoundException("Message"));
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Result result = Pipes.incrementMajor("ThePipe");
+                assertThat(status(result)).isEqualTo(NOT_FOUND);
+            }
+        });
     }
 
 }

@@ -47,6 +47,9 @@ GET		/pipe/:pipe/latest/:number			controllers.Pipes.getNumberOfLatestPipe(pipe: 
 # Start a pipe, ie create a new Pipe instance
 POST    /pipe/:pipe                 controllers.Pipes.start(pipe: String)
 
+#Rebuilds latest version of a pipe with major version incremented by 1. Minor version is reset to 1
+POST	/pipe/:pipe/incrementMajor controllers.Pipes.incrementMajor(pipe: String)
+
 POST    /pipe/:pipe/github  			controllers.GitHub.start(pipe: String)
 
 # Map static resources from the /public folder to the /assets URL path

@@ -59,7 +59,7 @@ public class OrchestratorTest {
     Pipe runningPipe;
     Pipe failedPipe;
     Pipe successfullPipe;
-    String stringVersion = "1";
+    String stringVersion = "1.1";
     Committer committer = new Committer("John", "john@company.com");
     private final VersionControlInfo firstCommit = new VersionControlInfo("#1", "FirstCommit",
             committer);
@@ -91,12 +91,12 @@ public class OrchestratorTest {
     }
 
     @Test
-    public void testStartPipeIncrementsVersionWhenEarlierExists() throws Exception {
+    public void testStartPipeIncrementsMinorVersionWhenEarlierExists() throws Exception {
         Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);
         when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
         VersionControlInfo secondCommit = new VersionControlInfo("#2", "SecondCommit", committer);
         orchestrator.start("ThePipe", secondCommit);
-        PipeVersion newVersion = PipeVersion.fromString("2", secondCommit, pipeConf);
+        PipeVersion newVersion = PipeVersion.fromString("1.2", secondCommit, pipeConf);
         verify(dbHelper).persistNewPipe(newVersion, pipeConf);
         verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
     }
@@ -370,6 +370,28 @@ public class OrchestratorTest {
         }
     }
 
+    @Test
+    public void testIncrementMajorPersistsNewVersionOfPipeAndNotifiesAboutNewVersion()
+            throws Exception {
+        Pipe persisted = Pipe.createNewFromConfig(version.getVersion(), pipeConf, firstCommit);
+        when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
+        orchestrator.incrementMajor("ThePipe");
+        PipeVersion newVersion = PipeVersion.fromString("2.1", firstCommit, pipeConf);
+        verify(dbHelper).persistNewPipe(newVersion, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
+    }
+
+    @Test
+    public void testIncrementMajorPersistsNewVersionWithVCNotAvailableWhenNoPreviousRunExists()
+            throws Exception {
+        when(dbHelper.getLatestPipe(pipeConf)).thenThrow(new DataNotFoundException(""));
+        orchestrator.incrementMajor("ThePipe");
+        PipeVersion newVersion = PipeVersion.fromString("2.1",
+                VersionControlInfo.createVCInfoNotAvailable(), pipeConf);
+        verify(dbHelper).persistNewPipe(newVersion, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
+    }
+
     private Phase createPhaseFromConf(PhaseConfig phaseConfig) {
         Phase phase = Phase.createNewFromConfig(phaseConfig);
         for (TaskConfig taskConf : phaseConfig.getTasks()) {
@@ -473,4 +495,5 @@ public class OrchestratorTest {
         firstPhase.setTasks(taskList);
         return firstPhase;
     }
+
 }

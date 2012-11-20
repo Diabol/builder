@@ -86,10 +86,13 @@ public class Orchestrator implements TaskCallback {
     private PipeVersion getNextPipeVersion(PipeConfig pipe, VersionControlInfo vcInfo) {
         try {
             Pipe latestPipe = dbHelper.getLatestPipe(pipe);
-            long latest = Long.valueOf(latestPipe.version);
-            return PipeVersion.fromString("" + ++latest, vcInfo, pipe);
+            String version = latestPipe.version;
+            String major = version.split("\\.")[0];
+            String minor = version.split("\\.")[1];
+            long latest = Long.valueOf(minor);
+            return PipeVersion.fromString(major + "." + ++latest, vcInfo, pipe);
         } catch (DataNotFoundException ex) {
-            return PipeVersion.fromString("1", vcInfo, pipe);
+            return PipeVersion.fromString("1.1", vcInfo, pipe);
         }
     }
 
@@ -250,5 +253,32 @@ public class Orchestrator implements TaskCallback {
 
     private PipeConfig getPipe(String pipeName) throws DataNotFoundException {
         return configReader.get(pipeName);
+    }
+
+    public PipeVersion incrementMajor(String pipeName) throws DataNotFoundException {
+        PipeConfig pipe = getPipe(pipeName);
+        PhaseConfig phase = pipe.getFirstPhaseConfig();
+        TaskConfig task = phase.getInitialTask();
+
+        PipeVersion version = createNewMajorVersion(pipe);
+        dbHelper.persistNewPipe(version, pipe);
+        notifictionHandler.notifyNewVersionOfPipe(version);
+        startTask(task, phase, pipe, version);
+        return version;
+    }
+
+    private PipeVersion createNewMajorVersion(PipeConfig pipe) {
+        try {
+            Pipe latestPipe = dbHelper.getLatestPipe(pipe);
+            VersionControlInfo vcInfo = latestPipe.versionControlInfo;
+            String version = latestPipe.version;
+            String major = version.split("\\.")[0];
+            String minor = version.split("\\.")[1];
+            long latest = Long.valueOf(major);
+            return PipeVersion.fromString(++latest + "." + minor, vcInfo, pipe);
+        } catch (DataNotFoundException ex) {
+            return PipeVersion.fromString("2.1", VersionControlInfo.createVCInfoNotAvailable(),
+                    pipe);
+        }
     }
 }
