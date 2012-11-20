@@ -79,7 +79,7 @@ label {
 }
 
 .expanded {
-    visibility: visible;
+    display: block;
     transition: width 3s, height 3s, transform 3s;
     -moz-transition: width 3s, height 3s, -moz-transform 3s;
     -webkit-transition: width 3s, height 3s, -webkit-transform 3s;
@@ -87,7 +87,7 @@ label {
 }
 
 .collapsed {
-    visibility: hidden;
+    display: none;
     transition: width 2s, height 2s, transform 2s;
     -moz-transition: width 2s, height 2s, -moz-transform 2s;
     -webkit-transition: width 2s, height 2s, -webkit-transform 2s;
