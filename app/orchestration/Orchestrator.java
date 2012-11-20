@@ -273,9 +273,8 @@ public class Orchestrator implements TaskCallback {
             VersionControlInfo vcInfo = latestPipe.versionControlInfo;
             String version = latestPipe.version;
             String major = version.split("\\.")[0];
-            String minor = version.split("\\.")[1];
             long latest = Long.valueOf(major);
-            return PipeVersion.fromString(++latest + "." + minor, vcInfo, pipe);
+            return PipeVersion.fromString(++latest + "." + 1, vcInfo, pipe);
         } catch (DataNotFoundException ex) {
             return PipeVersion.fromString("2.1", VersionControlInfo.createVCInfoNotAvailable(),
                     pipe);

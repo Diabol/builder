@@ -392,6 +392,16 @@ public class OrchestratorTest {
         verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
     }
 
+    @Test
+    public void testIncrementMajorSetsMinorToOne() throws Exception {
+        Pipe persisted = Pipe.createNewFromConfig("1.15", pipeConf, firstCommit);
+        when(dbHelper.getLatestPipe(pipeConf)).thenReturn(persisted);
+        orchestrator.incrementMajor("ThePipe");
+        PipeVersion newVersion = PipeVersion.fromString("2.1", firstCommit, pipeConf);
+        verify(dbHelper).persistNewPipe(newVersion, pipeConf);
+        verify(notificationHandler).notifyNewVersionOfPipe(newVersion);
+    }
+
     private Phase createPhaseFromConf(PhaseConfig phaseConfig) {
         Phase phase = Phase.createNewFromConfig(phaseConfig);
         for (TaskConfig taskConf : phaseConfig.getTasks()) {
