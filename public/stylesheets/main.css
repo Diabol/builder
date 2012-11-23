@@ -38,6 +38,14 @@
     font-size: 15px;
 }
 
+#started {
+	top: 15px;
+}
+
+#version {
+	padding-top: 3px;
+}
+
 #taskHeader, #pipeList {
     padding-left: 10px;
     padding-top: 10px;

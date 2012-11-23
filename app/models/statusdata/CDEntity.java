@@ -16,6 +16,7 @@ import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 import play.libs.Json;
+import controllers.PipeListHelper;
 
 /**
  * Base class for Pipe, Phase and Task.
@@ -96,9 +97,11 @@ public abstract class CDEntity extends Model implements StatusInterface {
         result.put("state", state.toString());
         if (started != null) {
             result.put("started", started.getTime());
+            result.put("startedAsString", PipeListHelper.formatDate(started));
         }
         if (finished != null) {
             result.put("finished", finished.getTime());
+            result.put("finishedAsString", PipeListHelper.formatDate(finished));
         }
         return result;
     }

@@ -38,13 +38,12 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("phaseName", status.getPhaseName());
         json.put("status", status.getStatus().toString());
         json.put("version", status.getVersion());
-
-        String started = status.getStarted() != null ? PipeListHelper.formatDate(status
-                .getStarted()) : "Not yet started";
-        json.put("started", started);
-        String finished = status.getFinished() != null ? PipeListHelper.formatDate(status
-                .getFinished()) : "Not yet finished";
-        json.put("finished", finished);
+        if (status.getStarted() != null) {
+            json.put("started", PipeListHelper.formatDate(status.getStarted()));
+        }
+        if (status.getFinished() != null) {
+            json.put("finished", PipeListHelper.formatDate(status.getFinished()));
+        }
         out.write(json);
     }
 
