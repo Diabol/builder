@@ -6,6 +6,7 @@
 
 @html = {
         <script>
+            var taskNameList = [];
             var getTasksUrl = '/pipe/@{pipeName}/@{pipeVersion}/@{phaseName}/tasks';
             $.ajax({
                 url: getTasksUrl,
@@ -14,10 +15,30 @@
             function renderTasks(tasks) {
                 for (var i = 0; i < tasks.length; i++) {
                     var task = tasks[i];
-                    var selected = task.name==='@{taskName}'? 'selected':'deselected';
-                    $('#tasktabs').append('<div class=\'left taskTab '+ selected +'\'><h3>'+task.name+'</h3></div>')
+                    taskNameList.push(task.name);
+                   var selected = task.name==='@{taskName}'? 'selected':'deselected';
+                    $('#tasktabs').append('<div id=\''+task.name+'-tab\' class=\'left taskTab '+ selected +'\'><h3><a href=\"#\" onClick=\"selectTab(\''+task.name+'\')\">'+task.name+'</a></h3></div>')
                 }
                 $('#tasktabs').append('<div class=\'clear\'></div>')
+                selectTab('@{taskName}');
+            }
+            function selectTab(taskName) {
+                showOutput('Fetching console log....');
+                var getTaskLogUrl = '/pipe/@{pipeName}/@{pipeVersion}/@{phaseName}/'+taskName+'/log';
+                $.ajax({
+                    url: getTaskLogUrl,
+                    success: showOutput
+                })
+                for (var i =0; i < taskNameList.length; i++) {
+                    var t = taskNameList[i];
+                    $('#'+t+'-tab').removeClass('selected');
+                    $('#'+t+'-tab').addClass('deselected');
+                }
+                $('#'+taskName+'-tab').removeClass('deselected');
+                $('#'+taskName+'-tab').addClass('selected');
+            }
+            function showOutput(data) {
+                $('#taskoutput').html(data)
             }
         </script>
 
@@ -29,8 +50,7 @@
             -->
         </div>
         <div id="taskoutput">
-            sdasdjasda
-            sdasdasd
+            No information avaibale
         </div>
 }
 

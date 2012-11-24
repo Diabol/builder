@@ -31,7 +31,8 @@
             result = result + "<div id='tasks' >";
             for (var taskCount = 0; taskCount < phase.tasks.length; taskCount++) {
                 var task = phase.tasks[taskCount];
-                result = result + "<div id='" + pipe.name + phase.name + task.name + "' class='task "
+                var onclick = "onClick=\"getTaskDetails('" + pipe.name +":" + phase.name +":"+ task.name+"')\"";
+                result = result + "<div id='" + pipe.name + phase.name + task.name + "' " + onclick + " class='task "
                         + task.state + " " + pipe.name + "' style='left: " + (5 + taskCount * 30)
                         + "px;' on><div class='taskInfo'><label>"+task.name+"</label></div></div>";
             }

@@ -15,6 +15,10 @@ label {
     color: #686985;
 }
 
+a {
+    text-decoration: none;
+}
+
 #logo-left {
     float: left;
     position: relative;
@@ -318,8 +322,12 @@ label {
     display: block;
 }
 
+#tasktabs h3 {
+    margin: 5px;
+}
+
 #tasktabs .selected {
-    background-color: yellow;
+    background-color: gray;
 }
 
 #tasktabs .deselected {
@@ -327,7 +335,7 @@ label {
 }
 
 #taskoutput {
-    border: 2px solid gray;
+    border-top: 2px solid gray;
     padding: 10px;
 }
 

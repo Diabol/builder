@@ -9,11 +9,11 @@ function toggleVisibility(id) {
 function getTaskDetails(task) {
     var taskSplit = task.split(':');
     var compVersion = shownPipeVersions[taskSplit[0]];
-    var url = '/pipe/'+taskSplit[0]+'/'+compVersion+'/'+taskSplit[1]+'/'+taskSplit[2]+'/log';
-    $('#detailsPanelTitle').html(taskSplit[0]+'/'+compVersion+'/'+taskSplit[1]+'/'+taskSplit[2]);
-    $('#detailsPanelLog').html('Information not available...');
+    var url = '/pipe/'+taskSplit[0]+'/'+compVersion+'/'+taskSplit[1]+'/'+taskSplit[2]+'/details';
+    $('#detailsPanelTitle').html(taskSplit[0]+'/'+compVersion+'/'+taskSplit[1]);
+    $('#detailsPanelBody').html('Information not available...');
     $.get(url, function(data) {
-        $('#detailsPanelLog').html(data);
+        $('#detailsPanelBody').html(data);
     });
     toggleVisibility('detailsPanel');
 }
