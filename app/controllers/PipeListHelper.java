@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
@@ -43,8 +44,10 @@ public class PipeListHelper {
         for (int taskCount = 0; taskCount < phase.tasks.size(); taskCount++) {
             Task task = phase.tasks.get(taskCount);
             buf.append("<div id='" + pipe.name + phase.name + task.name + "' class='task "
-                    + task.state + " " + pipe.name + "' onClick=\"getTaskDetails('"+pipe.name +":" + phase.name +":"+ task.name+"')\" style='left: " + (5 + taskCount * 30)
-                    + "px;'><div class='taskInfo'><label>"+task.name+"</label></div></div>");
+                    + task.state + " " + pipe.name + "' onClick=\"getTaskDetails('" + pipe.name
+                    + ":" + phase.name + ":" + task.name + "')\" style='left: "
+                    + (5 + taskCount * 30) + "px;'><div class='taskInfo'><label>" + task.name
+                    + "</label></div></div>");
         }
         buf.append("</div>");
         return new Html(buf.toString());
@@ -70,5 +73,27 @@ public class PipeListHelper {
             format = "MM/dd HH:mm";
         }
         return DateFormatUtils.format(dateToFormat, format);
+    }
+
+    public static String formatDuration(long millis) {
+        String result;
+        if (millis < 1000) {
+            result = String.format("%dms", millis);
+        } else if (millis < 60 * 1000) {
+            result = String.format("%ds", TimeUnit.MILLISECONDS.toSeconds(millis));
+        } else if (millis < 60 * 60 * 1000) {
+            result = String.format(
+                    "%dm %ds",
+                    TimeUnit.MILLISECONDS.toMinutes(millis),
+                    TimeUnit.MILLISECONDS.toSeconds(millis)
+                            - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+        } else {
+            result = String.format(
+                    "%dh %dm",
+                    TimeUnit.MILLISECONDS.toHours(millis),
+                    TimeUnit.MILLISECONDS.toMinutes(millis)
+                            - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)));
+        }
+        return result;
     }
 }

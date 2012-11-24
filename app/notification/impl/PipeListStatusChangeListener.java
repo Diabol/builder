@@ -1,5 +1,7 @@
 package notification.impl;
 
+import java.util.Date;
+
 import models.PipeVersion;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
@@ -10,8 +12,11 @@ import notification.TaskStatusChangedListener;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 
+import play.Logger;
 import play.libs.Json;
 import play.mvc.WebSocket;
+import utils.DBHelper;
+import utils.DataNotFoundException;
 import controllers.PipeListHelper;
 
 /**
@@ -38,11 +43,23 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("phaseName", status.getPhaseName());
         json.put("status", status.getStatus().toString());
         json.put("version", status.getVersion());
-        if (status.getStarted() != null) {
+        if (status.isRunning()) {
             json.put("started", PipeListHelper.formatDate(status.getStarted()));
-        }
-        if (status.getFinished() != null) {
-            json.put("finished", PipeListHelper.formatDate(status.getFinished()));
+        } else {
+            try {
+                // Started is not set on statuses about finished phase. Reading
+                // it from the first task of the phase.
+                Date started = DBHelper.getInstance()
+                        .getTasks(status.getPipeName(), status.getVersion(), status.getPhaseName())
+                        .get(0).started;
+                long diff = (status.getFinished().getTime() - started.getTime());
+                json.put("started", PipeListHelper.formatDate(started));
+                json.put("executionTime", PipeListHelper.formatDuration(diff));
+                json.put("finished", PipeListHelper.formatDate(status.getFinished()));
+            } catch (DataNotFoundException ex) {
+                Logger.error("Could not set started and finished of phase when pushing to pipe list view. "
+                        + ex.getMessage());
+            }
         }
         out.write(json);
     }
@@ -65,7 +82,7 @@ public class PipeListStatusChangeListener implements PhaseStatusChangedListener,
         json.put("newPipeVersion", true);
         json.put("pipeName", version.getPipeName());
         json.put("version", version.getVersion());
-        json.put("commitId", version.getVersionControlInfo().versionControlId);
+        json.put("committer", version.getVersionControlInfo().committer.name);
         json.put("commitMsg", version.getVersionControlInfo().versionControlText);
         out.write(json);
 

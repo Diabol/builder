@@ -92,7 +92,7 @@ public class Pipes extends Controller {
     }
 
     private static Pipe createNotStartedPipe(PipeConfig pipeConf) {
-        Pipe result = Pipe.createNewFromConfig("NA", pipeConf,
+        Pipe result = Pipe.createNewFromConfig("N/A", pipeConf,
                 VersionControlInfo.createVCInfoNotAvailable());
         for (PhaseConfig phaseConf : pipeConf.getPhases()) {
             Phase phase = Phase.createNewFromConfig(phaseConf);

@@ -101,7 +101,8 @@ public abstract class CDEntity extends Model implements StatusInterface {
         }
         if (finished != null) {
             result.put("finished", finished.getTime());
-            result.put("finishedAsString", PipeListHelper.formatDate(finished));
+            long diff = (finished.getTime() - started.getTime());
+            result.put("executionTime", PipeListHelper.formatDuration(diff));
         }
         return result;
     }

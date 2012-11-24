@@ -52,7 +52,7 @@ public class VersionControlInfo extends Model {
     }
 
     public static VersionControlInfo createVCInfoNotAvailable() {
-        return new VersionControlInfo("NA", "NA", Committer.createCommitterNotAvailable());
+        return new VersionControlInfo("N/A", "N/A", Committer.createCommitterNotAvailable());
     }
 
     @Override

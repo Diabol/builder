@@ -38,7 +38,7 @@ public class Committer {
     }
 
     public static Committer createCommitterNotAvailable() {
-        return new Committer("NA", "NA");
+        return new Committer("N/A", "N/A");
     }
 
     @Override

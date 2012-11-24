@@ -23,7 +23,7 @@ public class PhaseStatus extends PipeStatus {
 
     public static PhaseStatus newFinishedPhaseStatus(TaskExecutionContext context, boolean success) {
         return new PhaseStatus(context.getPipeVersion(), context.getPhase(), State.state(success),
-                context.getStarted(), context.getFinished());
+                null, context.getFinished());
     }
 
     /** Use the factory methods */

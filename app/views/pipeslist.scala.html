@@ -21,10 +21,10 @@
             } else {
             	result = result + "<span id='started'></span>";
             }
-            if(phase.finishedAsString){
-            	result = result + "<span id='finished'>  ->  "+phase.finishedAsString+"</span>";
+            if(phase.executionTime){
+            	result = result + "<span id='executionTime'>("+phase.executionTime+")</span>";
             } else {
-            	result = result + "<span id='finished'></span>";
+            	result = result + "<span id='executionTime'></span>";
             }
             result = result + "</div>";
     		result = result + "<hr/>";
@@ -47,7 +47,7 @@
         		var pipe =  pipes[pipeCount];
 	            for(var phaseCount = 0; phaseCount < pipe.phases.length; phaseCount++){
 	            	var phase = pipe.phases[phaseCount];
-	            	$('#'+pipe.name+'canvas').append("<div id='" + pipe.name + phase.name + "' class='phase block " + pipe.name + "' style='left: "+(20+phaseCount*320)+"px; top: 120px;'>"+generatePhaseMarkup(pipe, phase)+"</div>");
+	            	$('#'+pipe.name+'canvas').append("<div id='" + pipe.name + phase.name + "' class='phase block " + pipe.name + "' style='left: "+(20+phaseCount*320)+"px; top: 70px;'>"+generatePhaseMarkup(pipe, phase)+"</div>");
 	            } 
         	}
         }
@@ -62,13 +62,13 @@
         function resetPhases(className){
         	$('.'+className).animate({ backgroundColor: 'white' }, 'fast');
         	$('.'+className).find('#started').html("");
-    		$('.'+className).find('#finished').html("");
+    		$('.'+className).find('#executionTime').html("");
         }
         
-        function resetPipeVersionInfo(className, version, commitId, commitMsg) {
+        function resetPipeVersionInfo(className, version, committer, commitMsg) {
         	$('.'+className).find('#pipeVersion').html('Version: ' + version);
-    		$('.'+className).find('#versionControlInfo').find('#commitId').html(commitId);
-    		$('.'+className).find('#versionControlInfo').find('#commitText').html(commitMsg);
+    		$('.'+className).find('#versionControlInfo').find('#committer').html(committer);
+    		$('.'+className).find('#versionControlInfo').find('#commitText').html("'"+commitMsg+"'");
         }
         function highlightPhase(pipeName, phaseName) {
             if(selectedPhase &&  selectedPipe){
@@ -103,8 +103,8 @@
         		if(updatePhaseData.started) {
         			$('#'+domNodeId).find('#started').html(updatePhaseData.started);
         		}
-        		if(updatePhaseData.finished) {
-        			$('#'+domNodeId).find('#finished').html("  ->  "+updatePhaseData.finished);
+        		if(updatePhaseData.executionTime) {
+        			$('#'+domNodeId).find('#executionTime').html("("+updatePhaseData.executionTime+")");
         		}
         	}
         	switch(updatePhaseData.status) {
@@ -152,7 +152,7 @@
                 } else if(data.newPipeVersion) {
                 	shownPipeVersions[data.pipeName] = data.version;
                 	resetPhases(data.pipeName);
-                	resetPipeVersionInfo(data.pipeName, data.version, data.commitId, data.commitMsg);
+                	resetPipeVersionInfo(data.pipeName, data.version, data.committer, data.commitMsg);
                 }
 
             }
@@ -167,13 +167,13 @@
     </script>
     <div id="pipeList">
     @for(i <- 0 until pipes.length){
-        <div id="@{pipes(i).name}canvas" class="canvas component @{pipes(i).name}" style="width: 100%; height: 200px; padding-top: 10px;">
+        <div id="@{pipes(i).name}canvas" class="canvas component @{pipes(i).name}" style="width: 100%; height: 170px; padding-top: 10px;">
             <h2><span class="componentName">@{pipes(i).name}</span>  
             <span id="pipeVersion" class="componentVersion">Version: @{pipes(i).version}</span>
             <span id='versionControlInfo' class='right'>
-            	<span id="commitId">@{pipes(i).versionControlInfo.versionControlId}</span>
-            	<span>: </span>
-            	<span id="commitText">@{pipes(i).versionControlInfo.versionControlText}</span>
+            	<span id="commitText">'@{pipes(i).versionControlInfo.versionControlText}'</span>
+            	<span>by </span>
+            	<span id=committer>@{pipes(i).versionControlInfo.committer.name}</span>
             </span>
             </h2>
         </div>
