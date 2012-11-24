@@ -33,10 +33,12 @@
     </div>
     <div class="clear"></div>
 </div>
-
-<!--
-                <div id="breadcrumbs" class="left"> :: @title</div>
--->
+        <div id="detailsPanel" class="collapsed">
+            <div class="right"><a href="#" onclick="toggleVisibility('detailsPanel')">close</a></div>
+            <h2 id="detailsPanelTitle">Details Panel</h2>
+            <hr/>
+            <p id="detailsPanelLog">Details about a task goes here....</p>
+        </div>
         <div id="dashboard">
             @content
         </div>

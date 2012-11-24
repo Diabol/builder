@@ -43,8 +43,8 @@ public class PipeListHelper {
         for (int taskCount = 0; taskCount < phase.tasks.size(); taskCount++) {
             Task task = phase.tasks.get(taskCount);
             buf.append("<div id='" + pipe.name + phase.name + task.name + "' class='task "
-                    + task.state + " " + pipe.name + "' style='left: " + (5 + taskCount * 30)
-                    + "px;' on><div class='taskInfo'><label>"+task.name+"</label></div></div>");
+                    + task.state + " " + pipe.name + "' onClick=\"getTaskDetails('"+pipe.name +":" + phase.name +":"+ task.name+"')\" style='left: " + (5 + taskCount * 30)
+                    + "px;'><div class='taskInfo'><label>"+task.name+"</label></div></div>");
         }
         buf.append("</div>");
         return new Html(buf.toString());

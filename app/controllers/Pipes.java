@@ -30,6 +30,7 @@ import utils.LogHandler;
 import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
+import views.html.taskdetails;
 import executor.TaskExecutor;
 
 public class Pipes extends Controller {
@@ -174,6 +175,10 @@ public class Pipes extends Controller {
             Logger.error(errMsg, e);
             return notFound(errMsg);
         }
+    }
+
+    public static Result taskDetails(String taskName, String phaseName, String pipeName,String pipeVersion) {
+        return ok(taskdetails.render(taskName, phaseName, pipeName,pipeVersion));
     }
 
     public static Result startButtons() {

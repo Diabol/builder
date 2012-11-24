@@ -1,0 +1,37 @@
+@(taskName: String, phaseName: String, pipeName: String, pipeVersion: String)
+
+@headers = {
+    <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+}
+
+@html = {
+        <script>
+            var getTasksUrl = '/pipe/@{pipeName}/@{pipeVersion}/@{phaseName}/tasks';
+            $.ajax({
+                url: getTasksUrl,
+                success: renderTasks
+            })
+            function renderTasks(tasks) {
+                for (var i = 0; i < tasks.length; i++) {
+                    var task = tasks[i];
+                    var selected = task.name==='@{taskName}'? 'selected':'deselected';
+                    $('#tasktabs').append('<div class=\'left taskTab '+ selected +'\'><h3>'+task.name+'</h3></div>')
+                }
+                $('#tasktabs').append('<div class=\'clear\'></div>')
+            }
+        </script>
+
+        <div id="tasktabs">
+            <!--
+            <div class="left taskTab">Task 1</div>
+            <div class="left taskTab">Task 2</div>
+            <div class="left taskTab">Task 3</div>
+            -->
+        </div>
+        <div id="taskoutput">
+            sdasdjasda
+            sdasdasd
+        </div>
+}
+
+@blank("Phase output", headers)(html)
