@@ -187,27 +187,22 @@ a {
 }
 
 .componentName {
-    border-bottom: 3px solid #bcbabe;
+    margin: 0px;
+    border-top: 5px solid #bcbabe;
+    border-right: 3px solid #bcbabe;
+    border-bottom: 4px solid #fff;
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 5px;
-    -webkit-border-radius: 10px;
-    -webkit-border-bottom-right-radius: 0;
-    -moz-border-radius: 10px;
-    -moz-border-radius-bottomright: 0;
-    border-radius: 10px;
-    border-bottom-right-radius: 0;
-    /* Safari 4-5, Chrome 1-9 */
-    background: -webkit-gradient(linear, left top, right top, from(#f4ebf7), to(#bcbabe));
-    /* Safari 5.1, Chrome 10+ */
-    background: -webkit-linear-gradient(top, #f4ebf7, #bcbabe);
-    /* Firefox 3.6+ */
-    background: -moz-linear-gradient(top, #f4ebf7, #bcbabe);
-    /* IE 10 */
-    background: -ms-linear-gradient(top, #f4ebf7, #bcbabe);
-    /* Opera 11.10+ */
-    background: -o-linear-gradient(top, #f4ebf7, #bcbabe);
+    -webkit-border-top-right-radius: 10px;
+    -moz-border-radius-topright: 10px;
+    border-top-right-radius: 10px;
+    -webkit-border-bottom-left-radius: 10px;
+    -moz-border-radius-bottomleft: 10px;
+    border-bottom-left-radius: 10px;
     color: #2c2f85;
+    height: 25px;
+    font-size: 0.9em;
 }
 
 .componentVersion {
@@ -217,6 +212,7 @@ a {
 #versionControlInfo {
 	font-size: 0.7em;
     color: black;
+    font-weight: normal;
 }
 
 #dashboard {
