@@ -8,7 +8,6 @@ import models.config.PipeConfig;
 import models.config.TaskConfig;
 import models.message.PhaseStatus;
 import models.message.TaskStatus;
-import models.statusdata.Committer;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
@@ -200,7 +199,7 @@ public class DBHelper {
         } else {
             Pipe latest = foundPipes.get(foundPipes.size() - 1);
             VersionControlInfo vc = latest.versionControlInfo;
-            Committer committer = vc.committer;
+            String committer = vc.committer.name;
             return latest;
         }
     }
