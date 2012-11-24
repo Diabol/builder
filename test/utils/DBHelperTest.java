@@ -35,6 +35,14 @@ import com.avaje.ebean.ExpressionList;
 import executor.TaskExecutionContext;
 import executor.TaskResult;
 
+/**
+ * To be able to run these test in eclipse install the ebean enhancer plugin
+ * from Avaje. Found at: http://www.avaje.org/eclipseupdate/ Then right click on
+ * project and choose 'Add/remove bytecode enhancer'.
+ * 
+ * @author danielgronberg
+ * 
+ */
 public class DBHelperTest {
 
     PipeConfig configuredPipe;
