@@ -17,7 +17,7 @@
                     var task = tasks[i];
                     taskNameList.push(task.name);
                    var selected = task.name==='@{taskName}'? 'selected':'deselected';
-                    $('#tasktabs').append('<div id=\''+task.name+'-tab\' class=\'left taskTab '+ selected +'\'><h3><a href=\"#\" onClick=\"selectTab(\''+task.name+'\')\">'+task.name+'</a></h3></div>')
+                    $('#tasktabs').append('<div id=\''+task.name+'-tab\' class=\'left taskTab '+ selected +'\'><h3 class=\"link\" onClick=\"selectTab(\''+task.name+'\')\">'+task.name+'</h3></div>')
                 }
                 $('#tasktabs').append('<div class=\'clear\'></div>')
                 selectTab('@{taskName}');

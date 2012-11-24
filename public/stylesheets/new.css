@@ -238,6 +238,10 @@ a {
     margin-bottom: 0px;
 }
 
+.link:hover {
+    cursor: pointer;
+}
+
 .pipe {
 
 }

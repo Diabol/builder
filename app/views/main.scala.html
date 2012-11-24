@@ -21,20 +21,18 @@
 <div id="navigation">
     <div id="settings" class="right">
         <span id="breadcrumbs" class="left">@title</span>
-        <a href="#" onclick="toggleVisibility('settingsPanel');">
-            <img src="@routes.Assets.at("images/settings.png")" alt="settings"/>
-        </a>
+        <img class="link" onclick="toggleVisibility('settingsPanel');" src="@routes.Assets.at("images/settings.png")" alt="settings"/>
         <div id="settingsPanel" class="collapsed">
-            <div class="right"><a href="#" onclick="toggleVisibility('settingsPanel')">close</a></div>
+            <div class="right link" onclick="toggleVisibility('settingsPanel')">close</div>
             <h2>Settings</h2>
             <hr/>
-            <a href="#" onclick="toggleVisibility('header');">Toggle page header</a>
+            <span class="link" onclick="toggleVisibility('header');">Toggle page header</span>
         </div>
     </div>
     <div class="clear"></div>
 </div>
         <div id="detailsPanel" class="collapsed">
-            <div class="right"><a href="#" onclick="toggleVisibility('detailsPanel')">close</a></div>
+            <div class="right link" onclick="toggleVisibility('detailsPanel')">close</div>
             <h2 id="detailsPanelTitle">Details Panel</h2>
             <div id="detailsPanelBody">Details about a task goes here....</div>
         </div>
