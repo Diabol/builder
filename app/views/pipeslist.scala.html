@@ -84,6 +84,11 @@
         	function colorizeTask(colour) {
         		$('#'+updateTaskData.pipeName+updateTaskData.phaseName+updateTaskData.taskName).animate({ backgroundColor: colour }, 'slow');
         	}
+            function addTaskTrigger() {
+                var action = '<img class=\"link\" src=\"@routes.Assets.at("/images/play_alt3.png")\" onclick=\"doAction(\'/pipe/'+pipe.name+'/'+pipe.version+'/'+phase.name+'/'+task.name+'\')\"/>';
+                $('#'+updateTaskData.pipeName+updateTaskData.phaseName+updateTaskData.taskName).onclick='';
+                $('#'+updateTaskData.pipeName+updateTaskData.phaseName+updateTaskData.taskName).html=action;
+            }
         	switch(updateTaskData.status) {
         	case "RUNNING":
         		colorizeTask("#b5e0f7");
@@ -94,6 +99,10 @@
         	case "FAILURE":
         		colorizeTask("#d25353");
     			break;
+            case "PENDING":
+                    colorizeTask("#d3d3d3")
+                    addTaskTrigger();
+                    break;
         	}
         }
 

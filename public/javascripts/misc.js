@@ -27,7 +27,6 @@ function logJson(obj) {
 }
 
 function doAction(url) {
-    alert('Doing ajax POST to: '+url);
     $.ajax({
         url: url,
         type: "POST",
