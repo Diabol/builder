@@ -60,6 +60,7 @@ import executor.TaskExecutor;
 public class OrchestratorComponentTest extends MockitoTestBase implements
         TaskStatusChangedListener, PhaseStatusChangedListener, PipeStatusChangedListener {
 
+    private int numberOfPendingTaskStatusReceived;
     private int numberOfRunningTaskStatusRecieved;
     private int numberOfSuccessfullTaskStatusRecieved;
     private int numberOfFailedTaskStatusRecieved;
@@ -84,6 +85,7 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
 
     @Before
     public void prepare() {
+        numberOfPendingTaskStatusReceived = 0;
         numberOfRunningTaskStatusRecieved = 0;
         numberOfSuccessfullTaskStatusRecieved = 0;
         numberOfFailedTaskStatusRecieved = 0;
@@ -136,6 +138,9 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                             pipeVersion.getVersion());
                     assertThat(persistedPipe.state).isEqualTo(State.RUNNING);
                     assertFirstPhaseSuccessFull(persistedPipe);
+                    assertThat(persistedPipe.phases.get(1).tasks.get(0).state).isEqualTo(
+                            State.PENDING);
+                    assertThat(numberOfPendingTaskStatusReceived).isEqualTo(1);
                     assertThat(numberOfRunningTaskStatusRecieved).isEqualTo(4);
                     assertThat(numberOfSuccessfullTaskStatusRecieved).isEqualTo(4);
                     assertThat(numberOfRunningPhaseStatusReceived).isEqualTo(1);
@@ -310,11 +315,14 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
     public void recieveStatusChanged(TaskStatus status) {
         if (status.isRunning()) {
             numberOfRunningTaskStatusRecieved++;
+        } else if (status.isPending()) {
+            numberOfPendingTaskStatusReceived++;
         } else if (status.isSuccess()) {
             numberOfSuccessfullTaskStatusRecieved++;
         } else if (!status.isSuccess()) {
             numberOfFailedTaskStatusRecieved++;
         }
+
     }
 
     @Override

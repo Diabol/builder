@@ -32,6 +32,11 @@ public class TaskStatus extends PhaseStatus {
                 result.out(), result.err());
     }
 
+    public static TaskStatus newPendingTaskStatus(TaskExecutionContext context) {
+        return new TaskStatus(State.PENDING, context.getPipeVersion(), context.getPhase(),
+                context.getTask(), null, null, null, null);
+    }
+
     public String getOut() {
         return out;
     }
@@ -51,6 +56,10 @@ public class TaskStatus extends PhaseStatus {
         this.task = task;
         this.out = out;
         this.err = err;
+    }
+
+    public boolean isPending() {
+        return getState() == State.PENDING;
     }
 
 }

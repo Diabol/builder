@@ -87,6 +87,10 @@ public abstract class CDEntity extends Model implements StatusInterface {
         return state == State.RUNNING;
     }
 
+    public void pending() {
+        state = State.PENDING;
+    }
+
     public void startNow() {
         started = new Date();
         state = State.RUNNING;

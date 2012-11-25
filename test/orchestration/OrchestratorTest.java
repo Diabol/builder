@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.internal.verification.Times;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import utils.DBHelper;
@@ -147,7 +148,13 @@ public class OrchestratorTest {
         orchestrator.handleTaskResult(success);
 
         TaskStatus successTaskStatus = TaskStatus.newFinishedTaskStatus(success);
-        verifyTaskStatusForDBHelperAndNotificationHandler(successTaskStatus);
+        ArgumentCaptor<TaskStatus> dbHelpCapt = ArgumentCaptor.forClass(TaskStatus.class);
+        ArgumentCaptor<TaskStatus> notifyCapt = ArgumentCaptor.forClass(TaskStatus.class);
+
+        verify(dbHelper).updateTaskToFinished(dbHelpCapt.capture());
+        assertEquals(successTaskStatus.getFinished(), dbHelpCapt.getValue().getFinished());
+
+        verify(notificationHandler, new Times(2)).notifyTaskStatusListeners(notifyCapt.capture());
 
         PhaseStatus successPhaseStatus = PhaseStatus.newFinishedPhaseStatus(context, true);
         verifyPhaseStatusForDBHelperAndNotificationHandler(successPhaseStatus);
@@ -333,6 +340,33 @@ public class OrchestratorTest {
                 .forClass(TaskExecutionContext.class);
         verify(taskExecutor).execute(taskExecCapt.capture(), (Orchestrator) Mockito.notNull());
         assertTrue(taskExecCapt.getValue().getTask().getTaskName().equals("SecondAutomatic"));
+    }
+
+    @Test
+    public void testHandleTaskResultSuccessSetsNextManualTaskToPendingAndNotifies()
+            throws Exception {
+        TaskExecutionContext context = createContextForFirstTaskInPhase(pipeConf.getPhases().get(0));
+        context.finishedNow();
+        TaskResult success = new TaskResult(true, context);
+        Phase firstPhase = createPhaseFromConf(pipeConf.getFirstPhaseConfig());
+        firstPhase.tasks.get(0).finishNow(true);
+        when(dbHelper.getPhaseForContext(context)).thenReturn(firstPhase);
+        when(dbHelper.getPipe(version.getPipeName(), version.getVersion())).thenReturn(runningPipe);
+
+        orchestrator.handleTaskResult(success);
+        ArgumentCaptor<TaskStatus> capturedDBStatus = ArgumentCaptor.forClass(TaskStatus.class);
+        ArgumentCaptor<TaskStatus> capturedNotifyStatus = ArgumentCaptor.forClass(TaskStatus.class);
+
+        verify(dbHelper).updateTaskToPending(capturedDBStatus.capture());
+        assertTrue(capturedDBStatus.getValue().getStatus() == State.PENDING);
+        assertTrue(capturedDBStatus.getValue().getTaskName() == "SecondManual");
+
+        verify(notificationHandler, new Times(2)).notifyTaskStatusListeners(
+                capturedNotifyStatus.capture());
+        assertTrue(capturedNotifyStatus.getAllValues().get(0).getStatus() == State.SUCCESS);
+        assertTrue(capturedNotifyStatus.getAllValues().get(1).getStatus() == State.PENDING);
+        assertTrue(capturedNotifyStatus.getAllValues().get(1).getTaskName() == "SecondManual");
+
     }
 
     @Test

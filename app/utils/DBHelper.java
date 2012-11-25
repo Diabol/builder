@@ -11,7 +11,6 @@ import models.message.TaskStatus;
 import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
-import models.statusdata.VersionControlInfo;
 import play.db.ebean.Model.Finder;
 import executor.TaskExecutionContext;
 
@@ -118,6 +117,15 @@ public class DBHelper {
         }
     }
 
+    public void updateTaskToPending(TaskStatus taskStatus) {
+        Task task = getTask(taskStatus.getPipeName(), taskStatus.getVersion(),
+                taskStatus.getPhaseName(), taskStatus.getTaskName());
+        if (task != null) {
+            task.pending();
+            task.update();
+        }
+    }
+
     private Phase getPhase(String pipeName, String version, String phaseName) {
         List<Phase> foundPhases = phaseFind.where().eq("name", phaseName).eq("pipe.name", pipeName)
                 .eq("pipe.version", version).findList();
@@ -179,7 +187,9 @@ public class DBHelper {
     }
 
     public Pipe getPipe(String name, String version) throws DataNotFoundException {
-        List<Pipe> foundPipes = pipeFind.where().eq("name", name).eq("version", version).findList();
+        List<Pipe> foundPipes = pipeFind.fetch("versionControlInfo")
+                .fetch("versionControlInfo.committer").where().eq("name", name)
+                .eq("version", version).findList();
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No data found for pipe '" + name + "' with version "
                     + version);
@@ -193,13 +203,13 @@ public class DBHelper {
     }
 
     public Pipe getLatestPipe(PipeConfig pipe) throws DataNotFoundException {
-        List<Pipe> foundPipes = pipeFind.where().eq("name", pipe.getName()).findList();
+        List<Pipe> foundPipes = pipeFind.fetch("versionControlInfo")
+                .fetch("versionControlInfo.committer").where().eq("name", pipe.getName())
+                .findList();
         if (foundPipes.size() == 0) {
             throw new DataNotFoundException("No persisted pipes found for '" + pipe.getName() + "'");
         } else {
             Pipe latest = foundPipes.get(foundPipes.size() - 1);
-            VersionControlInfo vc = latest.versionControlInfo;
-            String committer = vc.committer.name;
             return latest;
         }
     }

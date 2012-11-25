@@ -31,6 +31,7 @@ import org.mockito.Matchers;
 import play.db.ebean.Model.Finder;
 
 import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
 
 import executor.TaskExecutionContext;
 import executor.TaskResult;
@@ -122,12 +123,16 @@ public class DBHelperTest {
                     Finder<Long, Pipe> mockedFinder = mock(Finder.class);
                     // Mock the ExpressionList to return two pipes
                     ExpressionList<Pipe> mockedExprList = mock(ExpressionList.class);
+                    Query<Pipe> mockedQuery = mock(Query.class);
                     when(
                             mockedExprList.eq((String) Matchers.notNull(),
                                     (String) Matchers.notNull())).thenReturn(mockedExprList);
                     List<Pipe> twoPipes = Arrays.asList(mock(Pipe.class), mock(Pipe.class));
                     when(mockedExprList.findList()).thenReturn(twoPipes);
-                    when(mockedFinder.where()).thenReturn(mockedExprList);
+                    when(mockedQuery.where()).thenReturn(mockedExprList);
+                    when(mockedFinder.fetch("versionControlInfo")).thenReturn(mockedFinder);
+                    when(mockedFinder.fetch("versionControlInfo.committer"))
+                            .thenReturn(mockedQuery);
 
                     DBHelper.getInstance().setPipeFinder(mockedFinder);
                     DBHelper.getInstance().getPipe(version.getPipeName(), version.getVersion());
@@ -696,6 +701,27 @@ public class DBHelperTest {
                 } catch (DataNotFoundException e) {
                     assertTrue(e != null);
                 }
+            }
+        });
+    }
+
+    @Test
+    public void testUpdateTaskToPendingSetsPendingState() {
+        running(fakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                persistPipeWithVersionControlInfo(version, configuredPipe);
+                TaskExecutionContext context = createContextForFirstTask();
+                TaskStatus taskStatus = TaskStatus.newPendingTaskStatus(context);
+                DBHelper.getInstance().updateTaskToPending(taskStatus);
+                try {
+                    Pipe persistedPipe = DBHelper.getInstance().getPipe(version.getPipeName(),
+                            version.getVersion());
+                    assertEquals(State.PENDING, persistedPipe.phases.get(0).tasks.get(0).state);
+                } catch (DataNotFoundException e) {
+                    assertTrue(false);
+                }
+
             }
         });
     }

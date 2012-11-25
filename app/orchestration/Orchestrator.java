@@ -198,6 +198,11 @@ public class Orchestrator implements TaskCallback {
             if (task.isAutomatic()) {
                 startTask(task, taskContext.getPhase(), taskContext.getPipe(),
                         taskContext.getPipeVersion());
+            } else {
+                TaskExecutionContext context = new TaskExecutionContext(task, lastTaskResult
+                        .context().getPipe(), lastTaskResult.context().getPhase(), lastTaskResult
+                        .context().getPipeVersion());
+                updateAndNotifyTaskPending(context);
             }
         }
         // 3. Trigger first task in next phase if all tasks in this phase
@@ -207,9 +212,17 @@ public class Orchestrator implements TaskCallback {
             if (newTaskContext != null) {
                 if (newTaskContext.getTask().isAutomatic()) {
                     startTask(newTaskContext);
+                } else {
+                    updateAndNotifyTaskPending(newTaskContext);
                 }
             }
         }
+    }
+
+    private void updateAndNotifyTaskPending(TaskExecutionContext context) {
+        TaskStatus pending = TaskStatus.newPendingTaskStatus(context);
+        dbHelper.updateTaskToPending(pending);
+        notifictionHandler.notifyTaskStatusListeners(pending);
     }
 
     private boolean allBlockingTasksInPhaseFinishedSuccessfully(TaskExecutionContext taskContext) {
