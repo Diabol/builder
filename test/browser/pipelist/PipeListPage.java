@@ -26,7 +26,7 @@ public class PipeListPage extends FluentPage {
 
     @Override
     public void isAt() {
-        assertThat(title()).isEqualTo("Pipe List");
+        assertThat(title()).isEqualTo("All pipelines with latest run");
         assertThat(find("div", withId("pipeList")).size()).isEqualTo(1);
     }
 
