@@ -4,7 +4,7 @@ import java.util.Date;
 
 public interface StatusInterface {
 	public enum State {
-        NOT_STARTED, RUNNING, SUCCESS, FAILURE;
+        NOT_STARTED, PENDING, RUNNING, SUCCESS, FAILURE;
 
         public static State state(boolean success) {
             return success ? SUCCESS : FAILURE;
@@ -15,4 +15,5 @@ public interface StatusInterface {
     public Date getFinished();
     public boolean isSuccess();
     public boolean isRunning();
+    public boolean isPending();
 }

@@ -51,6 +51,11 @@ public abstract class AbstractMessage implements StatusInterface {
     }
 
     @Override
+    public boolean isPending() {
+        return state == State.PENDING;
+    }
+
+    @Override
     public State getState() {
         return state;
     }

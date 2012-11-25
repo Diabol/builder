@@ -52,6 +52,7 @@ div.block, h1.block, h2.block, p.block
 .PENDING
 {
     background-color: #d3d3d3;
+    /*background-color: yellow;*/
 }
 
 

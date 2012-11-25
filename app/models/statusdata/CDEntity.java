@@ -78,6 +78,11 @@ public abstract class CDEntity extends Model implements StatusInterface {
     }
 
     @Override
+    public boolean isPending() {
+        return state == State.PENDING;
+    }
+
+    @Override
     public boolean isRunning() {
         return state == State.RUNNING;
     }

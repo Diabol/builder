@@ -25,3 +25,14 @@ function logJson(obj) {
     }
     console.log(output);
 }
+
+function doAction(url) {
+    alert('Doing ajax POST to: '+url);
+    $.ajax({
+        url: url,
+        type: "POST",
+        //success
+        success: function () {
+        }
+    });
+}
