@@ -1,5 +1,7 @@
 package utils;
 
+import executor.TaskExecutionContext;
+
 import java.util.List;
 
 import models.PipeVersion;
@@ -12,7 +14,6 @@ import models.statusdata.Phase;
 import models.statusdata.Pipe;
 import models.statusdata.Task;
 import play.db.ebean.Model.Finder;
-import executor.TaskExecutionContext;
 
 public class DBHelper {
 
@@ -252,5 +253,13 @@ public class DBHelper {
         } else {
             throw new DataNotFoundException("No persisted pipes found for " + pipeName);
         }
+    }
+
+    public Pipe getLatestPipeWithExecutedPhase(PipeConfig pipeConf, List<PhaseConfig> phasesWithEnv) {
+        List<Pipe> foundPipes = pipeFind.where().in("phases", phasesWithEnv).eq("name", pipeConf.getName()).findList();
+        if (foundPipes.size() > 0) {
+            return foundPipes.get(foundPipes.size() - 1);
+        }
+        return null;
     }
 }

@@ -1,9 +1,13 @@
 package controllers;
 
+import executor.TaskExecutor;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import models.JSonable;
 import models.PipeVersion;
+import models.config.EnvironmentConfig;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -37,8 +41,7 @@ public class Pipes extends Controller {
 
     private static PipeConfReader configReader = PipeConfReader.getInstance();
     private static DBHelper dbHelper = DBHelper.getInstance();
-    private static PipeNotificationHandler notificationHandler = PipeNotificationHandler
-            .getInstance();
+    private static PipeNotificationHandler notificationHandler = PipeNotificationHandler.getInstance();
     private static TaskExecutor taskExecutor = TaskExecutor.getInstance();
     private static LogHandler logHandler = LogHandler.getInstance();
 
@@ -74,8 +77,6 @@ public class Pipes extends Controller {
     /**
      * Get the latest version of each configured pipe. Create a not started pipe
      * if not started.
-     * 
-     * @return
      */
     private static List<Pipe> createLatestPipes() {
         List<Pipe> result = new ArrayList<Pipe>();
@@ -335,7 +336,7 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException ex) {
             phases = createNotStartedPhases(config);
         }
-        return ok(createJsonForPhases(phases));
+        return ok(toJson(phases));
     }
 
     /**
@@ -353,15 +354,7 @@ public class Pipes extends Controller {
         } catch (DataNotFoundException ex) {
             return notFound(ex.getMessage());
         }
-        return ok(createJsonForPhases(phases));
-    }
-
-    private static JsonNode createJsonForPhases(List<Phase> phases) {
-        List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
-        for (Phase phase : phases) {
-            jsonList.add(phase.toObjectNode());
-        }
-        return Json.toJson(jsonList.toArray());
+        return ok(toJson(phases));
     }
 
     /**
@@ -372,14 +365,41 @@ public class Pipes extends Controller {
      */
     public static Result getLatestPipes() {
         List<Pipe> latestPipes = createLatestPipes();
-        List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
-        for (Pipe pipe : latestPipes) {
-            jsonList.add(pipe.toObjectNode());
-        }
-        return ok(Json.toJson(jsonList.toArray()));
-
+        return ok(toJson(latestPipes));
     }
 
+    /**
+     * @return the latest version of all pipes for a given environment as JSon
+     */
+    public static Result getPipesForEnvironment(String environment) {
+        List<Pipe> pipes = new ArrayList<Pipe>();
+        for (PipeConfig pipeConf : configReader.getConfiguredPipes()) {
+            // Find relevant phases
+            List<PhaseConfig> phasesWithEnv = new ArrayList<PhaseConfig>();
+            for (PhaseConfig phase : pipeConf.getPhases()) {
+                for (EnvironmentConfig env : phase.getEnvironments()) {
+                    if (env.getName().equals(environment)) {
+                        phasesWithEnv.add(phase);
+                        break;
+                    }
+                }
+            }
+            // Get latest pipe
+            pipes.add(dbHelper.getLatestPipeWithExecutedPhase(pipeConf, phasesWithEnv));
+        }
+        
+        
+        return ok(toJson(pipes));
+    }
+
+    private static <T extends JSonable> JsonNode toJson(List<T> jsonables) {
+        List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
+        for (T jsonable : jsonables) {
+            jsonList.add(jsonable.toObjectNode());
+        }
+        return Json.toJson(jsonList.toArray());
+    }
+    
     /**
      * Get the latest version of a given pipe
      * 
@@ -457,11 +477,7 @@ public class Pipes extends Controller {
             } else {
                 resultList = pipes.subList(pipes.size() - number, pipes.size());
             }
-            List<ObjectNode> jsonList = new ArrayList<ObjectNode>();
-            for (Pipe pipe : resultList) {
-                jsonList.add(pipe.toObjectNode());
-            }
-            return ok(Json.toJson(jsonList.toArray()));
+            return ok(toJson(resultList));
         } catch (DataNotFoundException ex) {
             Logger.error(ex.getMessage(), ex);
             return notFound(ex.getMessage());

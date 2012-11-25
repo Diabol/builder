@@ -1,5 +1,6 @@
 package models.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,6 +9,7 @@ import java.util.List;
 public class PhaseConfig {
     private String name;
     private List<TaskConfig> tasks;
+    private List<EnvironmentConfig> environments = new ArrayList<EnvironmentConfig>();
 
     public PhaseConfig() {
 
@@ -34,6 +36,14 @@ public class PhaseConfig {
         this.tasks = tasks;
     }
 
+    public List<EnvironmentConfig> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(List<EnvironmentConfig> environments) {
+        this.environments = environments;
+    }
+
     public TaskConfig getInitialTask() {
         return getTasks().get(0);
     }
@@ -54,6 +64,10 @@ public class PhaseConfig {
 
         for (TaskConfig taskConfig : getTasks()) {
             taskConfig.validate();
+        }
+        
+        for (EnvironmentConfig envConfig : getEnvironments()) {
+            envConfig.validate();
         }
     }
 

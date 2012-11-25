@@ -15,10 +15,12 @@ import org.junit.Test;
  * @author danielgronberg, marcus
  */
 public class PhaseConfigTest {
+    
     private final PhaseConfig phaseConfEmpty = new PhaseConfig();
     private final PhaseConfig phaseConfWithName = new PhaseConfig();
     private final PhaseConfig phaseConfWithNameAndEmptyTaskList = new PhaseConfig();
-    private final PhaseConfig phaseConfValidWithTwoTasks = new PhaseConfig();
+    private final PhaseConfig phaseConfValidWithTwoTasksAndTwoEnvs = new PhaseConfig();
+    
     private final TaskConfig task1 = new TaskConfig();
 
 
@@ -29,13 +31,15 @@ public class PhaseConfigTest {
         phaseConfWithNameAndEmptyTaskList.setName("name and empty task list");
         phaseConfWithNameAndEmptyTaskList.setTasks(new ArrayList<TaskConfig>());
 
-        phaseConfValidWithTwoTasks.setName("Valid");
+        phaseConfValidWithTwoTasksAndTwoEnvs.setName("Valid");
         task1.setName("task1");
         task1.setCommand("ls");
         TaskConfig task2 = new TaskConfig();
         task2.setName("task2");
         task2.setCommand("echo hej");
-        phaseConfValidWithTwoTasks.setTasks(Arrays.asList(task1, task2));
+        phaseConfValidWithTwoTasksAndTwoEnvs.setTasks(Arrays.asList(task1, task2));
+        
+        phaseConfValidWithTwoTasksAndTwoEnvs.setEnvironments(Arrays.asList(new EnvironmentConfig("env1"), new EnvironmentConfig("env2")));
     }
 
     @Test
@@ -55,12 +59,12 @@ public class PhaseConfigTest {
 
     @Test
     public void testValidateOK() throws PipeValidationException {
-        phaseConfValidWithTwoTasks.validate();
+        phaseConfValidWithTwoTasksAndTwoEnvs.validate();
     }
 
     @Test
     public void testGetInitialTaskReturnsFirstTaskInTaskList() {
-        TaskConfig result = phaseConfValidWithTwoTasks.getInitialTask();
+        TaskConfig result = phaseConfValidWithTwoTasksAndTwoEnvs.getInitialTask();
         assertEquals(task1, result);
     }
 
@@ -86,19 +90,19 @@ public class PhaseConfigTest {
 
     @Test
     public void testGetTaskByNameReturnCorrectTaskWhenMatchFound() throws Exception {
-        TaskConfig result = phaseConfValidWithTwoTasks.getTaskByName("task1");
+        TaskConfig result = phaseConfValidWithTwoTasksAndTwoEnvs.getTaskByName("task1");
         assertEquals(task1, result);
     }
 
     @Test
     public void testGetTaskByNameThrowsExceptionWhenNotFound() {
         try {
-            phaseConfValidWithTwoTasks.getTaskByName("no match");
+            phaseConfValidWithTwoTasksAndTwoEnvs.getTaskByName("no match");
         } catch (RuntimeException ex) {
             assertNotNull(ex);
         }
     }
-
+    
     private static void shouldThrowPipeValidationException(PhaseConfig pc) {
         try {
             pc.validate();

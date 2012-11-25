@@ -7,6 +7,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
 
+import models.JSonable;
 import models.StatusInterface;
 
 import org.codehaus.jackson.node.ObjectNode;
@@ -25,7 +26,7 @@ import controllers.PipeListHelper;
  * 
  */
 @MappedSuperclass
-public abstract class CDEntity extends Model implements StatusInterface {
+public abstract class CDEntity extends Model implements StatusInterface, JSonable {
 
     @Constraints.Required
     @Enumerated(EnumType.STRING)
@@ -101,6 +102,7 @@ public abstract class CDEntity extends Model implements StatusInterface {
         state = success ? State.SUCCESS : State.FAILURE;
     }
 
+    @Override
     public ObjectNode toObjectNode() {
         ObjectNode result = Json.newObject();
         result.put("state", state.toString());

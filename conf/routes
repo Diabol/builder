@@ -33,7 +33,10 @@ GET    /pipe/:pipe/latest/phases		  controllers.Pipes.getPhasesForLatestVersion(
 GET		/pipe/:pipe/:version/phases		  controllers.Pipes.getPhases(pipe:String, version:String)
 
 # Get the latest version of all pipes
-GET	   /pipes/latest						  controllers.Pipes.getLatestPipes()
+GET	   /pipes/latest						controllers.Pipes.getLatestPipes()
+
+# Get the latest version of all pipes for a given environment
+GET    /pipes/:environment                  controllers.Pipes.getPipesForEnvironment(environment: String)
 
 # Get the latest version of a pipe
 GET 	/pipe/:pipe/latest					controllers.Pipes.getLatestPipe(pipe: String)

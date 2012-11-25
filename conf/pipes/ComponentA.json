@@ -27,10 +27,12 @@
         },
         {
             "name":"CI",
+            "environments":[
+                {"name":"CI"}
+            ],
             "tasks":[
                 {
                     "taskName":"Deploy",
-                    "isAutomatic":false,
                     "command":"conf/pipes/cmd/deploy-ci.sh",
                     "triggersTasks":["Integration-test"]
                 },
@@ -42,17 +44,44 @@
         },
         {
             "name":"QA",
+            "environments":[
+                {"name":"QA"},
+                {"name":"UAT"}
+            ],
             "tasks":[
                 {
                     "taskName":"Deploy",
                     "isAutomatic":false,
                     "command":"sleep 3",
+                    "triggersTasks":["Smoke-test"]
+                },
+                {
+                    "taskName":"Smoke-test",
+                    "command":"sleep 1",
                     "triggersTasks":["Manual-test"]
                 },
                 {
                     "taskName":"Manual-test",
                     "isAutomatic":false,
                     "command":"sleep 3"
+                }
+            ]
+        },
+        {
+            "name":"PROD",
+            "environments":[
+                {"name":"PROD"}
+            ],
+            "tasks":[
+                {
+                    "taskName":"Deploy",
+                    "isAutomatic":false,
+                    "command":"sleep 2",
+                    "triggersTasks":["Smoke-test"]
+                },
+                {
+                    "taskName":"Smoke-test",
+                    "command":"sleep 1"
                 }
             ]
         }

@@ -1,8 +1,15 @@
 package utils;
 
+import executor.TaskResult;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Stores date from some kind of event, e.g. {@link TaskResult}s.
+ * 
+ * @author danielgronberg
+ */
 public class LogHandler {
     private static LogHandler instance;
 
