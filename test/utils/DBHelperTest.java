@@ -7,6 +7,12 @@ import static org.mockito.Mockito.when;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.running;
 
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
+
+import executor.TaskExecutionContext;
+import executor.TaskResult;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,12 +35,6 @@ import org.junit.Test;
 import org.mockito.Matchers;
 
 import play.db.ebean.Model.Finder;
-
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.Query;
-
-import executor.TaskExecutionContext;
-import executor.TaskResult;
 
 /**
  * To be able to run these test in eclipse install the ebean enhancer plugin
@@ -124,9 +124,8 @@ public class DBHelperTest {
                     // Mock the ExpressionList to return two pipes
                     ExpressionList<Pipe> mockedExprList = mock(ExpressionList.class);
                     Query<Pipe> mockedQuery = mock(Query.class);
-                    when(
-                            mockedExprList.eq((String) Matchers.notNull(),
-                                    (String) Matchers.notNull())).thenReturn(mockedExprList);
+                    when(mockedExprList.eq((String) Matchers.notNull(),
+                            (String) Matchers.notNull())).thenReturn(mockedExprList);
                     List<Pipe> twoPipes = Arrays.asList(mock(Pipe.class), mock(Pipe.class));
                     when(mockedExprList.findList()).thenReturn(twoPipes);
                     when(mockedQuery.where()).thenReturn(mockedExprList);

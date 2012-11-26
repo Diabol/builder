@@ -5,6 +5,7 @@ import executor.TaskExecutionContext;
 import java.util.List;
 
 import models.PipeVersion;
+import models.StatusInterface.State;
 import models.config.PhaseConfig;
 import models.config.PipeConfig;
 import models.config.TaskConfig;
@@ -255,8 +256,15 @@ public class DBHelper {
         }
     }
 
-    public Pipe getLatestPipeWithExecutedPhase(PipeConfig pipeConf, List<PhaseConfig> phasesWithEnv) {
-        List<Pipe> foundPipes = pipeFind.where().in("phases", phasesWithEnv).eq("name", pipeConf.getName()).findList();
+    public Pipe getLatestPipeWithExecutedPhase(PipeConfig pipeConf, List<String> executedPhases) {
+        List<Pipe> foundPipes = pipeFind
+                .fetch("versionControlInfo")
+                .fetch("versionControlInfo.committer")
+                .where()
+                .eq("name", pipeConf.getName())
+                .in("phases.name", executedPhases)
+                .in("phases.state", State.RUNNING, State.FAILURE, State.SUCCESS)
+                .findList();
         if (foundPipes.size() > 0) {
             return foundPipes.get(foundPipes.size() - 1);
         }

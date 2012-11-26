@@ -6,12 +6,12 @@
             "tasks":[
                 {
                     "taskName":"Compile",
-                    "command":"sleep 3",
+                    "command":"sleep 2",
                     "triggersTasks":["Unit-test", "Sonar"]
                 },
                 {
                     "taskName":"Unit-test",
-                    "command":"sleep 3",
+                    "command":"sleep 2",
                     "triggersTasks":["Package"]
                 },
                 {
@@ -21,12 +21,15 @@
                 },
                 {
                     "taskName":"Package",
-                    "command":"sleep 3"
+                    "command":"sleep 2"
                 }
             ]
         },
         {
             "name":"CI",
+            "environments":[
+                {"name":"CI"}
+            ],
             "tasks":[
                 {
                     "taskName":"Deploy",
@@ -35,7 +38,7 @@
                 },
                 {
                     "taskName":"Integration-test",
-                    "command":"echo CI:Integration-test..."
+                    "command":"conf/pipes/cmd/integration-test.sh"
                 }
             ]
         },

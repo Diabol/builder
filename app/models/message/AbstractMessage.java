@@ -49,6 +49,11 @@ public abstract class AbstractMessage implements StatusInterface {
     public boolean isRunning() {
         return state == State.RUNNING;
     }
+    
+    @Override
+    public boolean hasStarted() {
+        return state != State.NOT_STARTED;
+    }
 
     @Override
     public boolean isPending() {

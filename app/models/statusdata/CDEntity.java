@@ -1,5 +1,7 @@
 package models.statusdata;
 
+import controllers.PipeListHelper;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -17,7 +19,6 @@ import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 import play.libs.Json;
-import controllers.PipeListHelper;
 
 /**
  * Base class for Pipe, Phase and Task.
@@ -86,6 +87,11 @@ public abstract class CDEntity extends Model implements StatusInterface, JSonabl
     @Override
     public boolean isRunning() {
         return state == State.RUNNING;
+    }
+    
+    @Override
+    public boolean hasStarted() {
+        return state != State.NOT_STARTED;
     }
 
     public void pending() {

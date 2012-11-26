@@ -22,4 +22,6 @@ public interface StatusInterface {
     public boolean isRunning();
 
     public boolean isPending();
+
+    public boolean hasStarted();
 }

@@ -15,7 +15,7 @@ GET     /startButtons               controllers.Pipes.startButtons()
 POST    /pipe/:pipe/:version/:phase/:task   controllers.Pipes.startTask(task: String, phase: String, pipe: String, version: String)
 
 #Get the log file for a given task
-GET     /pipe/:pipe/:version/:phase/:task/log controllers.Pipes.getTaskLog(task: String, phase: String, pipe: String, version: String)
+GET     /pipe/:pipe/:version/:phase/:task/log     controllers.Pipes.getTaskLog(task: String, phase: String, pipe: String, version: String)
 
 #Get the tas details in html
 GET     /pipe/:pipe/:version/:phase/:task/details controllers.Pipes.taskDetails(task: String, phase: String, pipe: String, version: String)
@@ -36,7 +36,10 @@ GET		/pipe/:pipe/:version/phases		  controllers.Pipes.getPhases(pipe:String, ver
 GET	   /pipes/latest						controllers.Pipes.getLatestPipes()
 
 # Get the latest version of all pipes for a given environment
-GET    /pipes/:environment                  controllers.Pipes.getPipesForEnvironment(environment: String)
+GET    /pipes/environment/:environment           controllers.Pipes.getPipesForEnvironment(environment: String)
+
+# Get the latest version of all pipes for a given environment as JSon
+GET    /pipes/environment/json/:environment      controllers.Pipes.getPipesForEnvironmentAsJson(environment: String)
 
 # Get the latest version of a pipe
 GET 	/pipe/:pipe/latest					controllers.Pipes.getLatestPipe(pipe: String)

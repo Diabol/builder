@@ -35,7 +35,6 @@ import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
 import views.html.taskdetails;
-import executor.TaskExecutor;
 
 public class Pipes extends Controller {
 
@@ -369,27 +368,42 @@ public class Pipes extends Controller {
     }
 
     /**
-     * @return the latest version of all pipes for a given environment as JSon
+     * @return the latest version of all pipes for a given environment
      */
     public static Result getPipesForEnvironment(String environment) {
+        List<Pipe> pipes = getLastestPipesForEnvironment(environment);
+        // TODO: We need to refactor views and modify this.
+        return ok(pipeslist.render(pipes));
+    }
+    
+    /**
+     * @return the latest version of all pipes for a given environment as JSon
+     */
+    public static Result getPipesForEnvironmentAsJson(String environment) {
+        List<Pipe> pipes = getLastestPipesForEnvironment(environment);
+        return ok(toJson(pipes));
+    }
+    
+    private static List<Pipe> getLastestPipesForEnvironment(String environment) {
         List<Pipe> pipes = new ArrayList<Pipe>();
         for (PipeConfig pipeConf : configReader.getConfiguredPipes()) {
             // Find relevant phases
-            List<PhaseConfig> phasesWithEnv = new ArrayList<PhaseConfig>();
+            List<String> phasesWithEnv = new ArrayList<String>();
             for (PhaseConfig phase : pipeConf.getPhases()) {
                 for (EnvironmentConfig env : phase.getEnvironments()) {
                     if (env.getName().equals(environment)) {
-                        phasesWithEnv.add(phase);
+                        phasesWithEnv.add(phase.getName());
                         break;
                     }
                 }
             }
             // Get latest pipe
-            pipes.add(dbHelper.getLatestPipeWithExecutedPhase(pipeConf, phasesWithEnv));
+            Pipe pipe = dbHelper.getLatestPipeWithExecutedPhase(pipeConf, phasesWithEnv);
+            if (pipe != null) {
+                pipes.add(pipe);
+            }
         }
-        
-        
-        return ok(toJson(pipes));
+        return pipes;
     }
 
     private static <T extends JSonable> JsonNode toJson(List<T> jsonables) {
