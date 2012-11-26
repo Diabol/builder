@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.running;
+import helpers.MockConfigHelper;
 
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
@@ -52,7 +53,8 @@ public class DBHelperTest {
 
     @Before
     public void setup() {
-        configuredPipe = PipeConfReader.getInstance().getConfiguredPipes().get(0);
+        configuredPipe = MockConfigHelper.mockConfig();
+
         vcInfo = new VersionControlInfo("#version", "Commit msg", new Committer("john",
                 "john@company.com"));
         version = PipeVersion.fromString("Version", vcInfo, configuredPipe);
