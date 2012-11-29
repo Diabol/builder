@@ -248,7 +248,8 @@ public class DBHelper {
     }
 
     public List<Pipe> getAll(String pipeName) throws DataNotFoundException {
-        List<Pipe> result = pipeFind.where().eq("name", pipeName).findList();
+        List<Pipe> result = pipeFind.fetch("versionControlInfo")
+                .fetch("versionControlInfo.committer").where().eq("name", pipeName).findList();
         if (result.size() > 0) {
             return result;
         } else {
