@@ -1,7 +1,5 @@
 package controllers;
 
-import executor.TaskExecutor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +33,14 @@ import utils.PipeConfReader;
 import views.html.pipeslist;
 import views.html.startbuttons;
 import views.html.taskdetails;
+import executor.TaskExecutor;
 
 public class Pipes extends Controller {
 
     private static PipeConfReader configReader = PipeConfReader.getInstance();
     private static DBHelper dbHelper = DBHelper.getInstance();
-    private static PipeNotificationHandler notificationHandler = PipeNotificationHandler.getInstance();
+    private static PipeNotificationHandler notificationHandler = PipeNotificationHandler
+            .getInstance();
     private static TaskExecutor taskExecutor = TaskExecutor.getInstance();
     private static LogHandler logHandler = LogHandler.getInstance();
 
@@ -69,8 +69,7 @@ public class Pipes extends Controller {
     }
 
     public static Result list() {
-        List<Pipe> latestPipes = createLatestPipes();
-        return ok(pipeslist.render(latestPipes));
+        return ok(pipeslist.render());
     }
 
     /**
@@ -177,8 +176,9 @@ public class Pipes extends Controller {
         }
     }
 
-    public static Result taskDetails(String taskName, String phaseName, String pipeName,String pipeVersion) {
-        return ok(taskdetails.render(taskName, phaseName, pipeName,pipeVersion));
+    public static Result taskDetails(String taskName, String phaseName, String pipeName,
+            String pipeVersion) {
+        return ok(taskdetails.render(taskName, phaseName, pipeName, pipeVersion));
     }
 
     public static Result startButtons() {
@@ -373,9 +373,9 @@ public class Pipes extends Controller {
     public static Result getPipesForEnvironment(String environment) {
         List<Pipe> pipes = getLastestPipesForEnvironment(environment);
         // TODO: We need to refactor views and modify this.
-        return ok(pipeslist.render(pipes));
+        return TODO;
     }
-    
+
     /**
      * @return the latest version of all pipes for a given environment as JSon
      */
@@ -383,7 +383,7 @@ public class Pipes extends Controller {
         List<Pipe> pipes = getLastestPipesForEnvironment(environment);
         return ok(toJson(pipes));
     }
-    
+
     private static List<Pipe> getLastestPipesForEnvironment(String environment) {
         List<Pipe> pipes = new ArrayList<Pipe>();
         for (PipeConfig pipeConf : configReader.getConfiguredPipes()) {
@@ -413,7 +413,7 @@ public class Pipes extends Controller {
         }
         return Json.toJson(jsonList.toArray());
     }
-    
+
     /**
      * Get the latest version of a given pipe
      * 

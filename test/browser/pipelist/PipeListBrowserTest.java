@@ -11,6 +11,7 @@ import org.fluentlenium.core.annotation.Page;
 import org.fluentlenium.core.domain.FluentList;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -46,9 +47,10 @@ public class PipeListBrowserTest extends AbstractBrowserFluentTest {
     }
 
     /**
-     * TODO: Figure out how to do gui testing. Webdriver does not seem to handle
-     * graffle api.
+     * TODO: Figure out how to do gui testing. This test does not load
+     * javascript and hence doesn't test the view.
      */
+    @Ignore
     @Test
     public void testPipeConfigVisibleInBrowser() {
         goTo(pipeListPage);
