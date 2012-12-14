@@ -248,11 +248,35 @@ a {
 
 .phase {
     float: left;
-    width: 250px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
     box-shadow: 5px 5px 5px #888888;
+    height: 70px;
+    width: 250px;
+    border: 1px solid #9DA3B3;
+    padding: 5px;
+}
+
+.SUCCESS
+{
+	background-color: #64cc7b;
+}
+
+.FAILURE
+{
+	background-color: #d25353;
+}
+
+.RUNNING
+{
+	background-color: #98c7f7;
+}
+
+.PENDING
+{
+    background-color: #d3d3d3;
+    /*background-color: yellow;*/
 }
 
 .phaseHeader {

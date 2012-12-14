@@ -69,7 +69,9 @@ public class Pipes extends Controller {
     }
 
     public static Result list() {
-        return ok(pipeslist.render());
+        String uri = request().uri().toString();
+        Boolean disableWS = uri.contains("disableWS");
+        return ok(pipeslist.render(disableWS));
     }
 
     /**

@@ -1,11 +1,9 @@
-@()
+@(disableWS: Boolean)
 
 @import models.statusdata._
 
 @headers = {
-    <script src="@routes.Assets.at("javascripts/graph-it/js-graph-it.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/jquery-ui-1.8.3.min.js")" type="text/javascript"></script>
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/graph-it/js-graph-it.css")" />
     <script src="@routes.Assets.at("javascripts/pipesCommon.js")" type="text/javascript"></script>
 }
 
@@ -50,16 +48,15 @@
         		var pipe =  pipes[pipeCount];
         		shownPipeVersions[pipe.name] = pipe.version;
         		//Function createCanvasMarkupNameAsId can be found in public/javascripts/pipesCommon.js
-        		$('#pipeList').append(createCanvasMarkupNameAsId(pipe));
+        		$('#pipeList').append(createCanvasMarkupNameAsId(pipe, pipeCount));
 	            for(var phaseCount = 0; phaseCount < pipe.phases.length; phaseCount++){
 	            	var phase = pipe.phases[phaseCount];
-	            	$('#'+pipe.name+'canvas').append("<div id='" + pipe.name + phase.name + "' class='phase block " + pipe.name + "' style='left: "+(20+phaseCount*320)+"px; top: 70px;'>"+generatePhaseMarkup(pipe, phase)+"</div>");
+	            	$('#'+pipe.name+'canvas').append("<div id='" + pipe.name + phase.name + "' class='phase block " + pipe.name + "' style='left: "+(20+phaseCount*320)+"px; top: 70px; position: absolute'>"+generatePhaseMarkup(pipe, phase)+"</div>");
 	            }
         	}
         }
         window.onload = function() {
             initPageObjects();
-            
         }
         
         function resetPhases(className){
@@ -137,49 +134,50 @@
         	return result;
         }
         
-        
-        $(function() {
-            var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
-            var chatSocket = new WS("@routes.Pipes.setupSocket().webSocketURL(request)")
-
-            var sendMessage = function() {
-            }
-
-            var receiveEvent = function(event) {
-                var data = JSON.parse(event.data);
-                console.log(data);
-                // Handle errors
-                if(data.error) {
-                    chatSocket.close();
-                    alert('An error has occured while executing a pipeline. Please refer to server log.');
-                    return
-                } else if(data.phaseUpdate) {
-                	if(shownPipeVersions[data.pipeName] == data.version) {
-                    	updatePhase(data);
-                	}
-                } else if(data.taskUpdate) {
-                	if(shownPipeVersions[data.pipeName] == data.version){
-                		//The updated task is visible
-                		updateTask(data);
-                	}
-                } else if(data.newPipeVersion) {
-                	shownPipeVersions[data.pipeName] = data.version;
-                	resetPhases(data.pipeName);
-                	resetPipeVersionInfo(data.pipeName, data.version, data.committer, data.commitMsg);
-                }
-
-            }
-
-            chatSocket.onmessage = receiveEvent
-
-        })
-        
+        //disableWS is set to true when asserting the page with HtmlUnit. Since HtmlUnit does not support WebSocket.
+        @if(!disableWS) {
+	        $(function() {
+	            var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+	            var chatSocket = new WS("@routes.Pipes.setupSocket().webSocketURL(request)")
+	
+	            var sendMessage = function() {
+	            }
+	
+	            var receiveEvent = function(event) {
+	                var data = JSON.parse(event.data);
+	                console.log(data);
+	                // Handle errors
+	                if(data.error) {
+	                    chatSocket.close();
+	                    alert('An error has occured while executing a pipeline. Please refer to server log.');
+	                    return
+	                } else if(data.phaseUpdate) {
+	                	if(shownPipeVersions[data.pipeName] == data.version) {
+	                    	updatePhase(data);
+	                	}
+	                } else if(data.taskUpdate) {
+	                	if(shownPipeVersions[data.pipeName] == data.version){
+	                		//The updated task is visible
+	                		updateTask(data);
+	                	}
+	                } else if(data.newPipeVersion) {
+	                	shownPipeVersions[data.pipeName] = data.version;
+	                	resetPhases(data.pipeName);
+	                	resetPipeVersionInfo(data.pipeName, data.version, data.committer, data.commitMsg);
+	                }
+	
+	            }
+	
+	            chatSocket.onmessage = receiveEvent
+	
+	        })
+        }
         $.ajax({
             	  url: '/pipes/latest',
             	  success: createPipeMarkup,
             	});
     </script>
-    <div id="pipeList">
+    <div id="pipeList" style="position: relative">
     
     </div>
 }

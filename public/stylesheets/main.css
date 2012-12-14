@@ -38,6 +38,12 @@
     font-size: 15px;
 }
 
+
+div.canvas {
+    margin-bottom: 20px;
+    overflow: visible;
+}
+
 #started {
 	top: 15px;
 }
