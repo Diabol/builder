@@ -11,7 +11,7 @@ Use this curl to fake a post from github to trigger a pipeline. Change path to h
 
 ##Integration Test
 There is a maven project in integration-test to run to perform tests at a given PipeIt installation. Execute
-'mvn clean install -Dpipeit.host=<url to instance>' to run. If pipeit.host is not specified, the test defaults to 'http://localhost:9000'
+'mvn clean install -Dpipeit.host=http://host:port' to run. If pipeit.host is not specified, the test defaults to 'http://localhost:9000'
 
 Build Infrastructure
 ====================
