@@ -35,7 +35,7 @@ and added
 [CloudBees SSH public key in the GitHub repository as a Deploy Key](https://help.github.com/articles/managing-deploy-keys).
 
 ### Accounts
-Marcus is the admin for the Diabol CloudBees account. Daniel G has admin role as well.
+Marcus is the admin for the Diabol CloudBees account. Andreas and Peter H.M. has admin role as well.
 
 HEROKU
 ------
