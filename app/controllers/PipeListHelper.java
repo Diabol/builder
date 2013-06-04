@@ -12,13 +12,14 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 
 import play.api.templates.Html;
+import scala.collection.mutable.StringBuilder;
 
 /**
  * Helper class for the pipe list view.
  */
 public class PipeListHelper {
     public static Html generateMarkupForTaskTree(Phase ph) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         // Create the nodes
         buf.append("<div id='taskHeader'>Tasks for " + ph.name + "</div>");
         for (int counter = 0; counter < ph.tasks.size(); counter++) {
@@ -26,11 +27,11 @@ public class PipeListHelper {
                     + (30 + 150 * counter) + "px; top: 50px;'><div style='padding-top: 40%;'>"
                     + ph.tasks.get(counter).name + "</div></div>");
         }
-        return new Html(buf.toString());
+        return new Html(buf);
     }
 
     public static Html generateMarkupForPhase(Pipe pipe, Phase phase) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         // Create the nodes
         buf.append("<h3>" + phase.name + "</h3>");
         buf.append("<hr/>");
@@ -50,7 +51,7 @@ public class PipeListHelper {
                     + "</label></div></div>");
         }
         buf.append("</div>");
-        return new Html(buf.toString());
+        return new Html(buf);
     }
 
     public static String formatDate(Date dateToFormat) {

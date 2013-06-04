@@ -34,10 +34,9 @@ public class PipeListBrowserTest extends AbstractBrowserFluentTest {
         Pipes.setPipeConfigReader(confReader);
     }
 
-    @Override
     @After
     public void after() {
-        super.after();
+        //super.after();
         Pipes.setPipeConfigReader(PipeConfReader.getInstance());
     }
 

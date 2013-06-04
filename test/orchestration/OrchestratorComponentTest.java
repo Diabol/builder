@@ -26,6 +26,7 @@ import notification.PipeNotificationHandler;
 import notification.PipeStatusChangedListener;
 import notification.TaskStatusChangedListener;
 
+//import org.apache.xpath.operations.String;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import play.Logger;
+import play.api.mvc.RequestHeader;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Http.RequestBody;
@@ -198,11 +200,12 @@ public class OrchestratorComponentTest extends MockitoTestBase implements
                     Map<String, String[]> encodedJson = createJsonWithCommit(commitId, commitMsg,
                             name, email);
                     Request requestMock = Mockito.mock(Request.class);
+                    RequestHeader requestHeaderMock = Mockito.mock(RequestHeader.class);
                     RequestBody body = Mockito.mock(RequestBody.class);
                     Mockito.when(body.asFormUrlEncoded()).thenReturn(encodedJson);
                     Mockito.when(requestMock.body()).thenReturn(body);
-                    Context.current.set(new Context(requestMock, new HashMap<String, String>(),
-                            new HashMap<String, String>()));
+                    Context.current.set(new Context(new Long(123123123), requestHeaderMock, requestMock, new HashMap<String, String>(),
+                            new HashMap<String, String>(), new HashMap<String,Object>()));
                     GitHub.start("ThePipe");
                     while (numberOfSuccessfullPhaseStatusRecieved < 3) {
                         try {

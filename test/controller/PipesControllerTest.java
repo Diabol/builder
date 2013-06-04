@@ -35,6 +35,8 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import play.Logger;
+import play.api.mvc.RequestHeader;
+import play.mvc.Http;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Http.RequestBody;
@@ -431,11 +433,12 @@ public class PipesControllerTest extends MockitoTestBase implements PhaseStatusC
                 String[] array = { jsonString };
                 json.put("payload", array);
                 Request requestMock = Mockito.mock(Request.class);
+                RequestHeader requestHeaderMock = Mockito.mock(RequestHeader.class);
                 RequestBody body = Mockito.mock(RequestBody.class);
                 Mockito.when(body.asFormUrlEncoded()).thenReturn(json);
                 Mockito.when(requestMock.body()).thenReturn(body);
-                Context.current.set(new Context(requestMock, new HashMap<String, String>(),
-                        new HashMap<String, String>()));
+                Context.current.set(new Context(new Long(1121212), requestHeaderMock, requestMock, new HashMap<String, String>(),
+                        new HashMap<String, String>(), new HashMap<String,Object>()));
                 GitHub.start("ThePipe");
             }
         });
