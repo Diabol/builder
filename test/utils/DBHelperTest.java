@@ -683,8 +683,10 @@ public class DBHelperTest {
                     assertEquals(persisted.get(0).name, configuredPipe.getName());
                     assertEquals(persisted.get(1).name, configuredPipe.getName());
                     assertEquals(persisted.get(0).version, "Version");
-                    assertEquals(persisted.get(0).versionControlInfo.committer,
-                            version.getVersionControlInfo().committer);
+                    assertEquals(persisted.get(0).versionControlInfo.committer.name,
+                            version.getVersionControlInfo().committer.name);
+                    assertEquals(persisted.get(0).versionControlInfo.committer.email,
+                            version.getVersionControlInfo().committer.email);
                     assertEquals(persisted.get(1).version, "Version2");
                 } catch (DataNotFoundException e) {
                     assertTrue(false);
