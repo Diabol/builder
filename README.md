@@ -59,3 +59,19 @@ Heroku CLI: https://toolbelt.heroku.com/osx
 ### Accounts
 Marcus created the app on Heroku and invited Andreas and Daniel to it. Anyone
 can create a new Heroku app if they want to.
+
+ItelliJ
+-------
+
+IntelliJ 12.1.3 - Ultimate Edition (but NOT Community Edition), has built-in support for Play framework projects.
+
+First, ensure that the built-in "Playframework Support" plugin is enabled, then install the plugins called "Scala" and
+"Play 2.0 support" from the Jetbrains repository.
+
+Second, from the command line in the root directory, perform the following commands:
+> play clean
+> play run
+(Hit Ctrl-C to quit the application, then...)
+> play idea
+
+Now reopen the project, wait a minute for all the indexing to complete, and all the red should be gone.
