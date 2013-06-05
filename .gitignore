@@ -13,6 +13,10 @@ tmp
 dist
 *.class
 .idea*
+*.iml
+.DS_Store
+default-create.sql
+default-drop.sql
 # Package Files #
 *.war
 *.ear
