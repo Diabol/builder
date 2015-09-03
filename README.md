@@ -1,5 +1,10 @@
 This is Diabol's Builder Play 2.0 app
 =====================================
+This app was developed as an attemp to build a pipeline orchestration tool. It is currently not maintained. It was develped during autumn 2012, mainly by Marcus Philip and Daniel Grönberg.
+
+**It was an evaluation of**
+- The Play framework - Useful!
+- Pipeline config as code - Great!
 
 Development & Testing
 =====================
