@@ -23,8 +23,7 @@ Build Infrastructure
 
 CI
 ------
-There is a Jenkins-as-a-Service running provided by CloudBees on:
-https://diabol.ci.cloudbees.com
+There was a Jenkins-as-a-Service running provided by CloudBees on: https://diabol.ci.cloudbees.com, but this service ahs shut down.
 
 To build the project we [installed the sbt plugin](http://wiki.cloudbees.com/bin/view/DEV/Playframework).
 
@@ -34,13 +33,13 @@ we installed the GitHub plugin so the build can be triggered by a WebHook (a
 kind of Service Hook), i.e. a POST from GitHub to the CI: 
 https://diabol.ci.cloudbees.com/github-webhook/. 
 
-Since the repo is private we read
+The repo was private, so we read
 [How to use Private GitHub Repositories with CloudBees](http://wiki.cloudbees.com/bin/view/DEV/How+to+use+Private+GitHub+Repositories+with+CloudBees) 
 and added
 [CloudBees SSH public key in the GitHub repository as a Deploy Key](https://help.github.com/articles/managing-deploy-keys).
 
 ### Accounts
-Marcus is the admin for the Diabol CloudBees account. Andreas and Peter H.M. has admin role as well.
+Marcus is the admin for the Diabol CloudBees account. Andreas has admin role as well.
 
 HEROKU
 ------
@@ -62,8 +61,7 @@ https://devcenter.heroku.com/articles/play but note that this is for _Play 1_.
 Heroku CLI: https://toolbelt.heroku.com/osx
 
 ### Accounts
-Marcus created the app on Heroku and invited Andreas and Daniel to it. Anyone
-can create a new Heroku app if they want to.
+Marcus created the app on Heroku and invited Andreas to it. Anyone can create a new Heroku app if they want to.
 
 ItelliJ
 -------
